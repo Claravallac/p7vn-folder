@@ -1,0 +1,77 @@
+{
+  "name": "himari-games-visual-novel",
+  "version": "1.0.18",
+  "description": "Visual Novel da Himari Games",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable",
+    "build:installer": "electron-builder --win nsis",
+    "build:linux": "electron-builder --linux AppImage"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^26.8.1",
+    "eslint": "^10.0.2"
+  },
+  "build": {
+    "appId": "com.himari.vrcnatstory",
+    "productName": "Himari Games - VRChat Story",
+    "asar": true,
+    "files": [
+      "index.html",
+      "seven-reels.html",
+      "main.js",
+      "preload.js",
+      "updater.js",
+      "discord-presence.js",
+      "js/**/*",
+      "css/**/*",
+      "assets/**/*",
+      "chapters/**/*",
+      "dialogues.json",
+      "chapters.json",
+      "!**/*.bat",
+      "!**/*.md",
+      "!backup/**",
+      "!dist/**",
+      "!.git/**",
+      "!*.bat",
+      "!*.md",
+      "!MAPA_MENTAL.md",
+      "!chapters.json.bak",
+      "node_modules/discord-rpc/**/*"
+    ],
+    "win": {
+      "icon": "assets/images/logo/icon.png",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "icon": "assets/images/logo/icon.png",
+      "target": [
+        "AppImage"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/images/logo/icon.png"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "discord-rpc": "^4.0.1"
+  }
+}
