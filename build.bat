@@ -155,7 +155,7 @@ if errorlevel 1 ( echo [AVISO] Release falhou — jogadores usarao fallback do Z
 
 :: Pega URL do asset gerado pelo release
 gh release view v%VERSION% --repo Claravallac/p7vn-folder --json assets >_tmp_assets.json 2>nul
-for /f "delims=" %%u in ('node -e "const d=require(fs).readFileSync("_tmp_assets.json","utf8");try{const a=JSON.parse(d).assets;console.log(a&&a[0]?a[0].url:"")}catch(e){console.log("")}" 2^>nul') do set DELTA_URL=%%u
+for /f "delims=" %%u in ('node get-release-url.js') do set DELTA_URL=%%u
 del _tmp_assets.json 2>nul
 
 if "%DELTA_URL%"=="" (

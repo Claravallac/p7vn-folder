@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.3",
+    "date": "22/03/2026",
+    "notes": "Update DEBUG"
+  },
+  {
     "version": "1.0.2",
     "date": "22/03/2026",
     "notes": "Update strings"
