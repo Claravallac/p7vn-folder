@@ -23,6 +23,27 @@ let _pendingUpdate = null;
 
 ipcMain.handle('update-check-pending', () => _pendingUpdate);
 
+
+// Procura o diretório real dos arquivos do game
+function findGameDir() {
+  const candidates = [
+    path.join(path.dirname(process.execPath), 'resources', 'app'),
+    path.join(path.dirname(process.execPath), 'resources'),
+    path.dirname(process.execPath),
+    app.getAppPath(),
+  ];
+  for (const dir of candidates) {
+    try {
+      if (fs.existsSync(path.join(dir, 'index.html')) &&
+          fs.existsSync(path.join(dir, 'main.js'))) {
+        return dir;
+      }
+    } catch(e) {}
+  }
+  // Fallback
+  return candidates[0];
+}
+
 function isNewer(remote, local) {
   const toNum = v => v.replace(/[^0-9.]/g, '').split('.').map(Number);
   const r = toNum(remote), l = toNum(local);
@@ -200,16 +221,17 @@ ipcMain.handle('update-download', async (_event, url) => {
     await _activeDownload;
     _activeDownload = null;
 
-    await extractZip(tmpPath, APPDATA_DIR);
+    const gameDir = app.isPackaged ? findGameDir() : APPDATA_DIR;
+    await extractZip(tmpPath, gameDir);
     try { fs.unlinkSync(tmpPath); } catch(e) {}
 
     // Remove arquivos deletados no repositorio
-    const removedPath = path.join(APPDATA_DIR, 'removed.json');
+    const removedPath = path.join(gameDir, 'removed.json');
     if (fs.existsSync(removedPath)) {
       try {
         const removed = JSON.parse(fs.readFileSync(removedPath, 'utf8'));
         for (const file of removed) {
-          const target = path.join(APPDATA_DIR, ...file.split('/'));
+          const target = path.join(gameDir, ...file.split('/'));
           try { if (fs.existsSync(target)) fs.unlinkSync(target); } catch(e) {}
         }
         fs.writeFileSync(removedPath, '[]', 'utf8');
