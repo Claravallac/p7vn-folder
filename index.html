@@ -15826,6 +15826,52 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 </div>
 
 <script>
+// ── Sons do sistema de update ─────────────────────────────────
+(function(){
+  var _actx = null;
+  function getCtx() {
+    if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+    return _actx;
+  }
+  function tone(freq, type, dur, vol) {
+    try {
+      var ctx = getCtx();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(vol || 0.07, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
+    } catch(e) {}
+  }
+  window._updSoundPopup = function() {
+    tone(440, 'sine', 0.09, 0.14);
+    setTimeout(function(){ tone(660, 'sine', 0.13, 0.12); }, 80);
+  };
+  window._updSoundClick = function() {
+    tone(520, 'sine', 0.07, 0.15);
+    setTimeout(function(){ tone(780, 'sine', 0.1, 0.12); }, 50);
+  };
+  window._updSoundDismiss = function() {
+    tone(300, 'sine', 0.12, 0.13);
+  };
+  window._updSoundRepair = function() {
+    tone(380, 'triangle', 0.1, 0.14);
+    setTimeout(function(){ tone(340, 'triangle', 0.1, 0.12); }, 90);
+    setTimeout(function(){ tone(300, 'triangle', 0.14, 0.1); }, 180);
+  };
+  window._updSoundTick = function() {
+    tone(260, 'sine', 0.04, 0.04);
+  };
+  window._updSoundDone = function() {
+    tone(523, 'sine', 0.15, 0.14);
+    setTimeout(function(){ tone(659, 'sine', 0.15, 0.12); }, 60);
+    setTimeout(function(){ tone(784, 'sine', 0.2,  0.12); }, 120);
+  };
+})();
+
 // ── Versão no menu e painel de update ────────────────────────
 (function(){
   function setMenuVersion(v){
@@ -16109,6 +16155,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 
   // Entra no modo de reparo
   if(sRepair) sRepair.addEventListener('click', function(){
+    if(window._updSoundRepair) window._updSoundRepair();
     sRepair.disabled = true;
     if(sRepairStatus){ sRepairStatus.textContent = 'Buscando versão...'; }
     fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/version.json')
@@ -16129,13 +16176,28 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 
   // Cancela modo de reparo — volta ao normal
   if(sRepairCancel) sRepairCancel.addEventListener('click', function(){
+    if(window._updSoundDismiss) window._updSoundDismiss();
     _repairUrl = null;
-    if(sRepairActive) sRepairActive.style.display = 'none';
-    if(sRepairIdle)   sRepairIdle.style.display   = '';
+    if(sRepairActive){
+      sRepairActive.style.transition = 'opacity 0.25s';
+      sRepairActive.style.opacity = '0';
+      setTimeout(function(){
+        sRepairActive.style.display = 'none';
+        sRepairActive.classList.remove('visible');
+        sRepairActive.style.opacity = '1';
+        if(sRepairIdle){
+          sRepairIdle.style.opacity = '0';
+          sRepairIdle.style.display = '';
+          sRepairIdle.style.transition = 'opacity 0.25s';
+          setTimeout(function(){ sRepairIdle.style.opacity = '1'; }, 10);
+        }
+      }, 250);
+    }
   });
 
   // Confirma reparo — inicia download da versão atual
   if(sRepairConfirm) sRepairConfirm.addEventListener('click', function(){
+    if(window._updSoundClick) window._updSoundClick();
     if(!_repairUrl) return;
     _downloadUrl = _repairUrl;
     window._updDownloadUrl = _repairUrl;
@@ -16173,15 +16235,47 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   });
 
   if(sCheck) sCheck.addEventListener('click', function(){
-    sCheck.disabled=true; sCheckStatus.textContent='Verificando...';
+    if(window._updSoundClick) window._updSoundClick();
+    sCheck.disabled=true;
+    // Barra de loading animada
+    sCheckStatus.style.color='rgba(255,255,255,0.3)';
+    sCheckStatus.textContent='';
+    var _loadBar = document.getElementById('upd-check-loadbar');
+    if(!_loadBar){
+      _loadBar = document.createElement('div');
+      _loadBar.id = 'upd-check-loadbar';
+      _loadBar.style.cssText = 'height:1px;background:rgba(255,255,255,0.06);border-radius:1px;overflow:hidden;margin-top:10px;margin-bottom:4px;';
+      var _loadFill = document.createElement('div');
+      _loadFill.id = 'upd-check-loadbar-fill';
+      _loadFill.style.cssText = 'height:100%;width:0%;background:rgba(var(--menu-accent-rgb),0.7);border-radius:1px;transition:width 0.15s ease;';
+      _loadBar.appendChild(_loadFill);
+      sCheckStatus.parentNode.insertBefore(_loadBar, sCheckStatus);
+    }
+    _loadBar.style.display = '';
+    var _fill = document.getElementById('upd-check-loadbar-fill');
+    if(_fill) _fill.style.width = '0%';
+    var _pct = 0;
+    var _loadInterval = setInterval(function(){
+      _pct = Math.min(_pct + Math.random() * 12, 88);
+      if(_fill) _fill.style.width = _pct + '%';
+      if(window._updSoundTick) window._updSoundTick();
+    }, 300);
+    function _finishLoad(ok){
+      clearInterval(_loadInterval);
+      if(_fill){ _fill.style.width='100%'; setTimeout(function(){ if(_loadBar){ _loadBar.style.transition='opacity 0.3s'; _loadBar.style.opacity='0'; setTimeout(function(){ _loadBar.style.display='none'; _loadBar.style.opacity='1'; if(_fill) _fill.style.width='0%'; },300); } },400); }
+    }
     fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/version.json')
       .then(function(r){ return r.json(); })
       .then(function(remote){
         electronAPI.getVersion().then(function(local){
           var rv=remote.version.split('.').map(Number), lv=local.split('.').map(Number), newer=false;
           for(var i=0;i<3;i++){ if((rv[i]||0)>(lv[i]||0)){newer=true;break;} if((rv[i]||0)<(lv[i]||0)) break; }
-          if(newer){ fillUpdate(remote); sCheckStatus.textContent=''; sCheck.disabled=false; }
-          else {
+          _finishLoad(true);
+          if(newer){
+            if(window._updSoundPopup) window._updSoundPopup();
+            fillUpdate(remote); sCheckStatus.textContent=''; sCheck.disabled=false;
+          } else {
+            if(window._updSoundDone) window._updSoundDone();
             sCheck.disabled=false;
             electronAPI.getVersion().then(function(v){ _showOkState(v); });
             sCheckStatus.style.color='#4ade80'; sCheckStatus.textContent='Você já tem a versão mais recente!';
@@ -16189,7 +16283,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
           }
         });
       })
-      .catch(function(){ sCheck.disabled=false; sCheckStatus.style.color='#f87171'; sCheckStatus.textContent='Sem conexão.'; setTimeout(function(){ sCheckStatus.textContent=''; },3000); });
+      .catch(function(){ _finishLoad(false); sCheck.disabled=false; sCheckStatus.style.color='#f87171'; sCheckStatus.textContent='Sem conexão.'; setTimeout(function(){ sCheckStatus.textContent=''; },3000); });
   });
 
   // ── Banner especial Aldrich — v1.0.40 ─────────────────────────────────────
