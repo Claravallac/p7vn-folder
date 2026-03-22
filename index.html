@@ -12201,7 +12201,7 @@
                                 if (el) el.textContent = 'v' + (_fakeVersion || v);
                             });
                         }
-                        fetch('https://raw.githubusercontent.com/Claravallac/p7vn/main/version.json')
+                        fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/version.json')
                             .then(function(r){ return r.json(); })
                             .then(function(d){
                                 var el = document.getElementById('dbg-upd-remote-label');
@@ -12234,7 +12234,7 @@
                     // Forçar checagem — usa a versão fake se definida
                     document.getElementById('dbg-upd-check').addEventListener('click', function(){
                         updLog('Checando versão remota...');
-                        fetch('https://raw.githubusercontent.com/Claravallac/p7vn/main/version.json')
+                        fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/version.json')
                             .then(function(r){ return r.json(); })
                             .then(function(remote){
                                 updLog('Remota: v' + remote.version);
@@ -12297,7 +12297,7 @@
                         setTimeout(function(){
                             if(prev === 'flex') updScreen.style.display = 'flex';
                             // recarrega manualmente o histórico
-                            fetch('https://api.github.com/repos/Claravallac/p7vn/releases?per_page=10')
+                            fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/changelog.json')
                               .then(function(r){ return r.json(); })
                               .then(function(releases){
                                 if(!list) return;
@@ -16004,7 +16004,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   if(sRepair) sRepair.addEventListener('click', function(){
     sRepair.disabled = true;
     if(sRepairStatus){ sRepairStatus.textContent = 'Buscando versão...'; }
-    fetch('https://raw.githubusercontent.com/Claravallac/p7vn/main/version.json')
+    fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/version.json')
       .then(function(r){ return r.json(); })
       .then(function(remote){
         _repairUrl = remote.url;
@@ -16067,7 +16067,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 
   if(sCheck) sCheck.addEventListener('click', function(){
     sCheck.disabled=true; sCheckStatus.textContent='Verificando...';
-    fetch('https://raw.githubusercontent.com/Claravallac/p7vn/main/version.json')
+    fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/version.json')
       .then(function(r){ return r.json(); })
       .then(function(remote){
         electronAPI.getVersion().then(function(local){
@@ -16170,7 +16170,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
       _changelogLoaded = true;
       var list = document.getElementById('upd-screen-changelog-list');
       if(list) list.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:2px">Carregando...</div>';
-      fetch('https://api.github.com/repos/Claravallac/p7vn/releases?per_page=10')
+      fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/changelog.json')
         .then(function(r){ return r.json(); })
         .then(function(releases){
           var list = document.getElementById('upd-screen-changelog-list');
@@ -16182,9 +16182,9 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
           list.innerHTML = '';
           releases.forEach(function(r){
             var entry = document.createElement('div');
-            var tag  = (r.tag_name||'').replace(/^v/,'');
-            var note = (r.body||'').trim() || '—';
-            var date = r.published_at ? new Date(r.published_at).toLocaleDateString('pt-BR') : '';
+            var tag  = (r.version||'').replace(/^v/,'');
+            var note = (r.notes||'').trim() || '—';
+            var date = r.date || '';
             if(tag === '1.0.40' || window._dbgForceAldrichBanner){
               entry.style.cssText = 'margin-bottom:4px';
               entry.innerHTML = window._buildAldrichBannerFn(tag, note, date);

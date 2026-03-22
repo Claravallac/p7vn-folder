@@ -124,6 +124,10 @@ echo.
 echo Detectando arquivos removidos...
 node detect-removed.js
 
+:: Atualiza changelog.json
+echo Atualizando changelog...
+node update-changelog.js
+
 :: Atualiza version.json
 node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%'},null,2),'utf8');"
 

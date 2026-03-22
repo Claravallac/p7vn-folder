@@ -23,7 +23,7 @@ const BRANCH           = 'main';
 const VERSION_JSON_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/version.json`;
 const ZIP_URL          = `https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${BRANCH}.zip`;
 
-const APPDATA_DIR = path.join(app.getPath('appData'), 'HimariGames');
+const APPDATA_DIR = app.isPackaged ? path.dirname(process.execPath) : app.getAppPath();
 
 let _mainWindow    = null;
 let _pendingUpdate = null;
@@ -179,7 +179,17 @@ async function checkForUpdates() {
   try {
     const raw    = await fetchText(VERSION_JSON_URL);
     const remote = JSON.parse(raw);
-    const local  = app.getVersion();
+
+    // Le versao local do version.json em AppData (atualizado pelos patches)
+    let local = app.getVersion();
+    try {
+      const versionFile = path.join(APPDATA_DIR, 'version.json');
+      if (fs.existsSync(versionFile)) {
+        const localData = JSON.parse(fs.readFileSync(versionFile, 'utf8'));
+        if (localData.version) local = localData.version;
+      }
+    } catch(e) {}
+
     if (!isNewer(remote.version, local)) return;
     _pendingUpdate = { version: remote.version, notes: remote.notes || '', url: ZIP_URL };
     if (_mainWindow && !_mainWindow.isDestroyed())

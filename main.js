@@ -217,7 +217,19 @@ ipcMain.on('discord-update', (event, payload) => {
 });
 
 // ── Versão do app ─────────────────────────────────────────────────────────────
-ipcMain.handle('get-version', () => app.getVersion());
+ipcMain.handle('get-version', () => {
+  // Le a versao do version.json local em AppData (atualizado pelos patches)
+  // Se nao existir, cai para a versao do package.json (installer)
+  try {
+    const APPDATA_DIR = path.dirname(process.execPath);
+    const versionFile = path.join(APPDATA_DIR, 'version.json');
+    if (fs.existsSync(versionFile)) {
+      const data = JSON.parse(fs.readFileSync(versionFile, 'utf8'));
+      if (data.version) return data.version;
+    }
+  } catch(e) {}
+  return app.getVersion();
+});
 
 // ── Bug Reporter — cria Issue no GitHub ──────────────────────────────────────
 ipcMain.handle('submit-bug-report', async (_event, { title, body }) => {
