@@ -849,6 +849,17 @@
       to   { opacity: 1; transform: translateX(0); }
     }
     .upd-changelog-entry { animation: updSlideIn 0.3s ease both; }
+    @keyframes updRepairIn {
+      from { opacity: 0; transform: translateY(-8px); max-height: 0; }
+      to   { opacity: 1; transform: translateY(0);    max-height: 200px; }
+    }
+    #upd-repair-active {
+      overflow: hidden;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    #upd-repair-active.visible {
+      animation: updRepairIn 0.3s cubic-bezier(0.4,0,0.2,1) both;
+    }
 
         #upd-screen-changelog-list::-webkit-scrollbar-track { background: transparent; }
         #upd-screen-changelog-list::-webkit-scrollbar-thumb { background: rgba(var(--menu-accent-rgb), 0.35); border-radius: 2px; }
@@ -16102,7 +16113,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
         if(sRepairInfo) sRepairInfo.textContent = 'Isso vai baixar v' + remote.version + ' novamente e substituir o executável atual. Use se o jogo estiver com problemas.';
         if(sRepairStatus) sRepairStatus.textContent = '';
         if(sRepairIdle)   sRepairIdle.style.display  = 'none';
-        if(sRepairActive) sRepairActive.style.display = '';
+        if(sRepairActive){ sRepairActive.style.display = ''; void sRepairActive.offsetWidth; sRepairActive.classList.add('visible'); }
         sRepair.disabled = false;
       })
       .catch(function(){
