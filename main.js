@@ -237,7 +237,7 @@ ipcMain.handle('submit-bug-report', async (_event, { title, body }) => {
 
   // Token com permissão apenas de criar issues (public_repo)
   // Substitua pelo seu token gerado em github.com/settings/tokens
-  const GITHUB_TOKEN = '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';
+  const GITHUB_TOKEN = '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';
   const REPO_OWNER   = 'Claravallac';
   const REPO_NAME    = 'p7vn-folder';
 
