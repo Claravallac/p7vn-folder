@@ -221,7 +221,7 @@ ipcMain.handle('get-version', () => {
   // Le a versao do version.json local em AppData (atualizado pelos patches)
   // Se nao existir, cai para a versao do package.json (installer)
   try {
-    const APPDATA_DIR = path.dirname(process.execPath);
+    const APPDATA_DIR = path.join(path.dirname(process.execPath), "resources", "app");
     const versionFile = path.join(APPDATA_DIR, 'version.json');
     if (fs.existsSync(versionFile)) {
       const data = JSON.parse(fs.readFileSync(versionFile, 'utf8'));
