@@ -1,6 +1,6 @@
 {
   "name": "himari-games-visual-novel",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "installerVersion": "1.0.7",
   "description": "Visual Novel da Himari Games",
   "main": "main.js",
@@ -41,7 +41,8 @@
       "!*.md",
       "!MAPA_MENTAL.md",
       "!chapters.json.bak",
-      "node_modules/discord-rpc/**/*"
+      "node_modules/discord-rpc/**/*",
+      "secrets.json"
     ],
     "win": {
       "icon": "assets/images/logo/icon.ico",
