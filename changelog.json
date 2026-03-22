@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.16",
+    "date": "22/03/2026",
+    "notes": "Assets inuteis removidos, memoria não dá em árvore"
+  },
+  {
     "version": "1.0.15",
     "date": "22/03/2026",
     "notes": "Assets test 2"
