@@ -1,1 +1,6 @@
-[]
+[
+  "criar-branch-delta.bat",
+  "lista.txt",
+  "start-electron.bat",
+  "zip_maker.bat"
+]

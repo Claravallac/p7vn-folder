@@ -12,12 +12,14 @@ echo.
 echo  O que deseja fazer?
 echo.
 echo   [1] Gerar installer (primeira distribuicao)
-echo   [2] Publicar update (jogadores ja tem o game)
+echo   [2] Update leve    (codigo: index.html, JS, CSS...)
+echo   [3] Update completo (codigo + assets de midia)
 echo.
-set /p OPCAO= Escolha (1 ou 2): 
+set /p OPCAO= Escolha (1, 2 ou 3): 
 
 if "%OPCAO%"=="1" goto :installer
-if "%OPCAO%"=="2" goto :update
+if "%OPCAO%"=="2" goto :update_leve
+if "%OPCAO%"=="3" goto :update_completo
 echo [ERRO] Opcao invalida.
 pause & exit /b 1
 
@@ -42,7 +44,6 @@ echo  Versao atual do installer: %CURRENT_INST%
 set /p INST_VERSION= Nova versao do installer (ex: 1.0.0): 
 if "%INST_VERSION%"=="" set INST_VERSION=%CURRENT_INST%
 
-:: Atualiza apenas installerVersion, nao mexe na versao do update
 node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.installerVersion='%INST_VERSION%';p.version=p.version||'1.0.0';fs.writeFileSync('package.json',JSON.stringify(p,null,2),'utf8');"
 echo  Versao do installer definida: %INST_VERSION%
 echo.
@@ -80,20 +81,93 @@ pause
 goto :eof
 
 :: ══════════════════════════════════════════════════════════════════════════════
-:update
+:update_leve
 :: ══════════════════════════════════════════════════════════════════════════════
 echo.
+echo  Update leve - apenas codigo (JS, CSS, HTML...)
+echo.
+call :check_tools
+call :git_init
+call :pedir_versao
+call :pedir_notes
 
+echo Detectando arquivos removidos...
+node detect-removed.js
+echo Atualizando changelog...
+node update-changelog.js
+node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%'},null,2),'utf8');"
+
+echo Subindo arquivos para o GitHub...
+git add --all -- . ":(exclude)assets/*"
+git commit -m "update leve: versao %VERSION%"
+git fetch origin main 2>nul
+git reset --soft origin/main 2>nul
+git push --force origin main
+if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
+
+echo.
+echo  ============================================
+echo   Update leve v%VERSION% publicado!
+echo   Jogadores recebem automaticamente.
+echo  ============================================
+echo.
+pause
+goto :eof
+
+:: ══════════════════════════════════════════════════════════════════════════════
+:update_completo
+:: ══════════════════════════════════════════════════════════════════════════════
+echo.
+echo  Update completo - codigo + assets de midia
+echo.
+call :check_tools
+call :git_init
+call :pedir_versao
+call :pedir_notes
+
+echo Detectando arquivos removidos...
+node detect-removed.js
+echo Atualizando changelog...
+node update-changelog.js
+node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%'},null,2),'utf8');"
+
+echo Subindo arquivos para o GitHub (incluindo assets)...
+git add --all .
+git add -f assets/audio/
+git add -f assets/fonts/
+git add -f assets/images/
+git add -f assets/videos/
+git commit -m "update completo: versao %VERSION%"
+git fetch origin main 2>nul
+git reset --soft origin/main 2>nul
+git push --force origin main
+if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
+
+echo.
+echo  ============================================
+echo   Update completo v%VERSION% publicado!
+echo   Jogadores recebem automaticamente.
+echo  ============================================
+echo.
+pause
+goto :eof
+
+:: ══════════════════════════════════════════════════════════════════════════════
+:: Subrotinas
+:: ══════════════════════════════════════════════════════════════════════════════
+
+:check_tools
 where node >nul 2>&1
 if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & pause & exit /b 1 )
 where gh >nul 2>&1
 if errorlevel 1 ( echo [ERRO] GitHub CLI nao encontrado. & pause & exit /b 1 )
 where git >nul 2>&1
 if errorlevel 1 ( echo [ERRO] Git nao encontrado. & pause & exit /b 1 )
+goto :eof
 
+:git_init
 git config --global user.email "claravallac@github.com"
 git config --global user.name "Claravallac"
-
 if not exist ".git\" (
     git init
     git remote add origin https://github.com/Claravallac/p7vn-folder.git
@@ -101,50 +175,23 @@ if not exist ".git\" (
     git commit -m "inicial"
     git push --set-upstream origin main
 )
+goto :eof
 
-:: Le versao atual do update
+:pedir_versao
 for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"version\"" package.json') do (
-    set RAW_VER=%%~v & goto :got_ver_upd
+    set RAW_VER=%%~v & goto :got_ver
 )
-:got_ver_upd
+:got_ver
 set CURRENT_VER=%RAW_VER:"=%
-
-echo  Versao atual do update: %CURRENT_VER%
-set /p VERSION= Nova versao do update (ex: 1.0.38): 
+echo  Versao atual: %CURRENT_VER%
+set /p VERSION= Nova versao (ex: 1.0.38): 
 if "%VERSION%"=="" set VERSION=%CURRENT_VER%
-
 node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='%VERSION%';fs.writeFileSync('package.json',JSON.stringify(p,null,2),'utf8');"
-echo  Versao do update definida: %VERSION%
+echo  Versao definida: %VERSION%
+goto :eof
 
+:pedir_notes
 set /p NOTES= Notas desta versao: 
 if "%NOTES%"=="" set NOTES=Nova atualizacao disponivel.
 echo.
-
-:: Detecta arquivos removidos
-echo Detectando arquivos removidos...
-node detect-removed.js
-
-:: Atualiza changelog.json
-echo Atualizando changelog...
-node update-changelog.js
-
-:: Atualiza version.json
-node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%'},null,2),'utf8');"
-
-:: Push para o GitHub
-echo Subindo arquivos para o GitHub...
-git add .
-git commit -m "update: versao %VERSION%"
-git fetch origin main 2>nul
-git reset --soft origin/main 2>nul
-git push --force origin main
-
-if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
-
-echo.
-echo  ============================================
-echo   Update v%VERSION% publicado!
-echo   Jogadores recebem automaticamente.
-echo  ============================================
-echo.
-pause
+goto :eof
