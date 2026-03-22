@@ -1,11 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════════════
 // updater.js — update via GitHub
-//
-// Fluxo:
-//   1. Checa version.json no repositório
-//   2. Se há versão nova, baixa o zip da branch main
-//   3. Extrai por cima dos arquivos em AppData\HimariGames\
-//   4. Reinicia o jogo
 // ══════════════════════════════════════════════════════════════════════════════
 
 const { app, ipcMain } = require('electron');
@@ -14,7 +8,6 @@ const http   = require('http');
 const fs     = require('fs');
 const path   = require('path');
 const os     = require('os');
-const zlib   = require('zlib');
 const { spawn } = require('child_process');
 
 const REPO_OWNER       = 'Claravallac';
@@ -54,41 +47,46 @@ function fetchText(url) {
   });
 }
 
-function downloadFile(url, destPath, onProgress, startByte = 0) {
+function downloadFile(url, destPath, onProgress) {
   let _cancelled = false, _currentReq = null;
   const promise = new Promise((resolve, reject) => {
     function doGet(currentUrl, hops) {
       if (_cancelled) return reject(new Error('CANCELLED'));
       if (hops > 10) return reject(new Error('Too many redirects'));
       const proto = currentUrl.startsWith('https') ? https : http;
-      const headers = { 'User-Agent': 'HimariGames-Updater' };
-      if (startByte > 0 && hops === 0) headers['Range'] = `bytes=${startByte}-`;
-      const req = proto.get(currentUrl, { headers }, res => {
+      const req = proto.get(currentUrl, { headers: { 'User-Agent': 'HimariGames-Updater' } }, res => {
         if ([301,302,303,307,308].includes(res.statusCode)) {
           res.resume();
           const loc = res.headers.location;
           if (!loc) return reject(new Error('Redirect sem location'));
           return doGet(loc.startsWith('http') ? loc : new URL(loc, currentUrl).href, hops+1);
         }
-        if (res.statusCode !== 200 && res.statusCode !== 206)
+        if (res.statusCode !== 200)
           return reject(new Error('HTTP ' + res.statusCode));
-        const cLen  = parseInt(res.headers['content-length'] || '0', 10);
-        const total = res.statusCode === 206 ? startByte + cLen : cLen;
-        let received = res.statusCode === 206 ? startByte : 0;
-        let lastTime = Date.now(), lastBytes = received, lastSpeed = '';
-        const file = res.statusCode === 206
-          ? fs.createWriteStream(destPath, { flags: 'a' })
-          : fs.createWriteStream(destPath);
+
+        const total    = parseInt(res.headers['content-length'] || '0', 10);
+        let received   = 0;
+        let lastTime   = Date.now(), lastBytes = 0, lastSpeed = '';
+
+        const file = fs.createWriteStream(destPath);
         res.on('data', chunk => {
           if (_cancelled) { res.destroy(); file.destroy(); return reject(new Error('CANCELLED')); }
-          received += chunk.length; file.write(chunk);
+          received += chunk.length;
+          file.write(chunk);
           const now = Date.now(), elapsed = (now - lastTime) / 1000;
           if (elapsed >= 0.5) {
             const bps = (received - lastBytes) / elapsed;
             lastTime = now; lastBytes = received;
             lastSpeed = bps > 1048576 ? (bps/1048576).toFixed(1)+' MB/s' : (bps/1024).toFixed(0)+' KB/s';
           }
-          if (total > 0 && onProgress) onProgress(received / total, lastSpeed || null);
+          if (onProgress) {
+            if (total > 0) {
+              onProgress(Math.round((received / total) * 100), lastSpeed || null);
+            } else {
+              // Sem content-length: mostra MB recebidos
+              onProgress(-(received), lastSpeed || null);
+            }
+          }
         });
         res.on('end',   () => { if (!_cancelled) { file.end(); resolve(); } });
         res.on('error', err => { file.destroy(); reject(err); });
@@ -105,8 +103,8 @@ function downloadFile(url, destPath, onProgress, startByte = 0) {
 function extractZip(zipPath, destDir) {
   return new Promise((resolve, reject) => {
     const tmpExtract = path.join(os.tmpdir(), 'HimariGames_extract_' + Date.now());
-    const psCmd = `Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('` + zipPath.replace(/\\/g, '\\\\') + `', '` + tmpExtract.replace(/\\/g, '\\\\') + `')`;
-    const proc = require('child_process').spawn('powershell.exe', ['-NoProfile', '-Command', psCmd], { stdio: 'pipe' });
+    const psCmd = `Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('${zipPath.replace(/\\/g, '\\\\')}', '${tmpExtract.replace(/\\/g, '\\\\')}')`;
+    const proc = spawn('powershell.exe', ['-NoProfile', '-Command', psCmd], { stdio: 'pipe' });
     let stderr = '';
     proc.stderr.on('data', d => stderr += d);
     proc.on('close', code => {
@@ -133,13 +131,8 @@ function extractZip(zipPath, destDir) {
   });
 }
 
-
 function _getTmpPath() {
   return path.join(app.getPath('downloads'), 'HimariGames_update.zip');
-}
-function _getPartialSize() {
-  try { const p = _getTmpPath(); if (fs.existsSync(p)) { const s = fs.statSync(p); return s.size > 0 ? s.size : 0; } } catch(e) {}
-  return 0;
 }
 
 function restartApp() {
@@ -160,7 +153,6 @@ async function checkForUpdates() {
     const raw    = await fetchText(VERSION_JSON_URL);
     const remote = JSON.parse(raw);
 
-    // Le versao local do version.json em AppData (atualizado pelos patches)
     let local = app.getVersion();
     try {
       const versionFile = path.join(APPDATA_DIR, 'version.json');
@@ -179,7 +171,7 @@ async function checkForUpdates() {
   }
 }
 
-ipcMain.handle('update-check-partial',   () => _getPartialSize());
+ipcMain.handle('update-check-partial',   () => 0); // Resume desabilitado
 ipcMain.handle('update-discard-partial', () => {
   try { const p = _getTmpPath(); if (fs.existsSync(p)) fs.unlinkSync(p); } catch(e) {}
 });
@@ -189,19 +181,19 @@ let _activeDownload = null;
 ipcMain.handle('update-download', async (_event, url) => {
   if (_activeDownload?.cancel) { _activeDownload.cancel(); _activeDownload = null; await new Promise(r => setTimeout(r, 150)); }
 
-  const tmpPath   = _getTmpPath();
-  const startByte = _getPartialSize();
+  // Sempre começa do zero — evita corrupção com ZIPs do GitHub
+  const tmpPath = _getTmpPath();
+  try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch(e) {}
 
   try {
     _activeDownload = downloadFile(url, tmpPath, (pct, spd) => {
       if (_mainWindow && !_mainWindow.isDestroyed())
-        _mainWindow.webContents.send('update-progress', Math.round(pct * 100), spd || '');
-    }, startByte);
+        _mainWindow.webContents.send('update-progress', pct, spd || '');
+    });
 
     await _activeDownload;
     _activeDownload = null;
 
-    // Extrai zip por cima dos arquivos em AppData\HimariGames\
     await extractZip(tmpPath, APPDATA_DIR);
     try { fs.unlinkSync(tmpPath); } catch(e) {}
 
@@ -221,7 +213,7 @@ ipcMain.handle('update-download', async (_event, url) => {
     if (_mainWindow && !_mainWindow.isDestroyed())
       _mainWindow.webContents.send('update-ready');
 
-    setTimeout(() => restartApp(), 1200);
+    // Nao reinicia automaticamente — aguarda o player confirmar
     return { ok: true };
   } catch(e) {
     _activeDownload = null;
@@ -232,6 +224,10 @@ ipcMain.handle('update-download', async (_event, url) => {
 
 ipcMain.handle('update-cancel', () => {
   if (_activeDownload?.cancel) { _activeDownload.cancel(); _activeDownload = null; }
+});
+
+ipcMain.handle('update-restart', () => {
+  restartApp();
 });
 
 module.exports = { setMainWindow, checkForUpdates };

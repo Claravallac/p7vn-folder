@@ -1,4 +1,4 @@
 {
-  "version": "1.0.4",
-  "notes": "Alterações no esquema de como o game percebe novas versões"
+  "version": "1.0.5",
+  "notes": "Arrumado bug que crashava o game ao instalar uma update de assets"
 }

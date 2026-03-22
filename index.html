@@ -15912,6 +15912,32 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   _startObserver();
 
   electronAPI.onUpdateProgress(function(pct, speed){
+    // pct negativo = bytes recebidos sem content-length conhecido
+    if(pct < 0) {
+      var mb = ((-pct) / 1048576).toFixed(1);
+      var txt = mb + ' MB baixados' + (speed ? '  · ' + speed : '');
+      if(progBar)  { progBar.style.width='100%'; progBar.style.opacity='0.3'; }
+      if(sProgBar) { sProgBar.style.width='100%'; sProgBar.style.opacity='0.3'; }
+      if(progPct)  progPct.textContent  = txt;
+      if(sProgPct) sProgPct.textContent = txt;
+      return;
+    }
+    if(progBar)  progBar.style.opacity  = '1';
+    if(sProgBar) sProgBar.style.opacity = '1';
+    // pct negativo = bytes recebidos sem total conhecido
+    if(pct < 0) {
+      var mb = (-pct / 1048576).toFixed(1);
+      var txt = mb + ' MB' + (speed ? '  · ' + speed : '');
+      if(progBar)  progBar.style.width = '100%';
+      if(sProgBar) sProgBar.style.width = '100%';
+      if(progBar)  progBar.style.opacity = '0.4';
+      if(sProgBar) sProgBar.style.opacity = '0.4';
+      if(progPct)  progPct.textContent  = txt;
+      if(sProgPct) sProgPct.textContent = txt;
+      return;
+    }
+    if(progBar)  progBar.style.opacity = '1';
+    if(sProgBar) sProgBar.style.opacity = '1';
     var pctTxt = pct + '%';
     if(progBar)  progBar.style.width  = pct + '%';
     if(sProgBar) sProgBar.style.width = pct + '%';
