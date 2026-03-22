@@ -16,7 +16,7 @@ const BRANCH           = 'main';
 const VERSION_JSON_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/version.json`;
 const ZIP_URL          = `https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${BRANCH}.zip`;
 
-const APPDATA_DIR = app.isPackaged ? path.dirname(process.execPath) : app.getAppPath();
+const APPDATA_DIR = app.isPackaged ? path.join(path.dirname(process.execPath), "resources", "app") : app.getAppPath();
 
 let _mainWindow    = null;
 let _pendingUpdate = null;
