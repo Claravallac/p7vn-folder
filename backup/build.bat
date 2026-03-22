@@ -103,7 +103,13 @@ git commit -m "update leve: versao %VERSION%"
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
 
-call :publicar_delta
+echo.
+echo  ============================================
+echo   Update leve v%VERSION% publicado!
+echo   Jogadores recebem automaticamente.
+echo  ============================================
+echo.
+pause
 goto :eof
 
 :: ══════════════════════════════════════════════════════════════════════════════
@@ -133,56 +139,18 @@ git commit -m "update completo: versao %VERSION%"
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
 
-call :publicar_delta
+echo.
+echo  ============================================
+echo   Update completo v%VERSION% publicado!
+echo   Jogadores recebem automaticamente.
+echo  ============================================
+echo.
+pause
 goto :eof
 
 :: ══════════════════════════════════════════════════════════════════════════════
 :: Subrotinas
 :: ══════════════════════════════════════════════════════════════════════════════
-
-:publicar_delta
-echo.
-echo Gerando ZIP delta...
-node make-delta.js %VERSION%
-if errorlevel 1 ( echo [AVISO] Delta nao gerado — continuando sem ele. & goto :publicar_delta_end )
-
-set DELTA_FILE=delta-v%VERSION%.zip
-if not exist "%DELTA_FILE%" ( echo [AVISO] Arquivo delta nao encontrado — continuando sem ele. & goto :publicar_delta_end )
-
-echo Criando GitHub Release v%VERSION%...
-gh release create v%VERSION% "%DELTA_FILE%" --title "v%VERSION%" --notes "%NOTES%" --repo Claravallac/p7vn-folder
-if errorlevel 1 ( echo [AVISO] Release falhou — jogadores usarao fallback do ZIP da branch. & goto :publicar_delta_cleanup )
-
-:: Pega URL do asset gerado pelo release
-for /f "delims=" %%u in ('gh release view v%VERSION% --repo Claravallac/p7vn-folder --json assets --jq ".assets[0].browserDownloadUrl" 2^>nul') do set DELTA_URL=%%u
-
-if "%DELTA_URL%"=="" (
-    echo [AVISO] URL do delta nao obtida — jogadores usarao fallback.
-    goto :publicar_delta_cleanup
-)
-
-echo URL do delta: %DELTA_URL%
-
-:: Atualiza version.json com URL do delta e faz push
-node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%',url:'%DELTA_URL%'},null,2),'utf8');"
-git add version.json
-git commit -m "update: url delta v%VERSION%"
-git push --force origin main
-
-echo.
-echo  ============================================
-echo   Update v%VERSION% publicado com delta!
-echo   Players baixam apenas os arquivos alterados.
-echo  ============================================
-
-:publicar_delta_cleanup
-:: Limpa ZIP delta local
-if exist "%DELTA_FILE%" del "%DELTA_FILE%"
-
-:publicar_delta_end
-echo.
-pause
-goto :eof
 
 :check_tools
 where node >nul 2>&1
@@ -212,7 +180,7 @@ for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"version\"" package.json') do
 :got_ver
 set CURRENT_VER=%RAW_VER:"=%
 echo  Versao atual: %CURRENT_VER%
-set /p VERSION= Nova versao (ex: 1.0.1): 
+set /p VERSION= Nova versao (ex: 1.0.38): 
 if "%VERSION%"=="" set VERSION=%CURRENT_VER%
 node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='%VERSION%';fs.writeFileSync('package.json',JSON.stringify(p,null,2),'utf8');"
 echo  Versao definida: %VERSION%

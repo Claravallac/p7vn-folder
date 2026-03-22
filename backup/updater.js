@@ -111,12 +111,7 @@ function extractZip(zipPath, destDir) {
       if (code !== 0) return reject(new Error('Extracao falhou: ' + stderr));
       try {
         const entries = fs.readdirSync(tmpExtract);
-        // Se tem uma unica pasta e nenhum arquivo na raiz = ZIP do GitHub (tem pasta raiz)
-        // Se tem arquivos na raiz = ZIP delta (sem pasta raiz)
-        const hasFiles = entries.some(e => fs.statSync(path.join(tmpExtract, e)).isFile());
-        const rootDir = (!hasFiles && entries.length === 1)
-          ? path.join(tmpExtract, entries[0])
-          : tmpExtract;
+        const rootDir = entries.length === 1 ? path.join(tmpExtract, entries[0]) : tmpExtract;
         const execBase = path.basename(process.execPath);
         function copyDir(src, dest) {
           fs.mkdirSync(dest, { recursive: true });
@@ -168,8 +163,7 @@ async function checkForUpdates() {
     } catch(e) {}
 
     if (!isNewer(remote.version, local)) return;
-    const updateUrl = remote.url || ZIP_URL;
-    _pendingUpdate = { version: remote.version, notes: remote.notes || '', url: updateUrl };
+    _pendingUpdate = { version: remote.version, notes: remote.notes || '', url: ZIP_URL };
     if (_mainWindow && !_mainWindow.isDestroyed())
       _mainWindow.webContents.send('update-available', _pendingUpdate);
   } catch(e) {

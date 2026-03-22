@@ -15957,14 +15957,10 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   });
 
   electronAPI.onUpdateReady(function(){
-    if(progBar)  { progBar.style.width='100%'; progBar.style.opacity='1'; }
-    if(sProgBar) { sProgBar.style.width='100%'; sProgBar.style.opacity='1'; }
-    if(progPct)  progPct.textContent  = 'Pronto!';
-    if(sProgPct) sProgPct.textContent = 'Pronto!';
-    if(btnCancel)  btnCancel.style.display='none';
-    if(sCancelDl)  sCancelDl.style.display='none';
-    if(btnUp)    { btnUp.disabled=false; btnUp.textContent='REINICIAR AGORA'; btnUp.style.background='#16a34a'; btnUp.onclick=function(){ if(electronAPI.updateRestart) electronAPI.updateRestart(); }; }
-    if(sInstall) { sInstall.disabled=false; sInstall.textContent='REINICIAR AGORA'; sInstall.style.background='#16a34a'; sInstall.onclick=function(){ if(electronAPI.updateRestart) electronAPI.updateRestart(); }; }
+    if(progPct)  { progPct.textContent='Reiniciando...';  progBar.style.width='100%'; }
+    if(sProgPct) { sProgPct.textContent='Reiniciando...'; sProgBar.style.width='100%'; }
+    if(btnUp)    { btnUp.textContent='CONCLUÍDO!';    btnUp.style.background='#16a34a'; }
+    if(sInstall) { sInstall.textContent='CONCLUÍDO!'; sInstall.style.background='#16a34a'; }
   });
 
   function startDownload(){
