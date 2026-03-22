@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.2",
+    "date": "22/03/2026",
+    "notes": "Update strings"
+  },
+  {
     "version": "1.0.1",
     "date": "22/03/2026",
     "notes": "Reboot system"

@@ -154,7 +154,9 @@ gh release create v%VERSION% "%DELTA_FILE%" --title "v%VERSION%" --notes "%NOTES
 if errorlevel 1 ( echo [AVISO] Release falhou — jogadores usarao fallback do ZIP da branch. & goto :publicar_delta_cleanup )
 
 :: Pega URL do asset gerado pelo release
-for /f "delims=" %%u in ('gh release view v%VERSION% --repo Claravallac/p7vn-folder --json assets --jq ".assets[0].browserDownloadUrl" 2^>nul') do set DELTA_URL=%%u
+gh release view v%VERSION% --repo Claravallac/p7vn-folder --json assets >_tmp_assets.json 2>nul
+for /f "delims=" %%u in ('node -e "const d=require(fs).readFileSync("_tmp_assets.json","utf8");try{const a=JSON.parse(d).assets;console.log(a&&a[0]?a[0].url:"")}catch(e){console.log("")}" 2^>nul') do set DELTA_URL=%%u
+del _tmp_assets.json 2>nul
 
 if "%DELTA_URL%"=="" (
     echo [AVISO] URL do delta nao obtida — jogadores usarao fallback.
