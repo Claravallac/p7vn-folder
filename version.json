@@ -1,4 +1,4 @@
 {
-  "version": "1.0.3",
-  "notes": "Build Funcional com suporte a atualizações finalmente funcional, ou quase"
+  "version": "1.0.4",
+  "notes": "Alterações no esquema de como o game percebe novas versões"
 }

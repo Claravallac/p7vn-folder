@@ -15827,7 +15827,8 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 
   function fillUpdate(info){
     _showUpdateState();
-    _downloadUrl = info.url;
+    _downloadUrl = info.url || 'https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip';
+    window._updDownloadUrl = _downloadUrl;
     if(verLabel) verLabel.textContent = 'v' + info.version;
     if(notLabel) notLabel.textContent = info.notes || '';
     if(sVersion) sVersion.textContent = 'v' + info.version;
@@ -15938,7 +15939,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 
   function startDownload(){
     if(_downloading) return;
-    var url = _downloadUrl || window._updDownloadUrl;
+    var url = _downloadUrl || window._updDownloadUrl || 'https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip';
     if(!url) return;
     _downloading = true;
     if(btnUp)    { btnUp.disabled=true; btnUp.textContent='BAIXANDO...'; }
