@@ -33,7 +33,6 @@ echo.
 where node >nul 2>&1
 if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & pause & exit /b 1 )
 
-:: Le versao atual do installer
 for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"installerVersion\"" package.json') do (
     set RAW_INST=%%~v & goto :got_inst_ver
 )
@@ -86,10 +85,38 @@ goto :eof
 echo.
 echo  Update leve - apenas codigo (JS, CSS, HTML...)
 echo.
-call :check_tools
-call :git_init
-call :pedir_versao
-call :pedir_notes
+
+where node >nul 2>&1
+if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & pause & exit /b 1 )
+where gh >nul 2>&1
+if errorlevel 1 ( echo [ERRO] GitHub CLI nao encontrado. & pause & exit /b 1 )
+where git >nul 2>&1
+if errorlevel 1 ( echo [ERRO] Git nao encontrado. & pause & exit /b 1 )
+
+git config --global user.email "claravallac@github.com"
+git config --global user.name "Claravallac"
+if not exist ".git\" (
+    git init
+    git remote add origin https://github.com/Claravallac/p7vn-folder.git
+    git add .
+    git commit -m "inicial"
+    git push --set-upstream origin main
+)
+
+for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"version\"" package.json') do (
+    set RAW_VER=%%~v & goto :got_ver_leve
+)
+:got_ver_leve
+set CURRENT_VER=%RAW_VER:"=%
+echo  Versao atual: %CURRENT_VER%
+set /p VERSION= Nova versao (ex: 1.0.1): 
+if "%VERSION%"=="" set VERSION=%CURRENT_VER%
+node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='%VERSION%';fs.writeFileSync('package.json',JSON.stringify(p,null,2),'utf8');"
+echo  Versao definida: %VERSION%
+
+set /p NOTES= Notas desta versao: 
+if "%NOTES%"=="" set NOTES=Nova atualizacao disponivel.
+echo.
 
 echo Detectando arquivos removidos...
 node detect-removed.js
@@ -103,8 +130,7 @@ git commit -m "update leve: versao %VERSION%"
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
 
-call :publicar_delta
-goto :eof
+goto :publicar_delta
 
 :: ══════════════════════════════════════════════════════════════════════════════
 :update_completo
@@ -112,10 +138,38 @@ goto :eof
 echo.
 echo  Update completo - codigo + assets de midia
 echo.
-call :check_tools
-call :git_init
-call :pedir_versao
-call :pedir_notes
+
+where node >nul 2>&1
+if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & pause & exit /b 1 )
+where gh >nul 2>&1
+if errorlevel 1 ( echo [ERRO] GitHub CLI nao encontrado. & pause & exit /b 1 )
+where git >nul 2>&1
+if errorlevel 1 ( echo [ERRO] Git nao encontrado. & pause & exit /b 1 )
+
+git config --global user.email "claravallac@github.com"
+git config --global user.name "Claravallac"
+if not exist ".git\" (
+    git init
+    git remote add origin https://github.com/Claravallac/p7vn-folder.git
+    git add .
+    git commit -m "inicial"
+    git push --set-upstream origin main
+)
+
+for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"version\"" package.json') do (
+    set RAW_VER=%%~v & goto :got_ver_completo
+)
+:got_ver_completo
+set CURRENT_VER=%RAW_VER:"=%
+echo  Versao atual: %CURRENT_VER%
+set /p VERSION= Nova versao (ex: 1.0.1): 
+if "%VERSION%"=="" set VERSION=%CURRENT_VER%
+node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='%VERSION%';fs.writeFileSync('package.json',JSON.stringify(p,null,2),'utf8');"
+echo  Versao definida: %VERSION%
+
+set /p NOTES= Notas desta versao: 
+if "%NOTES%"=="" set NOTES=Nova atualizacao disponivel.
+echo.
 
 echo Detectando arquivos removidos...
 node detect-removed.js
@@ -133,14 +187,11 @@ git commit -m "update completo: versao %VERSION%"
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
 
-call :publicar_delta
-goto :eof
+goto :publicar_delta
 
 :: ══════════════════════════════════════════════════════════════════════════════
-:: Subrotinas
-:: ══════════════════════════════════════════════════════════════════════════════
-
 :publicar_delta
+:: ══════════════════════════════════════════════════════════════════════════════
 echo.
 echo Gerando ZIP delta...
 node make-delta.js %VERSION%
@@ -153,7 +204,6 @@ echo Criando GitHub Release v%VERSION%...
 gh release create v%VERSION% "%DELTA_FILE%" --title "v%VERSION%" --notes "%NOTES%" --repo Claravallac/p7vn-folder
 if errorlevel 1 ( echo [AVISO] Release falhou — jogadores usarao fallback do ZIP da branch. & goto :publicar_delta_cleanup )
 
-:: Pega URL do asset gerado pelo release
 gh release view v%VERSION% --repo Claravallac/p7vn-folder --json assets >_tmp_assets.json 2>nul
 for /f "delims=" %%u in ('node get-release-url.js') do set DELTA_URL=%%u
 del _tmp_assets.json 2>nul
@@ -165,7 +215,6 @@ if "%DELTA_URL%"=="" (
 
 echo URL do delta: %DELTA_URL%
 
-:: Atualiza version.json com URL do delta e faz push
 node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%',url:'%DELTA_URL%'},null,2),'utf8');"
 git add version.json
 git commit -m "update: url delta v%VERSION%"
@@ -178,50 +227,9 @@ echo   Players baixam apenas os arquivos alterados.
 echo  ============================================
 
 :publicar_delta_cleanup
-:: Limpa ZIP delta local
 if exist "%DELTA_FILE%" del "%DELTA_FILE%"
 
 :publicar_delta_end
 echo.
 pause
-goto :eof
-
-:check_tools
-where node >nul 2>&1
-if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & pause & exit /b 1 )
-where gh >nul 2>&1
-if errorlevel 1 ( echo [ERRO] GitHub CLI nao encontrado. & pause & exit /b 1 )
-where git >nul 2>&1
-if errorlevel 1 ( echo [ERRO] Git nao encontrado. & pause & exit /b 1 )
-goto :eof
-
-:git_init
-git config --global user.email "claravallac@github.com"
-git config --global user.name "Claravallac"
-if not exist ".git\" (
-    git init
-    git remote add origin https://github.com/Claravallac/p7vn-folder.git
-    git add .
-    git commit -m "inicial"
-    git push --set-upstream origin main
-)
-goto :eof
-
-:pedir_versao
-for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"version\"" package.json') do (
-    set RAW_VER=%%~v & goto :got_ver
-)
-:got_ver
-set CURRENT_VER=%RAW_VER:"=%
-echo  Versao atual: %CURRENT_VER%
-set /p VERSION= Nova versao (ex: 1.0.1): 
-if "%VERSION%"=="" set VERSION=%CURRENT_VER%
-node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='%VERSION%';fs.writeFileSync('package.json',JSON.stringify(p,null,2),'utf8');"
-echo  Versao definida: %VERSION%
-goto :eof
-
-:pedir_notes
-set /p NOTES= Notas desta versao: 
-if "%NOTES%"=="" set NOTES=Nova atualizacao disponivel.
-echo.
 goto :eof
