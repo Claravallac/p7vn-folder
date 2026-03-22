@@ -1,0 +1,193 @@
+/* ===== ENDING SCREENS ===== */
+/* Ending 9999, Stupid Ending, Normal Ending */
+
+/* Ending 3 - Stupid */
+#ending3-screen {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'VT323', monospace;
+    color: white;
+    text-align: center;
+}
+
+#ending3-screen h1 {
+    font-size: 80px;
+    color: #ff0055;
+    margin-bottom: 30px;
+    text-shadow: 0 0 20px red;
+}
+
+#ending3-screen p {
+    font-size: 40px;
+    margin-bottom: 50px;
+    max-width: 800px;
+}
+
+#ending3-screen .close-hint {
+    font-size: 30px;
+    color: #aaa;
+}
+
+#ending3-screen .close-hint span {
+    color: #00ffff;
+    font-weight: bold;
+}
+
+/* Ending 9999999999 */
+#ending-9999 {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    flex-direction: column;
+    font-family: 'VT323', monospace;
+    color: #fff;
+    overflow: hidden;
+}
+
+#ending-9999-header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    flex-shrink: 0;
+    transition: transform 0.1s linear;
+}
+
+#ending-9999-label {
+    font-size: 26px;
+    color: #555;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+}
+
+#ending-9999-title {
+    font-size: 42px;
+    color: #888;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+}
+
+#ending-9999-subtitle {
+    font-size: 22px;
+    color: #444;
+    letter-spacing: 3px;
+}
+
+#abbyl-world {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    border-top: 2px solid #111;
+    background: #000;
+}
+
+#abbyl-world::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 50%, rgba(0, 0, 0, 0.2) 100%);
+    pointer-events: none;
+    z-index: 10;
+    animation: fogDrift 20s ease-in-out infinite;
+}
+
+#abbyl-world::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.12) 0%, transparent 35%),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.18) 0%, transparent 45%);
+    pointer-events: none;
+    z-index: 15;
+    opacity: 0.6;
+    animation: heavyFog 15s ease-in-out infinite;
+}
+
+#abbyl-glitch-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.glitch-pixel {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #111;
+    opacity: 0;
+    animation: glitchBlink var(--duration, 0.3s) var(--delay, 0s) forwards;
+}
+
+#abbyl-floor {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #0a0a0a;
+    border-top: 2px solid #1a1a1a;
+}
+
+#abbyl-thought {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'VT323', monospace;
+    font-size: 32px;
+    color: #fff;
+    pointer-events: none;
+    transition: opacity 0.5s;
+    background: linear-gradient(135deg, rgba(10, 10, 10, 0.95), rgba(5, 5, 5, 0.9));
+    border: 3px solid #333;
+    border-radius: 8px;
+    padding: 25px 30px;
+    width: 85%;
+    max-width: 900px;
+    min-height: 100px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#abbyl-thought img {
+    width: 100px;
+    height: 100px;
+    image-rendering: pixelated;
+    flex-shrink: 0;
+}
+
+#abbyl-thought-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+#abbyl-sprite {
+    position: absolute;
+    bottom: 60px;
+    image-rendering: pixelated;
+    width: 130px;
+    height: 263px;
+    object-fit: contain;
+    filter: blur(0px) brightness(1);
+    transition: filter 0.3s ease, transform 0.2s ease;
+}
+
+/* Gameover Video */
+#gameover-video {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: black;
+}

@@ -1,0 +1,88 @@
+// ===== CAPÍTULOS E DIÁLOGOS =====
+const chapters = {
+  0: {
+    title: "PRÓLOGO",
+    bg: "bg_cap0.jpg", // coloque uma imagem ou deixe vazio
+    lines: [
+      { speaker: "Nero", text: "Finalmente!", left: "nero", right: null },
+      { speaker: "Nero", text: "Eu sabia que era real, agora finalmente poderemos tomar conta de tudo!", left: "nero", right: null },
+      { speaker: "Arabel", text: "Isso é mesmo incrível, mal vejo a hora de governar esse mundo ao seu lado, sem ninguém sequer pensar em nos impedir!", left: "arabel", right: "nero" },
+      { speaker: "Nero", text: "Impedir? É impossível até pensar sobre isso, afinal, quem descobria sobre isso?", left: null, right: "nero" }
+    ]
+  },
+  1: {
+    title: "Capítulo 1 - A Descoberta",
+    bg: "bg_cap1.jpg",
+    lines: [
+      { speaker: "Aldrich Pudding", text: "Abbyl!", left: "aldrich", right: null },
+      { speaker: "Aldrich Pudding", text: "Eu já falei para você não atrapalhar meus desenhos para me mostrar essas invenções estranhas", left: "aldrich", right: null },
+      { speaker: "Abbyl", text: "Dessa vez é algo realmente incrível, veja, você só precisa fechar os olhos enquanto eu coloco esse equipamento nada estranho na sua testa", left: "abbyl", right: "aldrich" },
+      { speaker: "Aldrich Pudding", text: "Eu não sou idiota.", left: "aldrich", right: "abbyl" },
+      { speaker: "Abbyl", text: "Qual é, Pudding, me ajuda com isso, eu só tenho você.", left: "abbyl", right: "aldrich" },
+      { speaker: "Aldrich Pudding", text: "Tá bom, mas só essa vez, eu realmente preciso desenhar", left: "aldrich", right: "abbyl" },
+      { speaker: "Abbyl", text: "Maravilha! Eu prometo que não vai demorar nadinha!", left: "abbyl", right: null },
+      { speaker: "Narrador", text: "[Brilho na tela]", left: null, right: null },
+      { speaker: "Narrador", text: "[Aldrich Pudding aparece dentro do VR chat com o seu corpo físico e fica impressionado]", left: null, right: null },
+      { speaker: "Abbyl", text: "Então, o que achou?", left: "abbyl", right: null },
+      { speaker: "Aldrich Pudding", text: "Eu nunca pensei que você iria tão longe assim na falta do que fazer", left: "aldrich", right: "abbyl" },
+      { speaker: "Abbyl", text: "Isso não te impressionou?", left: "abbyl", right: "aldrich" },
+      { speaker: "Aldrich Pudding", text: "Sinceramente, o que me impressiona é quando não me pedem para desenhar uma grávida dando para um anão elfo em plena 3 da manhã", left: "aldrich", right: "abbyl" },
+      { speaker: "Abbyl", text: "Não sabia que você tinha uma opinião tão forte sobre isso...", left: "abbyl", right: "aldrich" },
+      { speaker: "Voz ao longe", text: "Aldrich??? Abbyl???", left: null, right: null },
+      { speaker: "Abbyl", text: "quem será?", left: "abbyl", right: null },
+      { speaker: "Aldrich Pudding", text: "sei lá.", left: "aldrich", right: null },
+      { speaker: "Voz ao longe", text: "Cocada é paia, Celeste é ruim, Quero mulher que não seja doida da cabeça", left: null, right: null },
+      { speaker: "Abbyl e Aldrich", text: "É o Seven -_-", left: "abbyl", right: "aldrich" },
+      { speaker: "Seven", text: "Onde cês tão? Eu vou acabar com cês, vey, hahaha", left: "seven", right: null },
+      { speaker: "Abbyl", text: "Eu não posso deixar esse doido sozinho no meu laboratório, vamos voltar", left: "abbyl", right: "aldrich" },
+      { speaker: "Aldrich Pudding", text: "Você tem um laboratório agora é? O roteirista me deixou tão ocupado com desenho quanto na vida real, vejo padrões aqui sobre favoritismo.", left: "aldrich", right: "abbyl" }
+    ]
+  },
+  "1.5": {
+    title: "Capítulo 1.5 - Depois do Time Skip",
+    type: "ch15"
+  },
+  "1.3": {
+    title: "Capítulo 1.3 - Call do Discord",
+    bg: "discord.png",
+    type: "discord_call",
+    bgEffect: "blur",
+    lines: [
+      { action: "scene_start", text: "[Estava rolando uma Call no server do Discord entre Seven e Pudding]" },
+      { action: "user_join", speaker: "Abbyl", sound: "entrar.mp3" },
+      { speaker: "Abbyl", text: "Então, qual a boa, pessoal?" },
+      { speaker: "Seven", text: "Nada demais, tava aqui mandando uns Reels pro pessoal, o Pudding tá desenhando, eu acho" },
+      { speaker: "Abbyl", text: "Deixa eu ver se entendi, vocês estão em Call pra nada?" },
+      { speaker: "Seven", text: "Não é bem 'pra nada' se ele precisar, vai me chamar, e se eu precisar, eu irei chamar" },
+      { speaker: "Abbyl", text: "Não é mais fácil só ligar pelo WhatsApp?" },
+      { speaker: "Seven", text: "Não tá constando, muito trampo" },
+      { speaker: "Abbyl", text: "Relação estranha essa aí de vocês." },
+      { action: "user_join", speaker: "Volkenburt", sound: "entrar.mp3" },
+      { speaker: "Volkenburt", text: "E aí pessoal" },
+      { speaker: "Abbyl", text: "Opa, Volken, tudo bom?" },
+      { speaker: "Seven", text: "Opa, Volken, tudo bom?" },
+      { speaker: "Volkenburt", text: "Olha o tanque que eu fiz" },
+      { action: "screen_share", speaker: "Volkenburt", sound: "transmissão.mp3", duration: 3 },
+      { speaker: "Abbyl", text: "Você é realmente bom nisso." },
+      { speaker: "Seven", text: "Você é realmente bom nisso." },
+      { action: "transition", text: "[Um tempo se passa...]" },
+      { speaker: "Abbyl", text: "Vocês não estão achando essa Call um pouco chata, não?" },
+      { speaker: "Seven", text: "Mais ou menos." },
+      { speaker: "Volkenburt", text: "Mais ou menos." },
+      { speaker: "Abbyl", text: "Bem, é que eu..." },
+      { speaker: "Abbyl", text: "Olha, dá pra por favor voltar com o meu nick normal?" },
+      { action: "nick_change", speaker: "Abbyl → Bybyl", text: "[Bybyl volta a ser Abbyl]" },
+      { speaker: "Abbyl", text: "Melhor, enfim" },
+      { speaker: "Abbyl", text: "Eu fiz um aparelho que acessa o universo paralelo" },
+      { speaker: "Volkenburt", text: "Cara, você deve tá é doido da cabeça" },
+      { speaker: "Seven", text: "Você fez sim, Abbyl, toma aqui o seu remédio." },
+      { speaker: "Abbyl", text: "Ninguém me leva a sério aqui..." },
+      { action: "drama_moment", text: "[Som de click dramático, fundo fica escuro]" },
+      { speaker: "Abbyl", text: "Será que ninguém aqui liga para o que eu faço?" },
+      { speaker: "Voz misteriosa", text: "Eu ligo.", action: "mystery_voice" }
+    ]
+  }
+};
+
+// Para adicionar mais capítulos, siga o mesmo padrão:
+// 2: { title: "Capítulo 2", bg: "bg_cap2.jpg", lines: [...] }

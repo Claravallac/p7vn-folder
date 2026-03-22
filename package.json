@@ -1,6 +1,7 @@
 {
   "name": "himari-games-visual-novel",
-  "version": "1.0.32",
+  "version": "1.0.38",
+  "installerVersion": "1.0.71",
   "description": "Visual Novel da Himari Games",
   "main": "main.js",
   "scripts": {
@@ -17,7 +18,7 @@
   "build": {
     "appId": "com.himari.vrcnatstory",
     "productName": "Himari Games - VRChat Story",
-    "asar": true,
+    "asar": false,
     "files": [
       "index.html",
       "seven-reels.html",
@@ -43,10 +44,10 @@
       "node_modules/discord-rpc/**/*"
     ],
     "win": {
-      "icon": "assets/images/logo/icon.png",
+      "icon": "assets/images/logo/icon.ico",
       "target": [
         {
-          "target": "portable",
+          "target": "nsis",
           "arch": [
             "x64"
           ]
@@ -60,9 +61,14 @@
       ]
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "assets/images/logo/icon.png"
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "installerIcon": "assets/images/logo/icon.ico",
+      "uninstallerIcon": "assets/images/logo/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Himari Games - VRChat Story"
     },
     "directories": {
       "output": "dist"

@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Himari Editor — VRChat Story</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #06060f;
+  --surface: #0d0d1a;
+  --surface2: #14142a;
+  --surface3: #1c1c38;
+  --border: rgba(255,0,85,0.2);
+  --border-b: rgba(255,0,85,0.55);
+  --accent: #ff0055;
+  --accent2: #00ffff;
+  --accent3: #aa00ff;
+  --text: #e2daf0;
+  --text-m: #7070a0;
+  --text-d: #35355a;
+  --success: #00ff88;
+}
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: rgba(255,0,85,0.5); border-radius: 3px; }
+input, select, textarea { outline: none; font-family: inherit; }
+
+/* ===== LAYOUT ===== */
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 18px; height: 50px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  flex-shrink: 0; gap: 12px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { font-size: 20px; }
+.logo-text { font-weight: 900; font-size: 13px; text-transform: uppercase; letter-spacing: 3px; color: var(--accent); text-shadow: 0 0 12px rgba(255,0,85,0.4); }
+.logo-sub { color: var(--text-m); font-weight: 400; letter-spacing: 1px; }
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.header-tip { font-size: 11px; color: var(--text-d); }
+
+.btn { border: none; cursor: pointer; border-radius: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.18s; font-family: inherit; }
+.btn-primary { background: var(--accent); color: #fff; padding: 8px 18px; font-size: 12px; }
+.btn-primary:hover { background: #ff3377; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(255,0,85,0.4); }
+.btn-ghost { background: transparent; color: var(--accent2); border: 1px solid rgba(0,255,255,0.25); padding: 7px 14px; font-size: 11px; }
+.btn-ghost:hover { background: rgba(0,255,255,0.08); border-color: var(--accent2); }
+
+#main { display: flex; flex: 1; overflow: hidden; }
+
+/* ===== PANEL BASE ===== */
+.panel { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+.panel-hdr {
+  padding: 9px 13px; font-size: 10px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-m); border-bottom: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+
+/* ===== LEFT: CHAPTER LIST ===== */
+#chapter-panel { width: 210px; flex-shrink: 0; background: var(--surface); }
+#chapter-list { flex: 1; overflow-y: auto; padding: 7px; display: flex; flex-direction: column; gap: 3px; }
+.ch-item {
+  padding: 9px 11px; border-radius: 7px; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.13s; font-size: 12px;
+}
+.ch-item:hover { background: var(--surface2); border-color: var(--border); }
+.ch-item.active { background: rgba(255,0,85,0.09); border-color: var(--accent); }
+.ch-item .ci-id { color: var(--text-d); font-size: 10px; font-family: monospace; margin-bottom: 2px; }
+.ch-item .ci-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ch-item .ci-count { color: var(--text-d); font-size: 10px; margin-top: 2px; }
+.panel-foot { padding: 9px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.btn-dashed {
+  width: 100%; background: transparent; border: 1px dashed rgba(255,0,85,0.35);
+  color: var(--accent); padding: 7px; border-radius: 6px; font-size: 11px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.18s;
+}
+.btn-dashed:hover { background: rgba(255,0,85,0.09); border-style: solid; }
+
+/* ===== CENTER: EDITOR ===== */
+#editor-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); min-width: 0; }
+
+#no-chapter { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px; color: var(--text-d); }
+#no-chapter .nc-icon { font-size: 52px; opacity: 0.3; }
+#no-chapter p { font-size: 13px; }
+
+/* Chapter Settings Bar */
+#ch-settings { padding: 13px 16px; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; display: none; }
+#ch-settings.on { display: block; }
+.srow { display: flex; gap: 9px; margin-bottom: 9px; align-items: flex-end; }
+.srow:last-child { margin-bottom: 0; }
+.fg { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.fg label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-m); font-weight: 700; }
+.fg input, .fg select {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); padding: 6px 9px; border-radius: 6px; font-size: 12px; transition: border-color 0.15s;
+}
+.fg input:focus, .fg select:focus { border-color: var(--accent); }
+.fg select option { background: #14142a; }
+.tc-toggle { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.tc-toggle label { font-size: 11px; color: var(--text-m); text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
+input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; width: 14px; height: 14px; }
+#tc-fields { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; margin-bottom: 8px; }
+#tc-fields .srow { margin-bottom: 7px; }
+#tc-fields .srow:last-child { margin-bottom: 0; }
+
+/* Line Section */
+#line-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#line-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 14px; border-bottom: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+.sec-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-m); font-weight: 700; }
+.add-btns { display: flex; gap: 5px; }
+.btn-addl {
+  background: transparent; border: 1px solid; padding: 4px 9px;
+  border-radius: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; cursor: pointer; transition: all 0.14s; font-family: inherit;
+}
+.btn-addl.d { border-color: rgba(255,0,85,0.45); color: var(--accent); }
+.btn-addl.d:hover { background: rgba(255,0,85,0.12); }
+.btn-addl.n { border-color: rgba(0,255,255,0.45); color: var(--accent2); }
+.btn-addl.n:hover { background: rgba(0,255,255,0.09); }
+.btn-addl.b { border-color: rgba(170,0,255,0.45); color: var(--accent3); }
+.btn-addl.b:hover { background: rgba(170,0,255,0.1); }
+
+#line-list { flex: 1; overflow-y: auto; padding: 7px 11px; }
+.li {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 9px; border-radius: 6px; cursor: pointer;
+  border: 1px solid transparent; margin-bottom: 2px; transition: all 0.11s; font-size: 12px;
+}
+.li:hover { background: var(--surface2); }
+.li.on { background: var(--surface2); border-color: var(--border-b); }
+.li-icon { font-size: 13px; flex-shrink: 0; width: 18px; text-align: center; }
+.li-body { flex: 1; overflow: hidden; }
+.li-spk { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+.li-spk.d { color: var(--accent); }
+.li-spk.n { color: var(--accent2); }
+.li-spk.b { color: var(--accent3); }
+.li-txt { color: var(--text-m); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.li-acts { display: flex; gap: 2px; opacity: 0; transition: opacity 0.13s; }
+.li:hover .li-acts { opacity: 1; }
+.li-btn { background: none; border: none; color: var(--text-m); cursor: pointer; font-size: 11px; padding: 2px 4px; border-radius: 3px; transition: all 0.1s; }
+.li-btn:hover { color: var(--text); background: var(--surface3); }
+.li-btn.x:hover { color: #ff4466; }
+
+/* Line Editor */
+#line-ed { border-top: 1px solid var(--border); padding: 12px 15px; background: var(--surface); flex-shrink: 0; display: none; }
+#line-ed.on { display: block; }
+#line-ed-title { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-m); font-weight: 700; margin-bottom: 9px; }
+
+/* Preview */
+#preview { border-top: 1px solid var(--border); flex-shrink: 0; height: 215px; display: none; background: #0a0a14; position: relative; overflow: hidden; }
+#preview.on { display: block; }
+#prev-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.45; }
+#prev-cl, #prev-cr { position: absolute; bottom: 0; height: 185px; pointer-events: none; }
+#prev-cl { left: 1%; }
+#prev-cr { right: 1%; }
+#prev-cl img, #prev-cr img { height: 100%; width: auto; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,0,0,0.9)); }
+#prev-dlg { position: absolute; bottom: 10px; left: 7%; width: 86%; z-index: 10; }
+#prev-spk {
+  display: inline-block; background: #ff0055; color: #fff;
+  padding: 4px 13px; border-radius: 5px 5px 0 0;
+  font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px;
+}
+#prev-spk.narr {
+  background: transparent; color: var(--accent2);
+  border: 1px solid rgba(0,255,255,0.3); border-bottom: none; border-radius: 5px 5px 0 0;
+}
+#prev-box {
+  background: linear-gradient(135deg, rgba(15,10,20,0.95), rgba(5,5,10,0.92));
+  border: 1px solid rgba(255,0,85,0.4); border-top: 2px solid #ff0055;
+  border-radius: 0 9px 9px 9px; padding: 10px 18px; color: #eaeaea;
+  font-size: 13px; line-height: 1.5; min-height: 52px;
+}
+#prev-box.narr { border-color: rgba(0,255,255,0.3); border-top-color: var(--accent2); border-radius: 9px; text-align: center; font-style: italic; color: #b0e0ff; }
+#prev-next { position: absolute; right: 9%; bottom: 14px; color: #00ffff; font-size: 13px; animation: bounce 1s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(4px)} }
+#preview-label { position: absolute; top: 8px; right: 10px; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-d); font-weight: 700; }
+
+/* ===== RIGHT: ASSETS ===== */
+#assets-panel { width: 240px; flex-shrink: 0; background: var(--surface); display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid var(--border); border-right: none; }
+.asset-sec { border-bottom: 1px solid var(--border); display: flex; flex-direction: column; }
+.asset-sec-hdr {
+  padding: 7px 11px; font-size: 10px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-m); background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.btn-up {
+  background: transparent; border: 1px solid rgba(255,0,85,0.3); color: var(--accent);
+  padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; cursor: pointer; transition: all 0.13s; font-family: inherit;
+}
+.btn-up:hover { background: rgba(255,0,85,0.1); }
+.asset-list { padding: 5px; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; max-height: 130px; }
+.asset-item {
+  display: flex; align-items: center; gap: 7px; padding: 5px 7px;
+  border-radius: 5px; font-size: 11px; background: var(--surface2);
+  border: 1px solid transparent; transition: border-color 0.13s;
+}
+.asset-item:hover { border-color: var(--border); }
+.a-thumb { width: 26px; height: 26px; border-radius: 3px; object-fit: cover; background: var(--surface3); flex-shrink: 0; }
+.a-info { flex: 1; overflow: hidden; }
+.a-key { font-family: monospace; font-size: 10px; color: var(--accent2); }
+.a-name { color: var(--text-m); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a-del { background: none; border: none; color: var(--text-d); cursor: pointer; font-size: 12px; transition: color 0.1s; }
+.a-del:hover { color: #ff4466; }
+.no-asset { padding: 8px 10px; font-size: 11px; color: var(--text-d); font-style: italic; text-align: center; }
+.char-form { padding: 7px; display: flex; gap: 5px; border-top: 1px solid var(--border); display: none; }
+.char-form input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); padding: 5px 7px; border-radius: 5px; font-size: 11px; font-family: monospace;
+}
+.char-form input:focus { border-color: var(--accent); }
+.char-form input::placeholder { color: var(--text-d); }
+.char-form .btn-ok { background: rgba(255,0,85,0.2); border: 1px solid var(--accent); color: var(--accent); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: 700; font-size: 12px; }
+.char-form .btn-ok:hover { background: rgba(255,0,85,0.35); }
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(70px);
+  background: var(--surface2); border: 1px solid var(--border-b); color: var(--text);
+  padding: 9px 18px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  transition: transform 0.28s; z-index: 9999; white-space: nowrap; pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="logo">
+    <span class="logo-icon">🎮</span>
+    <span class="logo-text">Himari <span class="logo-sub">Editor</span></span>
+  </div>
+  <span class="header-tip">💾 O projeto é salvo automaticamente no navegador</span>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="saveState()">💾 Salvar</button>
+    <button class="btn btn-primary" onclick="exportProject()">⬇ Exportar .ZIP</button>
+  </div>
+</header>
+
+<div id="main">
+
+  <!-- ===== LEFT: CAPÍTULOS ===== -->
+  <div id="chapter-panel" class="panel">
+    <div class="panel-hdr">Capítulos</div>
+    <div id="chapter-list"></div>
+    <div class="panel-foot">
+      <button class="btn-dashed" onclick="addChapter()">+ Novo Capítulo</button>
+    </div>
+  </div>
+
+  <!-- ===== CENTER: EDITOR ===== -->
+  <div id="editor-panel">
+
+    <div id="no-chapter">
+      <div class="nc-icon">📖</div>
+      <p>Selecione ou crie um capítulo</p>
+    </div>
+
+    <!-- Configurações do capítulo -->
+    <div id="ch-settings">
+      <div class="srow">
+        <div class="fg" style="flex:1.6">
+          <label>Título do Capítulo</label>
+          <input id="s-title" placeholder="Ex: Capítulo 2 - O Retorno" oninput="upCh('title', this.value)" />
+        </div>
+        <div class="fg" style="flex:0.75">
+          <label>ID único</label>
+          <input id="s-id" placeholder="cap_2" style="font-family:monospace;font-size:11px" oninput="upChId(this.value)" />
+        </div>
+        <div class="fg" style="flex:0.65">
+          <label>Próximo (ID)</label>
+          <input id="s-next" placeholder="null" style="font-family:monospace;font-size:11px" oninput="upCh('next', this.value || null)" />
+        </div>
+        <div style="flex-shrink:0;align-self:flex-end">
+          <button class="btn-dashed" style="width:auto;padding:6px 12px;font-size:11px;border-color:rgba(255,60,60,0.4);color:#ff4466" onclick="deleteChapter()">🗑 Deletar</button>
+        </div>
+      </div>
+      <div class="srow">
+        <div class="fg">
+          <label>Cenário (fundo)</label>
+          <select id="s-bg" onchange="upCh('bg', this.value||null)">
+            <option value="">Nenhum</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Música</label>
+          <select id="s-music" onchange="upCh('music', this.value||null)">
+            <option value="">Nenhuma</option>
+          </select>
+        </div>
+      </div>
+      <div class="tc-toggle">
+        <input type="checkbox" id="s-tc" onchange="toggleTC(this.checked)" />
+        <label for="s-tc">⏰ Passagem de Tempo (Time Card)</label>
+      </div>
+      <div id="tc-fields" class="hidden">
+        <div class="srow">
+          <div class="fg" style="flex:0.45">
+            <label>Hora</label>
+            <input id="tc-time" placeholder="14:15" oninput="upTC('time', this.value)" />
+          </div>
+          <div class="fg" style="flex:0.6">
+            <label>Período</label>
+            <input id="tc-period" placeholder="TARDE" oninput="upTC('period', this.value)" />
+          </div>
+          <div class="fg" style="flex:1.2">
+            <label>Data</label>
+            <input id="tc-date" placeholder="SEG · 13 DE JANEIRO" oninput="upTC('date', this.value)" />
+          </div>
+          <div class="fg" style="flex:1">
+            <label>Local</label>
+            <input id="tc-loc" placeholder="Laboratório da Abbyl" oninput="upTC('location', this.value)" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linhas -->
+    <div id="line-section">
+      <div id="line-hdr">
+        <span class="sec-label">Linhas da Cena</span>
+        <div class="add-btns">
+          <button class="btn-addl d" onclick="addLine('dialogue')">+ Diálogo</button>
+          <button class="btn-addl n" onclick="addLine('narrator')">+ Narrador</button>
+          <button class="btn-addl b" onclick="addLine('bgchange')">+ Fundo</button>
+        </div>
+      </div>
+      <div id="line-list"></div>
+    </div>
+
+    <!-- Editor da linha selecionada -->
+    <div id="line-ed">
+      <div id="line-ed-title">Editar Linha</div>
+      <div id="line-ed-body"></div>
+    </div>
+
+    <!-- Preview -->
+    <div id="preview">
+      <div id="prev-bg"></div>
+      <div id="prev-cl"></div>
+      <div id="prev-cr"></div>
+      <div id="prev-dlg">
+        <div id="prev-spk"></div>
+        <div id="prev-box"></div>
+      </div>
+      <div id="prev-next">▼</div>
+      <div id="preview-label">Preview</div>
+    </div>
+
+  </div><!-- /editor-panel -->
+
+  <!-- ===== RIGHT: ASSETS ===== -->
+  <div id="assets-panel">
+    <div class="panel-hdr">Assets do Projeto</div>
+
+    <!-- Personagens -->
+    <div class="asset-sec">
+      <div class="asset-sec-hdr">
+        <span>Personagens</span>
+        <button class="btn-up" onclick="trigUp('char')">+ Upload</button>
+      </div>
+      <div class="asset-list" id="al-char"></div>
+      <div class="char-form" id="char-form">
+        <input type="text" id="char-key-inp" placeholder="chave (ex: abbyl)" maxlength="30" />
+        <button class="btn-ok" onclick="confirmChar()">✓</button>
+      </div>
+    </div>
+
+    <!-- Cenários -->
+    <div class="asset-sec" style="flex:1">
+      <div class="asset-sec-hdr">
+        <span>Cenários</span>
+        <button class="btn-up" onclick="trigUp('bg')">+ Upload</button>
+      </div>
+      <div class="asset-list" id="al-bg"></div>
+    </div>
+
+    <!-- Músicas -->
+    <div class="asset-sec">
+      <div class="asset-sec-hdr">
+        <span>Músicas</span>
+        <button class="btn-up" onclick="trigUp('music')">+ Upload</button>
+      </div>
+      <div class="asset-list" id="al-music"></div>
+    </div>
+
+    <!-- File inputs ocultos -->
+    <input type="file" id="fi-char" accept="image/*" style="display:none" onchange="onCharFile(this)" />
+    <input type="file" id="fi-bg" accept="image/*" style="display:none" onchange="onBgFile(this)" />
+    <input type="file" id="fi-music" accept="audio/*" style="display:none" onchange="onMusicFile(this)" />
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+// ================================================================
+// STATE
+// ================================================================
+let S = {
+  chapters: [],
+  chars: [],    // { key, filename, dataUrl, file }
+  bgs: [],      // { filename, dataUrl, file }
+  musics: []    // { filename, file }
+};
+
+let selCh = null;   // selected chapter id
+let selLi = null;   // selected line index
+let pendChar = null; // pending char file
+
+// ================================================================
+// HELPERS
+// ================================================================
+const $ = id => document.getElementById(id);
+function getCh(id) { return S.chapters.find(c => c.id === id); }
+function selChap() { return getCh(selCh); }
+function genId() { return 'cap_' + Date.now().toString(36).slice(-5); }
+function toast(msg, ms = 2600) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), ms);
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ================================================================
+// CHAPTERS
+// ================================================================
+function addChapter() {
+  const id = genId();
+  S.chapters.push({
+    id, title: 'Novo Capítulo', bg: null, music: null, next: null,
+    useTC: false, tc: { time: '00:00', period: 'TARDE', date: 'SEG · 1 DE JANEIRO', location: '' },
+    lines: []
+  });
+  renderChList();
+  selectCh(id);
+  saveState();
+}
+
+function selectCh(id) {
+  selCh = id;
+  selLi = null;
+  renderChList();
+  renderEditor();
+}
+
+function deleteChapter() {
+  if (!selCh) return;
+  const ch = selChap();
+  if (!confirm(`Deletar "${ch.title}"? Isso não pode ser desfeito.`)) return;
+  S.chapters = S.chapters.filter(c => c.id !== selCh);
+  selCh = null;
+  selLi = null;
+  renderChList();
+  renderEditor();
+  saveState();
+}
+
+function upCh(field, val) {
+  const ch = selChap();
+  if (!ch) return;
+  ch[field] = val;
+  if (field === 'title') renderChList();
+  saveState();
+}
+
+function upChId(val) {
+  const ch = selChap();
+  if (!ch || !val.trim()) return;
+  if (S.chapters.find(c => c.id === val.trim() && c !== ch)) { toast('⚠ ID já existe!'); return; }
+  ch.id = val.trim();
+  selCh = val.trim();
+  saveState();
+}
+
+function toggleTC(val) {
+  const ch = selChap();
+  if (!ch) return;
+  ch.useTC = val;
+  $('tc-fields').classList.toggle('hidden', !val);
+  saveState();
+}
+
+function upTC(f, v) {
+  const ch = selChap();
+  if (!ch) return;
+  if (!ch.tc) ch.tc = {};
+  ch.tc[f] = v;
+  saveState();
+}
+
+// ================================================================
+// LINES
+// ================================================================
+function addLine(type) {
+  const ch = selChap();
+  if (!ch) { toast('⚠ Selecione um capítulo primeiro'); return; }
+  if (type === 'dialogue') ch.lines.push({ type: 'dialogue', speaker: '', text: '', left: null, right: null, bg: null });
+  else if (type === 'narrator') ch.lines.push({ type: 'narrator', text: '', bg: null });
+  else ch.lines.push({ type: 'bgchange', bg: null });
+  selLi = ch.lines.length - 1;
+  renderLineList();
+  renderLineEd();
+  renderPreview();
+  const ll = $('line-list');
+  ll.scrollTop = ll.scrollHeight;
+  saveState();
+}
+
+function selectLi(i) {
+  selLi = i;
+  renderLineList();
+  renderLineEd();
+  renderPreview();
+}
+
+function delLine(i, e) {
+  e.stopPropagation();
+  const ch = selChap();
+  if (!ch) return;
+  ch.lines.splice(i, 1);
+  if (selLi >= ch.lines.length) selLi = ch.lines.length - 1;
+  if (ch.lines.length === 0) selLi = null;
+  renderLineList();
+  renderLineEd();
+  renderPreview();
+  saveState();
+}
+
+function moveLi(i, dir, e) {
+  e.stopPropagation();
+  const ch = selChap();
+  if (!ch) return;
+  const j = i + dir;
+  if (j < 0 || j >= ch.lines.length) return;
+  [ch.lines[i], ch.lines[j]] = [ch.lines[j], ch.lines[i]];
+  if (selLi === i) selLi = j;
+  renderLineList();
+  renderPreview();
+  saveState();
+}
+
+function upLi(field, val) {
+  const ch = selChap();
+  if (!ch || selLi === null) return;
+  ch.lines[selLi][field] = val || null;
+  renderLineList();
+  renderPreview();
+  saveState();
+}
+
+// ================================================================
+// RENDER: Chapter List
+// ================================================================
+function renderChList() {
+  const el = $('chapter-list');
+  if (!S.chapters.length) {
+    el.innerHTML = '<div class="no-asset" style="margin-top:18px;padding:12px">Nenhum capítulo.<br>Clique em + Novo Capítulo</div>';
+    return;
+  }
+  el.innerHTML = S.chapters.map(ch => `
+    <div class="ch-item ${ch.id === selCh ? 'active' : ''}" onclick="selectCh('${esc(ch.id)}')">
+      <div class="ci-id">${esc(ch.id)}</div>
+      <div class="ci-title">${esc(ch.title || 'Sem título')}</div>
+      <div class="ci-count">${ch.lines.length} linha${ch.lines.length !== 1 ? 's' : ''}</div>
+    </div>
+  `).join('');
+}
+
+// ================================================================
+// RENDER: Editor Panel
+// ================================================================
+function renderEditor() {
+  const ch = selChap();
+  const noEl = $('no-chapter');
+  const setEl = $('ch-settings');
+  const lineSecEl = $('line-section');
+  const lineEdEl = $('line-ed');
+  const prevEl = $('preview');
+
+  if (!ch) {
+    noEl.style.display = 'flex';
+    setEl.classList.remove('on');
+    lineSecEl.style.display = 'none';
+    lineEdEl.classList.remove('on');
+    prevEl.classList.remove('on');
+    return;
+  }
+
+  noEl.style.display = 'none';
+  setEl.classList.add('on');
+  lineSecEl.style.display = 'flex';
+
+  $('s-title').value = ch.title || '';
+  $('s-id').value = ch.id || '';
+  $('s-next').value = ch.next || '';
+  $('s-tc').checked = ch.useTC || false;
+  $('tc-fields').classList.toggle('hidden', !ch.useTC);
+  if (ch.tc) {
+    $('tc-time').value = ch.tc.time || '';
+    $('tc-period').value = ch.tc.period || '';
+    $('tc-date').value = ch.tc.date || '';
+    $('tc-loc').value = ch.tc.location || '';
+  }
+
+  refreshSelects(ch);
+  renderLineList();
+  renderLineEd();
+  renderPreview();
+}
+
+function refreshSelects(ch) {
+  if (!ch) ch = selChap();
+  if (!ch) return;
+  $('s-bg').innerHTML = '<option value="">Nenhum</option>' +
+    S.bgs.map(b => `<option value="${esc(b.filename)}" ${ch.bg === b.filename ? 'selected' : ''}>${esc(b.filename)}</option>`).join('');
+  $('s-music').innerHTML = '<option value="">Nenhuma</option>' +
+    S.musics.map(m => `<option value="${esc(m.filename)}" ${ch.music === m.filename ? 'selected' : ''}>${esc(m.filename)}</option>`).join('');
+}
+
+// ================================================================
+// RENDER: Line List
+// ================================================================
+function renderLineList() {
+  const ch = selChap();
+  const el = $('line-list');
+  if (!ch) { el.innerHTML = ''; return; }
+  if (!ch.lines.length) {
+    el.innerHTML = '<div class="no-asset" style="padding:16px;text-align:center">Nenhuma linha ainda.<br>Adicione diálogos, narrador ou trocas de fundo acima.</div>';
+    return;
+  }
+  el.innerHTML = ch.lines.map((ln, i) => {
+    let icon, cls, spk, txt;
+    if (ln.type === 'dialogue') {
+      icon = '💬'; cls = 'd'; spk = ln.speaker || '(sem speaker)'; txt = ln.text || '…';
+    } else if (ln.type === 'narrator') {
+      icon = '📖'; cls = 'n'; spk = 'Narrador'; txt = ln.text || '…';
+    } else {
+      icon = '🖼'; cls = 'b'; spk = 'Fundo'; txt = ln.bg ? `→ ${ln.bg}` : '(nenhum)';
+    }
+    return `
+      <div class="li ${i === selLi ? 'on' : ''}" onclick="selectLi(${i})">
+        <span class="li-icon">${icon}</span>
+        <div class="li-body">
+          <div class="li-spk ${cls}">${esc(spk)}</div>
+          <div class="li-txt">${esc(txt.substring(0, 65))}</div>
+        </div>
+        <div class="li-acts">
+          <button class="li-btn" onclick="moveLi(${i},-1,event)" title="Mover acima">↑</button>
+          <button class="li-btn" onclick="moveLi(${i},1,event)" title="Mover abaixo">↓</button>
+          <button class="li-btn x" onclick="delLine(${i},event)" title="Deletar">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ================================================================
+// RENDER: Line Editor
+// ================================================================
+function buildBgOpts(sel) {
+  return '<option value="">Nenhum</option>' +
+    S.bgs.map(b => `<option value="${esc(b.filename)}" ${sel === b.filename ? 'selected' : ''}>${esc(b.filename)}</option>`).join('');
+}
+function buildCharOpts(sel) {
+  return `<option value="">— vazio —</option>` +
+    S.chars.map(c => `<option value="${esc(c.key)}" ${sel === c.key ? 'selected' : ''}>${esc(c.key)}</option>`).join('');
+}
+
+function renderLineEd() {
+  const ch = selChap();
+  const edEl = $('line-ed');
+  const prevEl = $('preview');
+  if (!ch || selLi === null || selLi >= ch.lines.length) {
+    edEl.classList.remove('on');
+    prevEl.classList.remove('on');
+    return;
+  }
+  edEl.classList.add('on');
+  prevEl.classList.add('on');
+  const ln = ch.lines[selLi];
+
+  if (ln.type === 'dialogue') {
+    $('line-ed-title').textContent = `💬 Diálogo — Linha ${selLi + 1}`;
+    $('line-ed-body').innerHTML = `
+      <div class="srow">
+        <div class="fg" style="flex:1">
+          <label>Personagem (Speaker)</label>
+          <input value="${esc(ln.speaker)}" placeholder="Ex: Abbyl" oninput="upLi('speaker',this.value)" />
+        </div>
+        <div class="fg" style="flex:0.85">
+          <label>Personagem Esquerda</label>
+          <select onchange="upLi('left',this.value)">${buildCharOpts(ln.left)}</select>
+        </div>
+        <div class="fg" style="flex:0.85">
+          <label>Personagem Direita</label>
+          <select onchange="upLi('right',this.value)">${buildCharOpts(ln.right)}</select>
+        </div>
+        <div class="fg" style="flex:0.75">
+          <label>Fundo (override)</label>
+          <select onchange="upLi('bg',this.value)">${buildBgOpts(ln.bg)}</select>
+        </div>
+      </div>
+      <div class="srow">
+        <div class="fg">
+          <label>Texto do Diálogo</label>
+          <input value="${esc(ln.text)}" placeholder="Digite o diálogo aqui..." oninput="upLi('text',this.value)" />
+        </div>
+      </div>
+    `;
+  } else if (ln.type === 'narrator') {
+    $('line-ed-title').textContent = `📖 Narrador — Linha ${selLi + 1}`;
+    $('line-ed-body').innerHTML = `
+      <div class="srow">
+        <div class="fg">
+          <label>Texto do Narrador</label>
+          <input value="${esc(ln.text)}" placeholder="[Descreva a ação ou evento...]" oninput="upLi('text',this.value)" />
+        </div>
+        <div class="fg" style="flex:0.6">
+          <label>Fundo (override)</label>
+          <select onchange="upLi('bg',this.value)">${buildBgOpts(ln.bg)}</select>
+        </div>
+      </div>
+    `;
+  } else {
+    $('line-ed-title').textContent = `🖼 Mudar Fundo — Linha ${selLi + 1}`;
+    $('line-ed-body').innerHTML = `
+      <div class="srow">
+        <div class="fg">
+          <label>Novo Cenário de Fundo</label>
+          <select onchange="upLi('bg',this.value)">${buildBgOpts(ln.bg)}</select>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// ================================================================
+// RENDER: Preview
+// ================================================================
+function renderPreview() {
+  const ch = selChap();
+  if (!ch || selLi === null) return;
+  const ln = ch.lines[selLi];
+  if (!ln) return;
+
+  // Background
+  const activeBg = ln.bg || ch.bg;
+  const bgAsset = S.bgs.find(b => b.filename === activeBg);
+  $('prev-bg').style.backgroundImage = bgAsset ? `url(${bgAsset.dataUrl})` : '';
+
+  // Characters
+  const clEl = $('prev-cl');
+  const crEl = $('prev-cr');
+  clEl.innerHTML = ''; crEl.innerHTML = '';
+  if (ln.type === 'dialogue') {
+    const lc = S.chars.find(c => c.key === ln.left);
+    const rc = S.chars.find(c => c.key === ln.right);
+    if (lc) clEl.innerHTML = `<img src="${lc.dataUrl}" />`;
+    if (rc) crEl.innerHTML = `<img src="${rc.dataUrl}" />`;
+  }
+
+  // Dialogue box
+  const spkEl = $('prev-spk');
+  const boxEl = $('prev-box');
+  if (ln.type === 'dialogue') {
+    spkEl.className = '';
+    spkEl.style.display = '';
+    spkEl.textContent = (ln.speaker || 'PERSONAGEM').toUpperCase();
+    boxEl.className = '';
+    boxEl.textContent = ln.text || '…';
+  } else if (ln.type === 'narrator') {
+    spkEl.className = 'narr';
+    spkEl.style.display = '';
+    spkEl.textContent = 'NARRADOR';
+    boxEl.className = 'narr';
+    boxEl.textContent = ln.text || '…';
+  } else {
+    spkEl.style.display = 'none';
+    boxEl.className = 'narr';
+    boxEl.textContent = `[Fundo muda para: ${ln.bg || 'nenhum'}]`;
+  }
+}
+
+// ================================================================
+// ASSETS
+// ================================================================
+function trigUp(type) { $('fi-' + type).click(); }
+
+function onCharFile(inp) {
+  const f = inp.files[0]; if (!f) return;
+  pendChar = f;
+  $('char-form').style.display = 'flex';
+  $('char-key-inp').value = f.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9_]/g,'_');
+  $('char-key-inp').focus();
+  inp.value = '';
+}
+
+function confirmChar() {
+  if (!pendChar) return;
+  const key = $('char-key-inp').value.trim();
+  if (!key) { toast('⚠ Informe uma chave para o personagem'); return; }
+  if (S.chars.find(c => c.key === key)) { toast('⚠ Essa chave já existe!'); return; }
+  const ext = pendChar.name.match(/\.[^.]+$/)?.[0] || '.png';
+  const reader = new FileReader();
+  reader.onload = e => {
+    S.chars.push({ key, filename: key + ext, dataUrl: e.target.result, file: pendChar });
+    pendChar = null;
+    $('char-form').style.display = 'none';
+    renderAssets();
+    refreshLineEd();
+    toast(`✓ Personagem "${key}" adicionado`);
+    saveState();
+  };
+  reader.readAsDataURL(pendChar);
+}
+
+function onBgFile(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    S.bgs.push({ filename: f.name, dataUrl: e.target.result, file: f });
+    renderAssets();
+    refreshSelects();
+    refreshLineEd();
+    toast(`✓ Cenário "${f.name}" adicionado`);
+    saveState();
+  };
+  reader.readAsDataURL(f);
+  inp.value = '';
+}
+
+function onMusicFile(inp) {
+  const f = inp.files[0]; if (!f) return;
+  S.musics.push({ filename: f.name, file: f });
+  renderAssets();
+  refreshSelects();
+  toast(`✓ Música "${f.name}" adicionada`);
+  saveState();
+  inp.value = '';
+}
+
+function delAsset(type, key) {
+  if (type === 'char') S.chars = S.chars.filter(c => c.key !== key);
+  else if (type === 'bg') S.bgs = S.bgs.filter(b => b.filename !== key);
+  else S.musics = S.musics.filter(m => m.filename !== key);
+  renderAssets();
+  refreshSelects();
+  refreshLineEd();
+  saveState();
+}
+
+function refreshLineEd() {
+  renderLineEd();
+  renderPreview();
+}
+
+function renderAssets() {
+  // Personagens
+  const cl = $('al-char');
+  cl.innerHTML = S.chars.length ? S.chars.map(c => `
+    <div class="asset-item">
+      <img class="a-thumb" src="${c.dataUrl}" />
+      <div class="a-info">
+        <div class="a-key">${esc(c.key)}</div>
+        <div class="a-name">${esc(c.filename)}</div>
+      </div>
+      <button class="a-del" onclick="delAsset('char','${esc(c.key)}')">✕</button>
+    </div>
+  `).join('') : '<div class="no-asset">Nenhum personagem</div>';
+
+  // Backgrounds
+  const bl = $('al-bg');
+  bl.innerHTML = S.bgs.length ? S.bgs.map(b => `
+    <div class="asset-item">
+      <img class="a-thumb" src="${b.dataUrl}" style="object-fit:cover" />
+      <div class="a-info">
+        <div class="a-name">${esc(b.filename)}</div>
+      </div>
+      <button class="a-del" onclick="delAsset('bg','${esc(b.filename)}')">✕</button>
+    </div>
+  `).join('') : '<div class="no-asset">Nenhum cenário</div>';
+
+  // Músicas
+  const ml = $('al-music');
+  ml.innerHTML = S.musics.length ? S.musics.map(m => `
+    <div class="asset-item">
+      <span style="font-size:18px;flex-shrink:0">🎵</span>
+      <div class="a-name" style="flex:1">${esc(m.filename)}</div>
+      <button class="a-del" onclick="delAsset('music','${esc(m.filename)}')">✕</button>
+    </div>
+  `).join('') : '<div class="no-asset">Nenhuma música</div>';
+}
+
+// ================================================================
+// SAVE / LOAD (localStorage)
+// ================================================================
+function saveState() {
+  try {
+    const data = {
+      chapters: S.chapters,
+      chars: S.chars.map(c => ({ key: c.key, filename: c.filename, dataUrl: c.dataUrl })),
+      bgs: S.bgs.map(b => ({ filename: b.filename, dataUrl: b.dataUrl })),
+      musics: S.musics.map(m => ({ filename: m.filename }))
+    };
+    localStorage.setItem('himari_ed_v1', JSON.stringify(data));
+  } catch(e) { /* quota exceeded - silent */ }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('himari_ed_v1');
+    if (!raw) return false;
+    const d = JSON.parse(raw);
+    S.chapters = d.chapters || [];
+    S.chars = (d.chars || []).map(c => ({ ...c, file: null }));
+    S.bgs = (d.bgs || []).map(b => ({ ...b, file: null }));
+    S.musics = (d.musics || []).map(m => ({ ...m, file: null }));
+    return true;
+  } catch(e) { return false; }
+}
+
+// ================================================================
+// EXPORT
+// ================================================================
+async function exportProject() {
+  if (!S.chapters.length) { toast('⚠ Nenhum capítulo para exportar'); return; }
+
+  const chapObj = {};
+  for (const ch of S.chapters) {
+    const entry = {
+      title: ch.title,
+      bg: ch.bg || null,
+      next: ch.next || null,
+      lines: ch.lines.map(ln => {
+        if (ln.type === 'dialogue') {
+          const r = { speaker: ln.speaker || '', text: ln.text || '', left: ln.left || null, right: ln.right || null };
+          if (ln.bg) r.bg = ln.bg;
+          return r;
+        } else if (ln.type === 'narrator') {
+          const r = { speaker: 'Narrador', text: ln.text || '', left: null, right: null };
+          if (ln.bg) r.bg = ln.bg;
+          return r;
+        } else {
+          return { speaker: 'Narrador', text: '', left: null, right: null, bg: ln.bg || null };
+        }
+      })
+    };
+    if (ch.music) entry.music = ch.music;
+    if (ch.useTC && ch.tc) entry.timeCard = ch.tc;
+    chapObj[ch.id] = entry;
+  }
+
+  const now = new Date().toLocaleString('pt-BR');
+  const chapterList = Object.entries(chapObj).map(([id, c]) => '  // - ' + id + ': ' + c.title).join('\n');
+  const chapLines = Object.entries(chapObj).map(([id,c]) => '  ' + id + ': "' + c.title + '" (' + c.lines.length + ' linhas)').join('\n');
+
+  const jsContent = [
+    '// ================================================================',
+    '// CAPITULOS CRIADOS NO HIMARI EDITOR',
+    '// Gerado em: ' + now,
+    '// ================================================================',
+    '//',
+    '// COMO IMPORTAR NO PROJETO:',
+    '//',
+    '//   1. Coloque este arquivo em:  js/extra_chapters.js',
+    '//',
+    '//   2. No index.html, antes de </body>, adicione:',
+    '//      <script src="js/extra_chapters.js"><\/script>',
+    '//',
+    '//   3. No js/chapters.js, adicione ao FINAL do arquivo:',
+    '//      Object.assign(chapters, extraChapters);',
+    '//',
+    '// CAPITULOS INCLUIDOS:',
+    chapterList,
+    '// ================================================================',
+    '',
+    'const extraChapters = ' + JSON.stringify(chapObj, null, 2) + ';'
+  ].join('\n');
+
+  const readme = [
+    'HIMARI EDITOR - PACOTE DE CAPITULOS',
+    '=====================================',
+    'Gerado em: ' + now,
+    '',
+    'COMO INTEGRAR NO PROJETO:',
+    '--------------------------',
+    '1. Copie "extra_chapters.js" para a pasta  js/  do projeto',
+    '2. Se houver assets novos, copie a pasta  assets_novos/',
+    '   para dentro da pasta  assets/  do projeto',
+    '3. No index.html, antes de </body>, adicione a tag:',
+    '     <script src="js/extra_chapters.js"><\/script>',
+    '4. No js/chapters.js, adicione no FINAL do arquivo:',
+    '     Object.assign(chapters, extraChapters);',
+    '',
+    'CAPITULOS INCLUIDOS:',
+    '--------------------',
+    chapLines,
+    '',
+    'ESTRUTURA DO ZIP:',
+    '-----------------',
+    '  extra_chapters.js         <- arquivo JS principal',
+    '  README.txt                <- este arquivo',
+    '  assets_novos/',
+    '    images/characters/      <- sprites de personagens',
+    '    images/                 <- cenarios (backgrounds)',
+    '    audio/                  <- musicas e sons'
+  ].join('\n');
+
+  // Build ZIP
+  const useZip = typeof JSZip !== 'undefined';
+  if (!useZip) {
+    // fallback: just download the JS
+    const blob = new Blob([jsContent], { type: 'text/javascript' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'extra_chapters.js' });
+    a.click();
+    toast('✓ extra_chapters.js baixado! (sem ZIP)');
+    return;
+  }
+
+  const zip = new JSZip();
+  zip.file('extra_chapters.js', jsContent);
+  zip.file('README.txt', readme);
+
+  // Assets com File objects
+  for (const c of S.chars) {
+    if (c.file) zip.file(`assets_novos/images/characters/${c.filename}`, c.file);
+    else if (c.dataUrl && c.dataUrl.startsWith('data:')) {
+      // convert dataUrl to blob
+      const res = await fetch(c.dataUrl);
+      const blob = await res.blob();
+      zip.file(`assets_novos/images/characters/${c.filename}`, blob);
+    }
+  }
+  for (const b of S.bgs) {
+    if (b.file) zip.file(`assets_novos/images/${b.filename}`, b.file);
+    else if (b.dataUrl && b.dataUrl.startsWith('data:')) {
+      const res = await fetch(b.dataUrl);
+      const blob = await res.blob();
+      zip.file(`assets_novos/images/${b.filename}`, blob);
+    }
+  }
+  for (const m of S.musics) {
+    if (m.file) zip.file(`assets_novos/audio/${m.filename}`, m.file);
+  }
+
+  try {
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: `himari_capitulos_${Date.now()}.zip`
+    });
+    a.click();
+    toast(`✓ ZIP exportado: ${S.chapters.length} capítulo(s)!`);
+  } catch(e) {
+    toast('⚠ Erro ao gerar ZIP: ' + e.message);
+  }
+}
+
+// ================================================================
+// INIT
+// ================================================================
+const loaded = loadState();
+renderChList();
+renderAssets();
+renderEditor();
+if (loaded && S.chapters.length) toast(`✓ Projeto carregado — ${S.chapters.length} capítulo(s)`);
+</script>
+</body>
+</html>

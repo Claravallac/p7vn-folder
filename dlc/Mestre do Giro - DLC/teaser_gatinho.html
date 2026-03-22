@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Volkenburt — O Gatinho da Gravata</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Almendra+Display&family=Cinzel:wght@400;600&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --night:      #0b0d1a;
+      --deep:       #07080f;
+      --lantern:    #f2c96e;
+      --lantern-dim:#9a7a2e;
+      --mae:        #f0c97a;
+      --filha:      #a8c8f0;
+      --page:       #ede3d0;
+      --page-dim:   #b8ad97;
+      --spell:      #3a2878;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--deep);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ── PAPER TEXTURE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.028;
+      pointer-events: none;
+      z-index: 998;
+      mix-blend-mode: soft-light;
+    }
+
+    /* ── NIGHT SKY ── */
+    #scene {
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 55% 60% at 50% 58%,
+          #1c1830 0%, #110e22 35%, #080818 65%, var(--deep) 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    /* Lantern bloom */
+    #lantern-glow {
+      position: fixed;
+      left: 50%; top: 48%;
+      transform: translate(-50%, -50%);
+      width: 520px; height: 520px;
+      background: radial-gradient(circle,
+        rgba(242,201,110,0.07) 0%,
+        rgba(242,201,110,0.03) 40%,
+        transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+      animation: lanternBreath 7s ease-in-out infinite;
+    }
+    @keyframes lanternBreath {
+      0%, 100% { opacity: 0.7; transform: translate(-50%,-50%) scale(1); }
+      50%       { opacity: 1.0; transform: translate(-50%,-50%) scale(1.08); }
+    }
+
+    /* ── PHOTO BG ── */
+    /* ── BLÁ BLÁ BLÁ ── */
+    .bla {
+      position: fixed;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: rgba(168,200,240,0.55);
+      pointer-events: none;
+      z-index: 9;
+      animation: blaFloat 2.2s ease-out forwards;
+    }
+    @keyframes blaFloat {
+      0%   { opacity: 0; transform: translateY(0) scale(0.7); }
+      15%  { opacity: 1; }
+      80%  { opacity: 0.7; }
+      100% { opacity: 0; transform: translateY(-60px) scale(1); }
+    }
+
+    /* ── POLAROID ── */
+    #polaroid {
+      position: fixed;
+      bottom: -320px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-3deg);
+      z-index: 8;
+      pointer-events: none;
+      transition: bottom 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease;
+      opacity: 0;
+      filter: drop-shadow(0 12px 32px rgba(0,0,0,0.7));
+    }
+    #polaroid.visible {
+      bottom: 3vh;
+      opacity: 1;
+    }
+    #polaroid.hide {
+      bottom: -320px;
+      opacity: 0;
+      transition: bottom 0.7s ease-in, opacity 0.5s ease;
+    }
+    #polaroid-frame {
+      background: #f5f0e8;
+      padding: 10px 10px 36px 10px;
+      width: 200px;
+    }
+    #polaroid-img {
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      filter: sepia(0.2) contrast(0.95);
+    }
+
+    /* ── TENSE DARKNESS ── */
+    #tense-dark {
+      position: absolute; inset: 0;
+      background: #3d0010;
+      opacity: 0;
+      z-index: 1;
+      pointer-events: none;
+      transition: opacity 3s ease;
+    }
+    #tense-dark.dark { opacity: 0.6; }
+
+    /* ── STARS ── */
+    #stars {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      opacity: 0;
+      animation: starFade ease-in-out infinite;
+    }
+    @keyframes starFade {
+      0%, 100% { opacity: 0; }
+      50%       { opacity: var(--peak); }
+    }
+    .mote {
+      position: absolute;
+      width: 1px; height: 1px;
+      background: rgba(242,201,110,0.8);
+      border-radius: 50%;
+      opacity: 0;
+      animation: moteDrift linear infinite;
+    }
+    @keyframes moteDrift {
+      0%   { transform: translateY(100vh) translateX(0); opacity: 0; }
+      8%   { opacity: 0.5; }
+      92%  { opacity: 0.15; }
+      100% { transform: translateY(-8vh) translateX(var(--dx)); opacity: 0; }
+    }
+
+    /* Vignette */
+    #vignette {
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse 75% 75% at 50% 50%,
+        transparent 35%, rgba(4,4,12,0.92) 100%);
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    /* ── MOON ── */
+    #moon-wrap {
+      position: fixed;
+      top: 6vh; left: 50%;
+      transform: translateX(-50%);
+      z-index: 6;
+      width: 52px;
+      height: 52px;
+      opacity: 0;
+      animation: moonRise 3s ease forwards 0.4s, moonFloat 9s ease-in-out 3.4s infinite;
+    }
+    @keyframes moonRise {
+      from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    #moon-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: #1a0005;
+      opacity: 0;
+      transition: opacity 4s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+    #moon-overlay.tense { opacity: 0.92; }
+    #moon {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%,
+        #fdf6e0 0%, #f5e090 45%, #c8a84a 100%);
+      box-shadow:
+        0 0 24px rgba(242,201,110,0.35),
+        0 0 60px rgba(242,201,110,0.12),
+        inset -6px -4px 0 rgba(180,140,50,0.4);
+    }
+    @keyframes moonFloat {
+      0%, 100% { transform: translateX(-50%) translateY(0)   rotate(-2deg); }
+      50%       { transform: translateX(-50%) translateY(-7px) rotate(2deg); }
+    }
+
+    /* ── DIALOGUE BOX ── */
+    #dialogue-box {
+      position: relative;
+      z-index: 10;
+      width: min(720px, 92vw);
+      padding: 2.2rem 2.8rem 2rem;
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+      text-align: center;
+    }
+    #dialogue-box.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* CSS-only corner brackets */
+    #dialogue-box::before,
+    #dialogue-box::after {
+      content: '';
+      position: absolute;
+      width: 28px; height: 28px;
+      border-color: rgba(242,201,110,0.2);
+      border-style: solid;
+    }
+    #dialogue-box::before { top: 0; left: 0; border-width: 1px 0 0 1px; }
+    #dialogue-box::after  { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+    /* ── SPEAKER NAME ── */
+    #speaker-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+      min-height: 1.2em;
+      transition: color 0.5s, text-shadow 0.5s;
+    }
+    #speaker-name.mae   { color: var(--mae);    text-shadow: 0 0 18px rgba(242,201,110,0.4); }
+    #speaker-name.filha { color: var(--filha);  text-shadow: 0 0 18px rgba(168,200,240,0.4); }
+    #speaker-name.none  { color: var(--page-dim); text-shadow: none; }
+
+    /* ── DIALOGUE TEXT ── */
+    #dialogue-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.22rem;
+      line-height: 1.82;
+      color: var(--page);
+      min-height: 3.5em;
+      letter-spacing: 0.015em;
+    }
+
+
+
+    .char {
+      display: inline;
+      opacity: 0;
+      animation: charFade 0.1s ease forwards;
+    }
+    @keyframes charFade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    /* ── CHOICE MENU ── */
+    #choice-menu {
+      position: fixed;
+      bottom: 6rem; left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    #choice-menu.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .choice-label {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(237,227,208,0.4);
+      margin-bottom: 0.3rem;
+    }
+    .choice-btn {
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 0.55rem 2.2rem;
+      border: 1px solid rgba(237,227,208,0.15);
+      background: rgba(255,255,255,0.03);
+      color: var(--page-dim);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.15s;
+      user-select: none;
+      width: 180px;
+      text-align: center;
+    }
+    .choice-btn:hover { background: rgba(255,255,255,0.07); border-color: rgba(237,227,208,0.4); color: var(--page); transform: scale(1.04); }
+    .choice-btn.sim:hover { border-color: rgba(100,220,120,0.5); color: #8de8a0; }
+    .choice-btn.nao:hover { border-color: rgba(220,80,80,0.5);   color: #e88080; }
+
+    #karma-feedback {
+      position: fixed;
+      bottom: 6rem; left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 0.72rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    #karma-feedback.positivo { color: #8de8a0; }
+    #karma-feedback.negativo { color: #e88080; }
+    #karma-feedback.show     { opacity: 1; }
+
+    #skip-hint {
+      position: fixed;
+      bottom: 1.6rem; right: 2.2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-style: normal;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(242,201,110,0.28);
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 1.2s;
+    }
+    #skip-hint.show { opacity: 1; }
+
+    /* ── SPELL FLASH (azul-roxo) ── */
+    #spell-flash {
+      position: fixed; inset: 0;
+      background: var(--spell);
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.12s;
+    }
+    #spell-flash.flash { opacity: 0.55; }
+
+    /* ── FINAL TITLE ── */
+    #final-title {
+      position: fixed; inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #final-title.show { opacity: 1; transition: opacity 1.8s ease; }
+
+    #logo-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    #logo-img {
+      display: block;
+      max-width: min(420px, 72vw);
+      mix-blend-mode: screen;
+      opacity: 0;
+      transform: rotate(-360deg) scale(0.4);
+    }
+
+    /* spin-in triggered by JS */
+    #logo-img.spin-in {
+      animation: spinReveal 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes spinReveal {
+      0%   { opacity: 0; transform: rotate(-360deg) scale(0.4); }
+      60%  { opacity: 1; transform: rotate(12deg)   scale(1.06); }
+      80%  { transform: rotate(-6deg) scale(0.97); }
+      100% { opacity: 1; transform: rotate(0deg)    scale(1); }
+    }
+
+    /* chromatic split layers */
+    #logo-wrap::before,
+    #logo-wrap::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: url('logo.png') center / contain no-repeat;
+      mix-blend-mode: screen;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #logo-wrap::before { filter: hue-rotate(40deg)  saturate(4) brightness(1.3); }
+    #logo-wrap::after  { filter: hue-rotate(200deg) saturate(4) brightness(1.3); }
+
+    #logo-wrap.aberrate::before {
+      animation: aberrateR 0.7s steps(1) forwards;
+    }
+    #logo-wrap.aberrate::after {
+      animation: aberrateB 0.7s steps(1) forwards;
+    }
+    @keyframes aberrateR {
+      0%   { opacity: 0; }
+      10%  { opacity: 0.7; transform: translate(7px, -3px);  clip-path: inset(15% 0 35% 0); }
+      25%  { opacity: 0; }
+      40%  { opacity: 0.5; transform: translate(-5px, 2px);  clip-path: inset(55% 0 8%  0); }
+      55%  { opacity: 0; }
+      70%  { opacity: 0.4; transform: translate(6px, 1px);   clip-path: inset(30% 0 40% 0); }
+      85%  { opacity: 0; }
+      100% { opacity: 0; }
+    }
+    @keyframes aberrateB {
+      0%   { opacity: 0; }
+      15%  { opacity: 0.6; transform: translate(-6px, 3px);  clip-path: inset(40% 0 20% 0); }
+      30%  { opacity: 0; }
+      50%  { opacity: 0.5; transform: translate(5px, -2px);  clip-path: inset(10% 0 55% 0); }
+      65%  { opacity: 0; }
+      80%  { opacity: 0.55; transform: translate(-4px, 3px); clip-path: inset(60% 0 5%  0); }
+      95%  { opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    /* idle glow after settling */
+    #logo-wrap.settled #logo-img {
+      animation: logoBreathe 4s ease-in-out infinite;
+    }
+    @keyframes logoBreathe {
+      0%, 100% { filter: drop-shadow(0 0 16px rgba(180,0,255,0.35)); }
+      50%       { filter: drop-shadow(0 0 42px rgba(180,0,255,0.75)) drop-shadow(0 0 80px rgba(180,0,255,0.2)); }
+    }
+
+
+
+    /* ── INTRO SCREEN ── */
+    #intro-screen {
+      position: fixed; inset: 0;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      transition: opacity 1.2s ease;
+    }
+    #intro-screen.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #intro-logo {
+      max-width: min(380px, 65vw);
+      mix-blend-mode: screen;
+      opacity: 0;
+      animation: introLogoFade 1.8s ease forwards 0.5s;
+    }
+    @keyframes introLogoFade {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #intro-hint {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      margin-top: 3.5rem;
+      opacity: 0;
+      animation: introHintFade 1.2s ease forwards 2.2s, introHintPulse 2s ease-in-out infinite 2.2s;
+    }
+    @keyframes introHintFade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes introHintPulse {
+      0%, 100% { opacity: 0.25; }
+      50%       { opacity: 0.7; }
+    }
+
+    /* ── GRAVAR HINT ── */
+    #rec-hint {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(180,0,255,0.45);
+      margin-top: 0.8rem;
+      opacity: 0;
+      animation: introHintFade 1.2s ease forwards 2.6s;
+    }
+    #fade-in {
+      position: fixed; inset: 0;
+      background: #000;
+      z-index: 100;
+      pointer-events: none;
+      animation: openCurtain 3s ease forwards;
+    }
+    @keyframes openCurtain {
+      0%   { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<audio id="bgNinar"  src="ninar.mp3"  loop></audio>
+<audio id="bgTense"  src="tense.mp3"  loop></audio>
+<audio id="papelSfx" src="papel.mp3"></audio>
+
+<div id="mae-pool" style="display:none">
+  <audio class="mae-tw" src="mae.mp3"></audio>
+  <audio class="mae-tw" src="mae.mp3"></audio>
+  <audio class="mae-tw" src="mae.mp3"></audio>
+  <audio class="mae-tw" src="mae.mp3"></audio>
+  <audio class="mae-tw" src="mae.mp3"></audio>
+</div>
+<div id="filha-pool" style="display:none">
+  <audio class="filha-tw" src="filha.mp3"></audio>
+  <audio class="filha-tw" src="filha.mp3"></audio>
+  <audio class="filha-tw" src="filha.mp3"></audio>
+  <audio class="filha-tw" src="filha.mp3"></audio>
+  <audio class="filha-tw" src="filha.mp3"></audio>
+</div>
+
+<div id="intro-screen">
+  <img id="intro-logo" src="logo.png" alt="Mestre do Giro"/>
+  <div id="intro-hint">pressione qualquer tecla para começar</div>
+  <div id="rec-hint">R · iniciar gravação</div>
+</div>
+
+<div id="fade-in"></div>
+<div id="spell-flash"></div>
+<div id="stars"></div>
+<div id="vignette"></div>
+<div id="lantern-glow"></div>
+<div id="moon-wrap"><div id="moon"></div><div id="moon-overlay"></div></div>
+
+<div id="polaroid">
+  <div id="polaroid-frame">
+    <img id="polaroid-img" src="aug.jpg" alt="aug"/>
+  </div>
+</div>
+
+<div id="scene">
+  <div id="tense-dark"></div>
+  <div id="dialogue-box">
+    <div id="speaker-name" class="none"></div>
+    <div id="dialogue-text"></div>
+  </div>
+</div>
+
+<div id="choice-menu">
+  <div class="choice-label">Contar história?</div>
+  <button class="choice-btn sim" onclick="escolher(true)">Sim</button>
+  <button class="choice-btn nao" onclick="escolher(false)">Não</button>
+</div>
+<div id="karma-feedback"></div>
+
+<div id="skip-hint">ESPAÇO · avançar</div>
+
+<div id="final-title">
+  <div id="logo-wrap">
+    <img id="logo-img" src="logo.png" alt="Mestre do Giro"/>
+  </div>
+</div>
+
+
+<script>
+/* ── STARS & MOTES ── */
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 55; i++) {
+  const s  = document.createElement('div');
+  s.className = 'star';
+  const sz   = Math.random() < 0.15 ? 2 : 1;
+  const peak = (0.08 + Math.random() * 0.35).toFixed(2);
+  s.style.cssText = `
+    left:${Math.random()*100}%; top:${Math.random()*80}%;
+    width:${sz}px; height:${sz}px;
+    --peak:${peak};
+    animation-duration:${2+Math.random()*6}s;
+    animation-delay:-${Math.random()*8}s;
+  `;
+  starsEl.appendChild(s);
+}
+for (let i = 0; i < 18; i++) {
+  const m = document.createElement('div');
+  m.className = 'mote';
+  const dx = (Math.random()-0.5)*90;
+  m.style.cssText = `
+    left:${Math.random()*100}%;
+    --dx:${dx}px;
+    animation-duration:${16+Math.random()*24}s;
+    animation-delay:-${Math.random()*24}s;
+    width:${Math.random()<0.2?2:1}px;
+    height:${Math.random()<0.2?2:1}px;
+  `;
+  starsEl.appendChild(m);
+}
+
+/* ── AUDIO ── */
+const ninar = document.getElementById('bgNinar');
+const tense = document.getElementById('bgTense');
+const papel = document.getElementById('papelSfx');
+ninar.volume = 0.38;
+tense.volume = 0;
+
+const maeTwEls   = [...document.querySelectorAll('.mae-tw')];
+const filhaTwEls = [...document.querySelectorAll('.filha-tw')];
+maeTwEls.forEach  (a => a.volume = 0.28);
+filhaTwEls.forEach(a => a.volume = 0.28);
+let maeIdx = 0, filhaIdx = 0;
+
+let audioCtx = null;
+let audioDestNode = null; // MediaStreamDestination para gravação
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playBlip(baseFreq, gainVal, wave) {
+  const ctx      = getCtx();
+  const duration = 0.065;
+  const osc      = ctx.createOscillator();
+  const env      = ctx.createGain();
+  osc.type = wave;
+  osc.frequency.value = baseFreq * (0.92 + Math.random() * 0.16);
+  env.gain.setValueAtTime(0, ctx.currentTime);
+  env.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + 0.004);
+  env.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+  osc.connect(env);
+  env.connect(ctx.destination);
+  // se gravando, rota pro stream de captura também
+  if (audioDestNode) env.connect(audioDestNode);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + duration);
+}
+
+// Mãe: onda senoidal aquecida, pitch médio-baixo (tipo Toriel)
+function playMaeClick() {
+  const a = maeTwEls[maeIdx++ % maeTwEls.length];
+  a.currentTime = 0;
+  a.play().catch(() => playBlip(310, 0.18, 'sine'));
+  // tenta o mp3; se falhar, usa blip sintético — mas dispara o blip sempre junto
+  playBlip(310, 0.18, 'sine');
+}
+
+// Filha: onda triangular fofinha, pitch mais suave
+function playFilhaClick() {
+  const a = filhaTwEls[filhaIdx++ % filhaTwEls.length];
+  a.currentTime = 0;
+  a.play().catch(() => {});
+  playBlip(380, 0.09, 'triangle');
+}
+
+function fadeAudio(audio, to, ms, cb) {
+  const steps=60, iv=ms/steps, delta=(to-audio.volume)/steps;
+  let n=0;
+  const t = setInterval(() => {
+    n++;
+    audio.volume = Math.max(0, Math.min(1, audio.volume+delta));
+    if (n>=steps) { clearInterval(t); audio.volume=to; if(cb) cb(); }
+  }, iv);
+}
+
+/* ── DIALOGUE ENGINE ── */
+const box      = document.getElementById('dialogue-box');
+const nameEl   = document.getElementById('speaker-name');
+const textEl   = document.getElementById('dialogue-text');
+const skipHint = document.getElementById('skip-hint');
+const tenseDark = document.getElementById('tense-dark');
+const flash    = document.getElementById('spell-flash');
+
+let currentStep     = -1;
+let typing          = false;
+let typeTimer       = null;
+let waitingForClick = false;
+
+const STEPS = [
+  { action: 'startNinar' },
+
+  { speaker: 'Filha', text: 'Mamãe, me conta uma história?' },
+  { action: 'showChoice' },
+  { speaker: 'Mãe',   text: 'Claro, minha filha.' },
+  { action: 'papel' },
+  { speaker: 'Mãe',   text: 'Achei uma que você vai gostar muito!' },
+  { speaker: 'Filha', text: 'Eba! Vamos, leia pra mim!' },
+
+  { speaker: 'Mãe',   text: 'Era uma vez... Um pequeno gatinho preto que usava uma bela gravata preta', showPhoto: true },
+  { speaker: 'Mãe',   text: 'Ele costumava ter uma boa vida até então...' },
+
+  { action: 'fotoSomeNinarPara' },
+
+  { speaker: 'Mãe',   text: 'Mas um dia... Tudo mudou', startTense: true },
+  { speaker: 'Mãe',   text: 'Um fanático por cachorros que odiava gatos (e que por ironia do destino também odiava gravatas pretas) jogou um feitiço nele.' },
+  { speaker: 'Filha', text: 'Que coisa mais horrível... Quem faria uma coisa dessas?' },
+
+  { action: 'tensePara' },
+
+  { speaker: 'Filha', text: 'Quer dizer... Faz sentido odiar uma gravata preta né?' },
+  { speaker: 'Filha', text: 'Elas não destacam em nada e parecem apenas parte do terno ao invés de um adereço que dê algum destaque de moda ao modelo', blaBlaBla: true },
+  { speaker: 'Mãe',   text: '... Bem...' },
+  { speaker: 'Mãe',   text: 'Eu vou ignorar isso...' },
+  { speaker: 'Mãe',   text: 'Continuando...', startTenseAfter: true },
+
+  { speaker: 'Mãe',   text: 'Ele jogou um feitiço onde tudo o que esse gatinho tocava começava a girar' },
+  { speaker: 'Mãe',   text: 'Depois disso, sua mãe, seus amigos, suas bolas de pelo... Tudo começou a girar ao entrar em contato com ele.' },
+
+  { action: 'tensePara2' },
+
+  { speaker: 'Filha', text: 'Que roteiro ruim. Isso parece aquele tipo de história que criam, pois o roteirista não pensou em mais nada sobre o personagem.' },
+  { speaker: 'Mãe',   text: 'Eu e você, minha filha, somos frutos disso também...' },
+  { speaker: 'Filha', text: 'Então quer dizer que a gente não existe e provavelmente estamos narrando um teaser de uma DLC de um game que nem existe?' },
+  { speaker: 'Mãe',   text: 'Não é pra tanto também, acho que Deus não seria tão cruel com as nossas vidas metafóricas...' },
+  { speaker: 'Mãe',   text: 'Ou seria?', final: true }
+];
+
+function typeText(txt, el, speed, clickFn, onDone) {
+  typing = true; el.innerHTML = ''; let i = 0;
+  function next() {
+    if (i < txt.length) {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = txt[i];
+      el.appendChild(span);
+      if (txt[i] !== ' ') clickFn();
+      i++; typeTimer = setTimeout(next, speed);
+    } else { typing = false; if (onDone) onDone(); }
+  }
+  next();
+}
+
+function skipType() {
+  if (typeTimer) clearTimeout(typeTimer); typing = false;
+  stopBlas();
+  const step = STEPS[currentStep];
+  if (step && step.text) {
+    textEl.innerHTML = '';
+    for (const ch of step.text) {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.style.opacity = '1';
+      span.style.animation = 'none';
+      span.textContent = ch;
+      textEl.appendChild(span);
+    }
+  }
+}
+
+function handleAction(action, idx) {
+  switch (action) {
+    case 'startNinar':
+      ninar.play().catch(()=>{});
+      setTimeout(() => {
+        box.classList.add('visible'); skipHint.classList.add('show');
+        setTimeout(() => runStep(idx+1), 400);
+      }, 1400);
+      break;
+    case 'papel':
+      papel.currentTime = 0; papel.play().catch(()=>{});
+      setTimeout(() => runStep(idx+1), 1700);
+      break;
+    case 'fotoSomeNinarPara':
+      polaroid.classList.remove('visible');
+      polaroid.classList.add('hide');
+      fadeAudio(ninar, 0, 1800, () => ninar.pause());
+      setTimeout(() => runStep(idx+1), 2200);
+      break;
+    case 'showChoice':
+      waitingForClick = false;
+      document.getElementById('choice-menu').classList.add('visible');
+      break;
+    case 'tensePara': case 'tensePara2':
+      try { tense.pause(); tense.currentTime = 0; tense.volume = 0; } catch(e) {}
+      tenseDark.classList.remove('dark');
+      document.getElementById('moon-overlay').classList.remove('tense');
+      setTimeout(() => runStep(idx+1), 900);
+      break;
+  }
+}
+
+function runStep(idx) {
+  if (idx >= STEPS.length) return;
+  currentStep = idx;
+  const step  = STEPS[idx];
+
+  if (step.action) { handleAction(step.action, idx); return; }
+
+  nameEl.textContent = step.speaker || '';
+  nameEl.className   = step.speaker === 'Mãe' ? 'mae' : step.speaker === 'Filha' ? 'filha' : 'none';
+
+  if (step.showPhoto) { polaroid.classList.remove('hide'); polaroid.classList.add('visible'); }
+  if (step.spellFlash) {
+    flash.classList.add('flash');
+    setTimeout(() => flash.classList.remove('flash'), 300);
+  }
+  if (step.startTense) { tense.volume = 0.35; tense.play().catch(()=>{}); tenseDark.classList.add('dark'); document.getElementById('moon-overlay').classList.add('tense'); }
+
+  const clickFn = step.speaker === 'Filha' ? playFilhaClick : playMaeClick;
+  const speed   = step.blaBlaBla ? 22 : 48;
+
+  if (step.blaBlaBla) startBlas();
+
+  typeText(step.text, textEl, speed, clickFn, () => {
+    if (step.blaBlaBla) stopBlas();
+    if (step.startTenseAfter) {
+      setTimeout(() => { tense.volume=0.35; tense.play().catch(()=>{}); tenseDark.classList.add('dark'); document.getElementById('moon-overlay').classList.add('tense'); waitingForClick=true; }, 700);
+    } else if (step.final) {
+      waitingForClick = false;
+      typing = true; // bloqueia cliques durante a transição
+      setTimeout(() => { typing = false; showFinal(); }, 1800);
+    } else {
+      waitingForClick = true;
+    }
+  });
+}
+
+function escolher(sim) {
+  const menu    = document.getElementById('choice-menu');
+  const karma   = document.getElementById('karma-feedback');
+
+  menu.classList.remove('visible');
+
+  karma.textContent = sim ? '✦ karma positivo' : '✦ karma negativo';
+  karma.className   = sim ? 'positivo show' : 'negativo show';
+
+  setTimeout(() => {
+    karma.classList.remove('show');
+    setTimeout(() => runStep(currentStep + 1), 400);
+  }, 1600);
+}
+
+let blaInterval = null;
+
+function spawnBla() {
+  const words = ['blá', 'blá, blá', 'blá blá blá', 'blá...', 'blá blá'];
+  const el = document.createElement('span');
+  el.className = 'bla';
+  el.textContent = words[Math.floor(Math.random() * words.length)];
+  const size = 0.7 + Math.random() * 1.1;
+  el.style.cssText = `
+    left: ${5 + Math.random() * 88}%;
+    top:  ${10 + Math.random() * 72}%;
+    font-size: ${size}rem;
+    opacity: 0;
+    transform: rotate(${(Math.random()-0.5)*18}deg);
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2400);
+}
+
+function startBlas() {
+  spawnBla();
+  blaInterval = setInterval(spawnBla, 180);
+}
+
+function stopBlas() {
+  clearInterval(blaInterval);
+  blaInterval = null;
+}
+
+function advance() {
+  if (typing)          { skipType(); waitingForClick=true; return; }
+  if (!waitingForClick) return;
+  waitingForClick = false;
+  runStep(currentStep+1);
+}
+
+function showFinal() {
+  box.style.transition   = 'opacity 1.6s';
+  box.style.opacity      = '0';
+  skipHint.style.opacity = '0';
+  setTimeout(() => {
+    const ft   = document.getElementById('final-title');
+    const img  = document.getElementById('logo-img');
+    const wrap = document.getElementById('logo-wrap');
+
+    ft.classList.add('show');
+
+    // spin-in após o fade da tela
+    setTimeout(() => {
+      img.classList.add('spin-in');
+
+      // chromatic aberration logo após o spin terminar
+      setTimeout(() => {
+        let bursts = 0;
+        function burst() {
+          wrap.classList.remove('aberrate');
+          void wrap.offsetWidth;
+          wrap.classList.add('aberrate');
+          bursts++;
+          if (bursts < 3) setTimeout(burst, 750 + Math.random() * 200);
+          else {
+            setTimeout(() => {
+              wrap.classList.remove('aberrate');
+              wrap.classList.add('settled');
+            }, 750);
+          }
+        }
+        burst();
+      }, 1200);
+    }, 600);
+  }, 1400);
+}
+
+/* ── INTRO SCREEN ── */
+const introScreen = document.getElementById('intro-screen');
+let introDone = false;
+
+function startStory() {
+  if (introDone) return;
+  introDone = true;
+  introScreen.classList.add('hide');
+  setTimeout(() => { introScreen.remove(); runStep(0); }, 1200);
+}
+
+// só libera após o hint aparecer (2.2s)
+setTimeout(() => {
+  document.addEventListener('click', startStory,   { once: true });
+  document.addEventListener('keydown', e => {
+    if (e.code !== 'KeyR') startStory();
+  }, { once: true });
+}, 2200);
+
+document.addEventListener('click', advance);
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'Enter') advance();
+  if (e.code === 'KeyR') toggleRecording();
+});
+
+/* ── GRAVAÇÃO (tecla R) ── */
+let mediaRecorder = null;
+let recordedChunks = [];
+let recIndicator   = null;
+
+function getAudioDestination() {
+  // cria uma vez e reutiliza
+  if (!audioDestNode) {
+    const ctx = getCtx();
+    audioDestNode = ctx.createMediaStreamDestination();
+    // conecta o destino principal ao nó de captura
+    ctx.destination.channelCount = 2;
+  }
+  return audioDestNode;
+}
+
+// Redireciona todos os blips pro nó de captura também
+function playBlip(baseFreq, gainVal, wave) {
+  const ctx      = getCtx();
+  const duration = 0.065;
+  const osc      = ctx.createOscillator();
+  const env      = ctx.createGain();
+
+  osc.type = wave;
+  osc.frequency.value = baseFreq * (0.92 + Math.random() * 0.16);
+
+  env.gain.setValueAtTime(0, ctx.currentTime);
+  env.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + 0.004);
+  env.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+
+  osc.connect(env);
+  env.connect(ctx.destination);
+  // também envia pro stream de gravação
+  const dest = getAudioDestination();
+  env.connect(dest);
+
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + duration);
+}
+
+// Roteia áudios HTML (<audio>) pro Web Audio e pro stream de captura
+function routeHtmlAudio(audioEl) {
+  const ctx  = getCtx();
+  const dest = getAudioDestination();
+  // evita criar múltiplos nós para o mesmo elemento
+  if (audioEl._routed) return;
+  audioEl._routed = true;
+  const src = ctx.createMediaElementSource(audioEl);
+  src.connect(ctx.destination);
+  src.connect(dest);
+}
+
+async function toggleRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    return;
+  }
+
+  try {
+    // roteia todos os elementos de áudio HTML pro Web Audio
+    [ninar, tense, papel, ...maeTwEls, ...filhaTwEls].forEach(routeHtmlAudio);
+
+    const displayStream = await navigator.mediaDevices.getDisplayMedia({
+      video: {
+        frameRate: 60,
+        width:  { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false // áudio vem do Web Audio abaixo
+    });
+
+    // combina vídeo da tela + áudio do Web Audio
+    const audioStream = getAudioDestination().stream;
+    const combined    = new MediaStream([
+      ...displayStream.getVideoTracks(),
+      ...audioStream.getAudioTracks()
+    ]);
+
+    recordedChunks = [];
+
+    // tenta VP9 primeiro, fallback para vp8
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+      ? 'video/webm;codecs=vp9,opus'
+      : 'video/webm;codecs=vp8,opus';
+
+    mediaRecorder = new MediaRecorder(combined, {
+      mimeType,
+      videoBitsPerSecond: 8_000_000,  // 8 Mbps
+      audioBitsPerSecond:   192_000   // 192 kbps
+    });
+
+    mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      document.body.style.cursor = '';
+      displayStream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'gravacao_teaser.webm';
+      a.click();
+      URL.revokeObjectURL(url);
+      if (recIndicator) { recIndicator.remove(); recIndicator = null; }
+    };
+
+    mediaRecorder.start(100);
+    document.body.style.cursor = 'none'; // coleta chunks a cada 100ms
+
+  } catch (err) {
+    console.warn('Gravação cancelada ou não suportada:', err);
+  }
+}
+</script>
+</body>
+</html>

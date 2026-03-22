@@ -1,0 +1,286 @@
+/* ===== ANIMATIONS ===== */
+/* Todas as keyframes organizadas */
+
+/* Logo & Splash Screen */
+@keyframes logoAppear {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+        filter: blur(10px);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+@keyframes glow {
+    from {
+        filter: drop-shadow(0 0 10px rgba(255, 0, 85, 0.4));
+    }
+    to {
+        filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.6));
+    }
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Menu Title */
+@keyframes titlePulse {
+    0%, 100% {
+        transform: scale(1);
+        text-shadow: 0 0 15px #ff0055, 0 0 30px #ff0055, 3px 3px 0px #00ffff;
+    }
+    50% {
+        transform: scale(1.02);
+        text-shadow: 0 0 25px #ff0055, 0 0 50px #ff0055, -3px -3px 0px #00ffff;
+    }
+}
+
+/* Menu Buttons */
+@keyframes buttonShine {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Dialogue & Text */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+        text-shadow: 0 0 10px #00ffff;
+    }
+    50% {
+        transform: translateY(5px);
+        text-shadow: 0 0 20px #00ffff;
+    }
+}
+
+@keyframes historyZoom {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.1);
+    }
+}
+
+/* Dev Character */
+@keyframes slideUp {
+    from {
+        bottom: -300px;
+    }
+    to {
+        bottom: 20px;
+    }
+}
+
+@keyframes slideUpCenter {
+    from {
+        bottom: -300px;
+    }
+    to {
+        bottom: 50%;
+        transform: translate(-50%, 50%);
+    }
+}
+
+/* Battle - UT Float */
+@keyframes utFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+/* Battle - Arena Show */
+@keyframes arenaShow {
+    0% {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Battle - Nero Effects */
+@keyframes neroFloat {
+    0%, 100% {
+        transform: translate(-10%, -5%);
+    }
+    50% {
+        transform: translate(10%, 5%);
+    }
+}
+
+@keyframes neroFlash {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes neroZoom {
+    from {
+        transform: scale(0.3) rotate(-10deg);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes neroShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    20% {
+        transform: translateX(-8px);
+    }
+    40% {
+        transform: translateX(8px);
+    }
+    60% {
+        transform: translateX(-5px);
+    }
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes rbShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-4px);
+    }
+    75% {
+        transform: translateX(4px);
+    }
+}
+
+@keyframes disperseChar {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--dx), var(--dy)) rotate(var(--dr));
+        opacity: 0;
+    }
+}
+
+/* Battle Effects */
+@keyframes particleFade {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+}
+
+@keyframes pulseEffect {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+/* Ending 9999 */
+@keyframes heavyFog {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.6;
+    }
+    33% {
+        transform: translate(30px, -20px) scale(1.1);
+        opacity: 0.8;
+    }
+    66% {
+        transform: translate(-30px, 20px) scale(0.9);
+        opacity: 0.7;
+    }
+}
+
+@keyframes fogDrift {
+    0%, 100% {
+        opacity: 0.4;
+        transform: translateX(0);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateX(30px);
+    }
+}
+
+@keyframes glitchBlink {
+    0%, 90% {
+        opacity: 0;
+    }
+    91%, 100% {
+        opacity: 0.8;
+    }
+}
+
+@keyframes healFloat {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-50px);
+    }
+}
+
+@keyframes pkmnShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-10px);
+    }
+    75% {
+        transform: translateX(10px);
+    }
+}
+
+@keyframes mystFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===== UNDERTALE DEATH ANIMATION ===== */
+/* Toda a animação de morte é feita via Web Animations API (element.animate) em battle-core.js
+   para evitar problemas com CSS custom properties em @keyframes */

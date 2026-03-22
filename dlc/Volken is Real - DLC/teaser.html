@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Volkenburt — O Capacete da Sorte</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a84c;
+      --gold-dim: #7a5e22;
+      --off-white: #e8dfc8;
+      --ink: #0a0806;
+      --smoke: rgba(255,255,255,0.04);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      overflow: hidden;
+      cursor: none;
+      user-select: none;
+    }
+
+    /* ── GRAIN OVERLAY ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.045;
+      pointer-events: none;
+      z-index: 999;
+      mix-blend-mode: overlay;
+    }
+
+    /* ── SCENE BACKGROUND ── */
+    #scene {
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 60%, #1a0e04 0%, #000 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Dust particles */
+    #particles {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .particle {
+      position: absolute;
+      width: 1px; height: 1px;
+      background: var(--gold);
+      border-radius: 50%;
+      opacity: 0;
+      animation: drift linear infinite;
+    }
+
+    @keyframes drift {
+      0%   { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10%  { opacity: 0.4; }
+      90%  { opacity: 0.15; }
+      100% { transform: translateY(-10vh) translateX(var(--dx)); opacity: 0; }
+    }
+
+    /* Vignette */
+    #vignette {
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse 80% 80% at 50% 50%,
+        transparent 40%, rgba(0,0,0,0.85) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* ── HELMET ICON ── */
+    #helmet-wrap {
+      position: fixed;
+      top: 8vh; left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      opacity: 0;
+      animation: helmetAppear 2.5s ease forwards;
+      animation-delay: 0.5s;
+    }
+    @keyframes helmetAppear {
+      from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    #helmet-icon {
+      font-size: 5rem;
+      filter: drop-shadow(0 0 18px var(--gold-dim));
+      animation: helmetFloat 6s ease-in-out infinite;
+    }
+    @keyframes helmetFloat {
+      0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 18px var(--gold-dim)); }
+      50%       { transform: translateY(-8px); filter: drop-shadow(0 0 28px var(--gold)); }
+    }
+
+    #helmet-crack {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      color: #ff3300;
+      filter: drop-shadow(0 0 12px #ff3300);
+    }
+    #helmet-wrap.stolen #helmet-icon { animation: none; opacity: 0.15; }
+    #helmet-wrap.stolen #helmet-crack { opacity: 0.7; }
+
+    /* Decorative divider */
+    .divider {
+      width: 260px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+      margin: 0 auto 1.5rem;
+      opacity: 0;
+      transition: opacity 1s;
+    }
+    .divider.show { opacity: 1; }
+
+    /* ── DIALOGUE BOX ── */
+    #dialogue-box {
+      position: relative;
+      z-index: 10;
+      width: min(720px, 92vw);
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 2rem 2.5rem 1.8rem;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      text-align: center;
+    }
+
+    #dialogue-box.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #speaker-name {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      min-height: 1.2em;
+      text-shadow: 0 0 12px rgba(201,168,76,0.5);
+    }
+
+    #dialogue-text {
+      font-family: 'EB Garamond', serif;
+      font-size: 1.18rem;
+      line-height: 1.75;
+      color: var(--off-white);
+      min-height: 3.5em;
+      letter-spacing: 0.01em;
+    }
+
+    .cursor-blink {
+      display: inline-block;
+      width: 2px; height: 1.1em;
+      background: var(--gold);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 0.9s step-end infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ── SKIP HINT ── */
+    #skip-hint {
+      position: fixed;
+      bottom: 1.5rem; right: 2rem;
+      font-family: 'EB Garamond', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      color: rgba(201,168,76,0.4);
+      z-index: 20;
+      opacity: 0;
+      transition: opacity 1s;
+    }
+    #skip-hint.show { opacity: 1; }
+
+    /* ── TENSE FLASH ── */
+    #tension-flash {
+      position: fixed; inset: 0;
+      background: #1a0000;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
+    #tension-flash.flash { opacity: 0.7; }
+
+    /* ── FINAL TITLE ── */
+    #final-title {
+      position: fixed; inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%,
+        rgba(20,10,2,0.7) 0%, transparent 100%);
+    }
+    #final-title.show {
+      opacity: 1;
+      transition: opacity 2s ease;
+    }
+    #final-title h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.4rem, 4vw, 2.8rem);
+      color: var(--gold);
+      letter-spacing: 0.2em;
+      text-align: center;
+      text-shadow:
+        0 0 30px rgba(201,168,76,0.6),
+        0 0 80px rgba(201,168,76,0.2);
+      margin-bottom: 0.5rem;
+      animation: titlePulse 4s ease-in-out infinite;
+    }
+    #final-title p {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      color: rgba(232,223,200,0.5);
+      letter-spacing: 0.3em;
+      text-align: center;
+    }
+    @keyframes titlePulse {
+      0%, 100% { text-shadow: 0 0 30px rgba(201,168,76,0.6), 0 0 80px rgba(201,168,76,0.2); }
+      50%       { text-shadow: 0 0 50px rgba(201,168,76,0.9), 0 0 120px rgba(201,168,76,0.4); }
+    }
+
+    /* ── GLITCH LOGO ── */
+    #logo-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    #logo-img {
+      display: block;
+      max-width: min(420px, 70vw);
+      filter: drop-shadow(0 0 24px rgba(201,168,76,0.35));
+    }
+    #logo-wrap::before,
+    #logo-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('volken.png') center/contain no-repeat;
+      opacity: 0;
+    }
+    #logo-wrap::before {
+      filter: hue-rotate(180deg) saturate(3) brightness(1.5);
+      mix-blend-mode: screen;
+    }
+    #logo-wrap::after {
+      filter: hue-rotate(270deg) saturate(3) brightness(1.5);
+      mix-blend-mode: screen;
+    }
+
+    #logo-wrap.glitching::before {
+      animation: glitchR 0.6s steps(1) forwards;
+    }
+    #logo-wrap.glitching::after {
+      animation: glitchB 0.6s steps(1) forwards;
+    }
+    #logo-wrap.glitching #logo-img {
+      animation: glitchMain 0.6s steps(1) forwards;
+    }
+
+    @keyframes glitchMain {
+      0%   { transform: translate(0); clip-path: inset(0 0 0 0); }
+      10%  { transform: translate(-4px, 2px); clip-path: inset(20% 0 30% 0); }
+      20%  { transform: translate(4px, -2px); clip-path: inset(50% 0 10% 0); }
+      30%  { transform: translate(0); clip-path: inset(0 0 0 0); }
+      40%  { transform: translate(3px, 1px); clip-path: inset(70% 0 5% 0); }
+      50%  { transform: translate(-2px); clip-path: inset(10% 0 60% 0); }
+      60%  { transform: translate(0); clip-path: inset(0 0 0 0); }
+      70%  { transform: translate(-5px, -1px); clip-path: inset(35% 0 45% 0); }
+      80%  { transform: translate(2px, 3px); clip-path: inset(0 0 0 0); }
+      90%  { transform: translate(-1px); }
+      100% { transform: translate(0); clip-path: inset(0 0 0 0); }
+    }
+    @keyframes glitchR {
+      0%   { opacity: 0; }
+      10%  { opacity: 0.7; transform: translate(6px, -2px); clip-path: inset(20% 0 30% 0); }
+      20%  { opacity: 0; }
+      30%  { opacity: 0.5; transform: translate(-4px, 1px); clip-path: inset(60% 0 5% 0); }
+      40%  { opacity: 0; }
+      50%  { opacity: 0.6; transform: translate(5px); clip-path: inset(10% 0 55% 0); }
+      60%  { opacity: 0; }
+      70%  { opacity: 0.4; transform: translate(-6px, 2px); clip-path: inset(40% 0 30% 0); }
+      80%  { opacity: 0; }
+      100% { opacity: 0; transform: translate(0); }
+    }
+    @keyframes glitchB {
+      0%   { opacity: 0; }
+      15%  { opacity: 0.6; transform: translate(-5px, 2px); clip-path: inset(40% 0 20% 0); }
+      25%  { opacity: 0; }
+      45%  { opacity: 0.5; transform: translate(4px, -1px); clip-path: inset(15% 0 50% 0); }
+      55%  { opacity: 0; }
+      65%  { opacity: 0.7; transform: translate(-3px, 3px); clip-path: inset(65% 0 5% 0); }
+      75%  { opacity: 0; }
+      100% { opacity: 0; transform: translate(0); }
+    }
+
+    /* idle subtle glow pulse after glitch */
+    #logo-wrap.settled #logo-img {
+      animation: logoPulse 4s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%, 100% { filter: drop-shadow(0 0 20px rgba(201,168,76,0.3)); }
+      50%       { filter: drop-shadow(0 0 40px rgba(201,168,76,0.6)); }
+    }
+
+    /* ── CLICK TO CONTINUE ── */
+    #continue-hint {
+      position: fixed;
+      bottom: 3rem; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: rgba(201,168,76,0.55);
+      letter-spacing: 0.2em;
+      z-index: 70;
+      opacity: 0;
+      animation: none;
+    }
+    #continue-hint.show {
+      opacity: 1;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50%       { opacity: 0.9; }
+    }
+
+    /* Black fade-in at start */
+    #fade-in {
+      position: fixed; inset: 0;
+      background: #000;
+      z-index: 100;
+      pointer-events: none;
+      animation: fadeInScene 2.5s ease forwards;
+    }
+    @keyframes fadeInScene {
+      0%   { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Audio elements -->
+<audio id="bgMel"   src="musicmel.mp3"  loop></audio>
+<audio id="pagesfx" src="page.mp3"></audio>
+<audio id="bgTense" src="tense.mp3"     loop></audio>
+
+<!-- Fade in from black -->
+<div id="fade-in"></div>
+
+<!-- Tension flash overlay -->
+<div id="tension-flash"></div>
+
+<!-- Particles -->
+<div id="particles"></div>
+<div id="vignette"></div>
+
+<!-- Helmet removed -->
+
+<!-- Scene -->
+<div id="scene">
+  <div id="dialogue-box">
+    <div id="speaker-name"></div>
+    <div id="dialogue-text"><span class="cursor-blink"></span></div>
+  </div>
+</div>
+
+<!-- UI -->
+<div id="skip-hint">ESPAÇO · avançar</div>
+<div id="final-title">
+  <h1>O CAPACETE DA SORTE</h1>
+  <p>uma dlc de volkenburt</p>
+  <div id="logo-wrap" style="margin-top: 2.5rem;">
+    <img id="logo-img" src="volken.png" alt="Volkenburt" />
+  </div>
+</div>
+<div id="continue-hint">[ clique para continuar ]</div>
+
+<script>
+  /* ── PARTICLES ── */
+  const pContainer = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const x = Math.random() * 100;
+    const dur = 12 + Math.random() * 20;
+    const delay = Math.random() * 20;
+    const dx = (Math.random() - 0.5) * 120;
+    p.style.cssText = `
+      left: ${x}%;
+      --dx: ${dx}px;
+      animation-duration: ${dur}s;
+      animation-delay: -${delay}s;
+      width: ${Math.random() < 0.3 ? 2 : 1}px;
+      height: ${Math.random() < 0.3 ? 2 : 1}px;
+    `;
+    pContainer.appendChild(p);
+  }
+
+  /* ── AUDIO ── */
+  const mel   = document.getElementById('bgMel');
+  const pg    = document.getElementById('pagesfx');
+  const tense = document.getElementById('bgTense');
+  mel.volume = 0.6;
+  tense.volume = 0;
+
+  function fadeAudio(audio, targetVol, duration, onDone) {
+    const steps = 60;
+    const interval = duration / steps;
+    const delta = (targetVol - audio.volume) / steps;
+    let count = 0;
+    const t = setInterval(() => {
+      count++;
+      audio.volume = Math.max(0, Math.min(1, audio.volume + delta));
+      if (count >= steps) {
+        clearInterval(t);
+        audio.volume = targetVol;
+        if (onDone) onDone();
+      }
+    }, interval);
+  }
+
+  /* ── TYPEWRITER SOUND ── */
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playClick() {
+    const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.04, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audioCtx.sampleRate * 0.008));
+    }
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0.18;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2200;
+    filter.Q.value = 1.2;
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    src.start();
+  }
+
+  /* ── DIALOGUE ENGINE ── */
+  const box     = document.getElementById('dialogue-box');
+  const nameEl  = document.getElementById('speaker-name');
+  const textEl  = document.getElementById('dialogue-text');
+  const skipHint = document.getElementById('skip-hint');
+
+  let currentStep = -1;
+  let typing = false;
+  let typeTimer = null;
+  let waitingForClick = false;
+
+  const STEPS = [
+    // step 0: show box, start mel
+    {
+      action: 'startMel'
+    },
+    // 1
+    {
+      speaker: 'Volkenburt',
+      text: 'Eu não o encontro em lugar algum...',
+    },
+    // 2
+    {
+      speaker: 'Volkenburt',
+      text: 'Não pode ser...',
+    },
+    // 3
+    {
+      speaker: 'Volkenburt',
+      text: 'Isso não pode estar acontecendo...',
+    },
+    // 4
+    {
+      speaker: 'Volkenburt',
+      text: 'Espera... O que é isso?',
+      afterDelay: 800,
+      after: 'fadeMelPage'  // fade mel, play page sfx, start tense
+    },
+    // 5 — tense music, ??? speaker
+    {
+      speaker: '???',
+      text: 'Se você quer o seu tão adorado capacete, venha até o VRCHAT e pegue-o de mim.',
+      tenseFlash: true
+    },
+    // 6
+    {
+      speaker: 'Volkenburt',
+      text: 'Como assim? VRChat? Esse lugar é só escombros agora.',
+    },
+    // 7
+    {
+      speaker: 'Volkenburt',
+      text: 'Me desculpe, Abbyl. Mesmo que você tenha feito de tudo para frear este universo...',
+    },
+    // 8 — tense stops abruptly, final line
+    {
+      speaker: '',
+      text: 'Ele ainda...',
+      stopTense: true,
+    },
+    // 9
+    {
+      speaker: '',
+      text: 'Ainda me chama.',
+      final: true
+    }
+  ];
+
+  function typeText(txt, el, speed, onDone) {
+    typing = true;
+    el.innerHTML = '';
+    let i = 0;
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor-blink';
+
+    function next() {
+      if (i < txt.length) {
+        el.textContent = txt.slice(0, i + 1);
+        el.appendChild(cursor);
+        if (txt[i] !== ' ') playClick();
+        i++;
+        typeTimer = setTimeout(next, speed);
+      } else {
+        typing = false;
+        if (onDone) onDone();
+      }
+    }
+    next();
+  }
+
+  function skipType() {
+    if (typeTimer) clearTimeout(typeTimer);
+    typing = false;
+    const step = STEPS[currentStep];
+    if (step && step.text) {
+      textEl.textContent = step.text;
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor-blink';
+      textEl.appendChild(cursor);
+    }
+  }
+
+  function runStep(idx) {
+    if (idx >= STEPS.length) return;
+    currentStep = idx;
+    const step = STEPS[idx];
+
+    if (step.action === 'startMel') {
+      mel.play().catch(() => {});
+      setTimeout(() => {
+        box.classList.add('visible');
+        skipHint.classList.add('show');
+        setTimeout(() => runStep(idx + 1), 400);
+      }, 1200);
+      return;
+    }
+
+    // Speaker name
+    nameEl.textContent = step.speaker || '';
+
+    // Stolen helmet visual removed
+
+    // Tense flash
+    if (step.tenseFlash) {
+      const flash = document.getElementById('tension-flash');
+      flash.classList.add('flash');
+      setTimeout(() => flash.classList.remove('flash'), 300);
+    }
+
+    // Stop tense abruptly
+    if (step.stopTense) {
+      tense.pause();
+      tense.currentTime = 0;
+    }
+
+    const speed = step.speaker === '???' ? 65 : 80;
+
+    typeText(step.text, textEl, speed, () => {
+      if (step.after === 'fadeMelPage') {
+        setTimeout(() => {
+          fadeAudio(mel, 0, 2000, () => {
+            mel.pause();
+          });
+          pg.play().catch(() => {});
+          setTimeout(() => {
+            tense.volume = 0.6;
+            tense.play().catch(() => {});
+            waitingForClick = true;
+          }, 1200);
+        }, step.afterDelay || 0);
+      } else if (step.final) {
+        setTimeout(showFinal, 1800);
+      } else {
+        waitingForClick = true;
+      }
+    });
+  }
+
+  function advance() {
+    if (typing) {
+      skipType();
+      waitingForClick = true;
+      return;
+    }
+    if (!waitingForClick) return;
+    waitingForClick = false;
+    runStep(currentStep + 1);
+  }
+
+  function showFinal() {
+    box.style.transition = 'opacity 1.5s';
+    box.style.opacity = '0';
+    skipHint.style.opacity = '0';
+
+    setTimeout(() => {
+      const ft = document.getElementById('final-title');
+      ft.classList.add('show');
+
+      // glitch burst after fade in
+      setTimeout(() => {
+        const wrap = document.getElementById('logo-wrap');
+        wrap.classList.add('glitching');
+
+        // repeat glitch a few times
+        let bursts = 0;
+        const maxBursts = 4;
+        const interval = setInterval(() => {
+          wrap.classList.remove('glitching');
+          void wrap.offsetWidth; // reflow to restart animation
+          bursts++;
+          if (bursts < maxBursts) {
+            setTimeout(() => wrap.classList.add('glitching'), 80 + Math.random() * 200);
+          } else {
+            clearInterval(interval);
+            wrap.classList.remove('glitching');
+            wrap.classList.add('settled');
+            document.getElementById('continue-hint').classList.add('show');
+          }
+        }, 650);
+      }, 800);
+    }, 1200);
+  }
+
+  /* ── INPUT ── */
+  document.addEventListener('click', advance);
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' || e.code === 'Enter') advance();
+  });
+
+  /* ── START ── */
+  setTimeout(() => runStep(0), 500);
+</script>
+</body>
+</html>

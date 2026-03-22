@@ -1,0 +1,6 @@
+{
+  "appId": "com.p7n.app",
+  "appName": "P7N",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

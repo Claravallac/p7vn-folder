@@ -1,0 +1,94 @@
+/* ===== Z-INDEX SYSTEM ===== */
+/* Organizacao hierarquica de z-index para evitar conflitos */
+
+:root {
+    /* Base Layer (0-99) */
+    --z-background: 0;
+    --z-character-base: 1;
+    --z-dialogue-wrapper: 2;
+    
+    /* Game Screen (100-299) */
+    --z-game-screen: 100;
+    --z-dialogue-box: 101;
+    --z-character: 102;
+    
+    /* Battle UI (300-499) */
+    --z-battle-arena: 310;
+    --z-battle-hud: 320;
+    --z-battle-effects: 330;
+    --z-battle-particles: 331;
+    --z-arena-quiz-show: 340;
+    
+    /* Interactive Panels (500-699) */
+    --z-action-panel: 510;
+    --z-timing-wrap: 520;
+    --z-inventory-panel: 530;
+    --z-quiz-options: 540;
+    --z-password-input: 550;
+    
+    /* Intermediate Screens (700-899) */
+    --z-minigame-screen: 750;
+    --z-prologue-screen: 800;
+    --z-game-screen-main: 800;
+    --z-real-battle-screen: 820;
+    --z-battle-intro: 850;
+    --z-pkmn-battle-screen: 870;
+    
+    /* Modal/Screen Layers (900-999) */
+    --z-menu-screen: 900;
+    --z-debug-screen: 901;
+    --z-history-screen: 950;
+    
+    /* Overlay & Top Screens (1000-1999) */
+    --z-splash-screen: 1000;
+    --z-quiz-screen: 1200;
+    --z-password-screen: 1300;
+    --z-ending3-screen: 1400;
+    --z-ending-9999: 1500;
+    
+    /* UI Elements (2000-2999) */
+    --z-dev-character-base: 2000;
+    --z-dev-character-center: 2001;
+    --z-dev-bubble: 2005;
+    
+    /* Cutscene/Giant Text (3000-3999) */
+    --z-dev-character-fixed: 3000;
+    --z-legendary-toast: 3100;
+    --z-nero-giant-text: 3200;
+    --z-battle-effects-high: 3300;
+    
+    /* Effects & Transitions (4000-4999) */
+    --z-fade-overlay: 4000;
+    --z-time-pass-message: 4100;
+    --z-battle-intro-hearts: 4200;
+    
+    /* Critical Top Layer (5000+) */
+    --z-gameover-video: 5000;
+    --z-debug-js-indicator: 5100;
+}
+
+/* Aplicar z-index nos elementos */
+#fade-overlay { z-index: var(--z-fade-overlay); }
+#splash-screen { z-index: var(--z-splash-screen); }
+#history-screen { z-index: var(--z-history-screen); }
+#menu-screen { z-index: var(--z-menu-screen); }
+#game-screen { z-index: var(--z-game-screen-main); }
+#prologue-screen { z-index: var(--z-prologue-screen); }
+#minigame-screen { z-index: var(--z-minigame-screen); }
+#quiz-screen { z-index: var(--z-quiz-screen); }
+#password-screen { z-index: var(--z-password-screen); }
+#ending3-screen { z-index: var(--z-ending3-screen); }
+#ending-9999 { z-index: var(--z-ending-9999); }
+#ut-battle-screen { z-index: var(--z-real-battle-screen); }
+#real-battle-screen { z-index: var(--z-real-battle-screen); }
+#pkmn-battle-screen { z-index: var(--z-pkmn-battle-screen); }
+#battle-intro { z-index: var(--z-battle-intro); }
+#dev-character { z-index: var(--z-dev-character-base); }
+#dev-character.center { z-index: var(--z-dev-character-center); }
+#nero-giant-text { z-index: var(--z-nero-giant-text); }
+#legendary-toast { z-index: var(--z-legendary-toast); }
+#gameover-video { z-index: var(--z-gameover-video); }
+#debug-js-indicator { z-index: var(--z-debug-js-indicator); }
+#debug-screen { z-index: var(--z-debug-screen); }
+#time-pass-message { z-index: var(--z-time-pass-message); }
+#battle-effects { z-index: var(--z-battle-effects-high); }

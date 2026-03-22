@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Chapter 1.3</title>
+    <style>
+        body {
+            background: #1e1f22;
+            color: #dbdee1;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        .pass {
+            background: rgba(35, 165, 90, 0.2);
+            border-color: #23a55a;
+        }
+        .fail {
+            background: rgba(242, 63, 66, 0.2);
+            border-color: #f23f42;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chapter 1.3 Dependency Check</h1>
+    <div id="results"></div>
+
+    <script src="./js/chapter-1-3-discord-call.js"></script>
+    <script src="./js/chapter-1-3-executor.js"></script>
+    <script src="./js/chapter-1-3-complete.js"></script>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+
+        function test(name, condition) {
+            const div = document.createElement('div');
+            div.className = 'test-result ' + (condition ? 'pass' : 'fail');
+            div.textContent = (condition ? '✓' : '✗') + ' ' + name;
+            resultsDiv.appendChild(div);
+        }
+
+        // Run tests
+        test('Chapter13Complete object exists', typeof Chapter13Complete === 'object');
+        test('Chapter13Complete.init is a function', typeof Chapter13Complete.init === 'function');
+        test('window.Chapter13Complete exists', typeof window.Chapter13Complete === 'object');
+        test('window.discordCallSystem exists', typeof window.discordCallSystem === 'object');
+        test('window.startChapter13 exists', typeof window.startChapter13 === 'function');
+
+        // List available functions/objects
+        const h2 = document.createElement('h2');
+        h2.textContent = 'Available Objects';
+        resultsDiv.appendChild(h2);
+
+        const ul = document.createElement('ul');
+        if (typeof Chapter13Complete === 'object') {
+            ul.innerHTML += '<li>Chapter13Complete.init()</li>';
+        }
+        if (typeof window.discordCallSystem === 'object') {
+            ul.innerHTML += '<li>window.discordCallSystem</li>';
+        }
+        if (typeof window.startChapter13 === 'function') {
+            ul.innerHTML += '<li>window.startChapter13()</li>';
+        }
+        resultsDiv.appendChild(ul);
+    </script>
+</body>
+</html>

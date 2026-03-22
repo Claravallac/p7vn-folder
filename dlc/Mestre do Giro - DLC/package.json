@@ -1,0 +1,9 @@
+{
+  "name": "volkenburt-teaser",
+  "version": "1.0.0",
+  "description": "Teaser DLC Volkenburt",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  }
+}

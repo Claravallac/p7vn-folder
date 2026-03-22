@@ -1,0 +1,103 @@
+<!-- ══ AUTO-UPDATE BANNER — cole antes do </body> no index.html ══════════════ -->
+<div id="update-banner" style="
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:99999;
+  background:rgba(10,10,20,0.97); border-top:2px solid #7c3aed;
+  padding:14px 24px; font-family:inherit; color:#fff;
+  flex-direction:row; align-items:center; gap:20px;
+  box-shadow:0 -4px 32px rgba(124,58,237,0.35);
+">
+  <div style="flex:1; min-width:0">
+    <div style="font-size:11px; letter-spacing:4px; color:#a78bfa; font-weight:800; margin-bottom:4px">
+      ATUALIZAÇÃO DISPONÍVEL
+    </div>
+    <div id="update-version-label" style="font-size:13px; letter-spacing:2px; color:#fff; font-weight:700"></div>
+    <div id="update-notes-label"   style="font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis"></div>
+  </div>
+
+  <!-- barra de progresso (escondida até o download começar) -->
+  <div id="update-progress-wrap" style="display:none; flex:1; max-width:200px">
+    <div style="background:rgba(255,255,255,0.12); border-radius:4px; height:6px; overflow:hidden">
+      <div id="update-progress-bar" style="height:100%; background:#7c3aed; width:0%; transition:width 0.2s"></div>
+    </div>
+    <div id="update-progress-pct" style="font-size:10px; color:rgba(255,255,255,0.5); margin-top:5px; text-align:center; letter-spacing:2px">0%</div>
+  </div>
+
+  <button id="update-btn" style="
+    padding:10px 22px; background:#7c3aed; color:#fff; border:none;
+    font-size:11px; font-weight:800; letter-spacing:3px; cursor:pointer;
+    font-family:inherit; transition:background .2s; white-space:nowrap;
+  ">ATUALIZAR</button>
+
+  <button id="update-dismiss" style="
+    padding:10px 16px; background:transparent; color:rgba(255,255,255,0.4);
+    border:1px solid rgba(255,255,255,0.15); font-size:10px; letter-spacing:2px;
+    cursor:pointer; font-family:inherit; transition:all .2s; white-space:nowrap;
+  ">DEPOIS</button>
+</div>
+
+<script>
+(function(){
+  if(!window.electronAPI) return;
+
+  var banner   = document.getElementById('update-banner');
+  var btnUp    = document.getElementById('update-btn');
+  var btnDis   = document.getElementById('update-dismiss');
+  var progWrap = document.getElementById('update-progress-wrap');
+  var progBar  = document.getElementById('update-progress-bar');
+  var progPct  = document.getElementById('update-progress-pct');
+  var verLabel = document.getElementById('update-version-label');
+  var notLabel = document.getElementById('update-notes-label');
+
+  var _downloadUrl = '';
+
+  // Update disponível → mostra banner
+  electronAPI.onUpdateAvailable(function(info){
+    verLabel.textContent = 'Versão ' + info.version;
+    notLabel.textContent = info.notes || '';
+    _downloadUrl = info.url;
+    banner.style.display = 'flex';
+  });
+
+  // Progresso do download
+  electronAPI.onUpdateProgress(function(pct){
+    progBar.style.width = pct + '%';
+    progPct.textContent  = pct + '%';
+  });
+
+  // Download concluído
+  electronAPI.onUpdateReady(function(){
+    progPct.textContent     = 'Reiniciando...';
+    progBar.style.width     = '100%';
+    btnUp.textContent       = 'CONCLUÍDO!';
+    btnUp.style.background  = '#16a34a';
+  });
+
+  // Botão Atualizar
+  btnUp.addEventListener('click', function(){
+    if(!_downloadUrl) return;
+    btnUp.disabled          = true;
+    btnUp.textContent       = 'BAIXANDO...';
+    btnDis.style.display    = 'none';
+    progWrap.style.display  = 'block';
+    electronAPI.updateDownload(_downloadUrl).then(function(res){
+      if(res && !res.ok){
+        progPct.textContent = 'Erro: ' + (res.error || 'falha no download');
+        btnUp.disabled      = false;
+        btnUp.textContent   = 'TENTAR DE NOVO';
+      }
+    });
+  });
+
+  // Botão Depois → esconde banner
+  btnDis.addEventListener('click', function(){
+    banner.style.display = 'none';
+  });
+
+  // Hover nos botões
+  btnUp.addEventListener('mouseenter',  function(){ if(!btnUp.disabled) btnUp.style.background='#6d28d9'; });
+  btnUp.addEventListener('mouseleave',  function(){ if(!btnUp.disabled) btnUp.style.background='#7c3aed'; });
+  btnDis.addEventListener('mouseenter', function(){ btnDis.style.borderColor='rgba(255,255,255,0.4)'; btnDis.style.color='rgba(255,255,255,0.7)'; });
+  btnDis.addEventListener('mouseleave', function(){ btnDis.style.borderColor='rgba(255,255,255,0.15)'; btnDis.style.color='rgba(255,255,255,0.4)'; });
+})();
+</script>
+<!-- ══ fim AUTO-UPDATE BANNER ════════════════════════════════════════════════ -->
