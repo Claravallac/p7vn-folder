@@ -101,58 +101,38 @@ function downloadFile(url, destPath, onProgress, startByte = 0) {
   return promise;
 }
 
-// Extrai ZIP — pula a pasta raiz que o GitHub adiciona (ex: p7vn-folder-main/)
+// Extrai ZIP via PowerShell (suporta ZIP64) — pula a pasta raiz do GitHub
 function extractZip(zipPath, destDir) {
   return new Promise((resolve, reject) => {
-    try {
-      const buf = fs.readFileSync(zipPath);
-      const u16 = o => buf[o] | (buf[o+1] << 8);
-      const u32 = o => (buf[o] | (buf[o+1]<<8) | (buf[o+2]<<16) | (buf[o+3]<<24)) >>> 0;
-
-      let eocd = -1;
-      for (let i = buf.length - 22; i >= 0; i--) {
-        if (u32(i) === 0x06054b50) { eocd = i; break; }
-      }
-      if (eocd === -1) return reject(new Error('ZIP inválido'));
-
-      const count = u16(eocd + 8);
-      let cdOffset = u32(eocd + 16);
-
-      for (let i = 0; i < count; i++) {
-        if (u32(cdOffset) !== 0x02014b50) return reject(new Error('ZIP: CD inválido'));
-        const comp     = u16(cdOffset + 10);
-        const compSz   = u32(cdOffset + 20);
-        const nameLen  = u16(cdOffset + 28);
-        const extraLen = u16(cdOffset + 30);
-        const commLen  = u16(cdOffset + 32);
-        const lhOffset = u32(cdOffset + 42);
-        const name     = buf.slice(cdOffset+46, cdOffset+46+nameLen).toString('utf8');
-        cdOffset += 46 + nameLen + extraLen + commLen;
-
-        // Pula a pasta raiz do GitHub (ex: "p7vn-folder-main/arquivo.js")
-        const parts = name.split('/');
-        if (parts.length < 2) continue;
-        const relativeName = parts.slice(1).join('/');
-        if (!relativeName || relativeName.endsWith('/')) continue;
-
-        // Nao sobrescreve o executavel principal
-        if (relativeName === path.basename(process.execPath)) continue;
-
-        const lnLen   = u16(lhOffset + 26);
-        const leLen   = u16(lhOffset + 28);
-        const dataOff = lhOffset + 30 + lnLen + leLen;
-        const data    = buf.slice(dataOff, dataOff + compSz);
-        const outPath = path.join(destDir, ...relativeName.split('/'));
-
-        fs.mkdirSync(path.dirname(outPath), { recursive: true });
-        if (comp === 0) fs.writeFileSync(outPath, data);
-        else if (comp === 8) fs.writeFileSync(outPath, zlib.inflateRawSync(data));
-        else return reject(new Error(`Compressão não suportada: ${comp}`));
-      }
-      resolve();
-    } catch(e) { reject(e); }
+    const tmpExtract = path.join(os.tmpdir(), 'HimariGames_extract_' + Date.now());
+    const psCmd = `Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('` + zipPath.replace(/\\/g, '\\\\') + `', '` + tmpExtract.replace(/\\/g, '\\\\') + `')`;
+    const proc = require('child_process').spawn('powershell.exe', ['-NoProfile', '-Command', psCmd], { stdio: 'pipe' });
+    let stderr = '';
+    proc.stderr.on('data', d => stderr += d);
+    proc.on('close', code => {
+      if (code !== 0) return reject(new Error('Extracao falhou: ' + stderr));
+      try {
+        const entries = fs.readdirSync(tmpExtract);
+        const rootDir = entries.length === 1 ? path.join(tmpExtract, entries[0]) : tmpExtract;
+        const execBase = path.basename(process.execPath);
+        function copyDir(src, dest) {
+          fs.mkdirSync(dest, { recursive: true });
+          for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+            if (entry.name === execBase) continue;
+            const sp = path.join(src, entry.name);
+            const dp = path.join(dest, entry.name);
+            if (entry.isDirectory()) copyDir(sp, dp);
+            else fs.copyFileSync(sp, dp);
+          }
+        }
+        copyDir(rootDir, destDir);
+        fs.rmSync(tmpExtract, { recursive: true, force: true });
+        resolve();
+      } catch(e) { reject(e); }
+    });
   });
 }
+
 
 function _getTmpPath() {
   return path.join(app.getPath('downloads'), 'HimariGames_update.zip');

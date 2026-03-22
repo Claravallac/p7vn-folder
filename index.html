@@ -16007,7 +16007,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/version.json')
       .then(function(r){ return r.json(); })
       .then(function(remote){
-        _repairUrl = remote.url;
+        _repairUrl = remote.url || 'https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip';
         if(sRepairInfo) sRepairInfo.textContent = 'Isso vai baixar v' + remote.version + ' novamente e substituir o executável atual. Use se o jogo estiver com problemas.';
         if(sRepairStatus) sRepairStatus.textContent = '';
         if(sRepairIdle)   sRepairIdle.style.display  = 'none';

@@ -1,6 +1,3 @@
 [
-  "build-installer.bat",
-  "build-linux.bat",
-  "capacitor.config.json",
-  "zip_maker.ps1"
+  "js/battle-arabel-pokemon.js"
 ]

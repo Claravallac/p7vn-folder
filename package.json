@@ -1,7 +1,7 @@
 {
   "name": "himari-games-visual-novel",
-  "version": "1.0.2",
-  "installerVersion": "1.0.1",
+  "version": "1.0.3",
+  "installerVersion": "1.0.4",
   "description": "Visual Novel da Himari Games",
   "main": "main.js",
   "scripts": {
@@ -61,14 +61,17 @@
       ]
     },
     "nsis": {
-      "oneClick": true,
+      "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": false,
       "installerIcon": "assets/images/logo/icon.ico",
       "uninstallerIcon": "assets/images/logo/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Himari Games - VRChat Story"
+      "shortcutName": "Himari Games - VRChat Story",
+      "runAfterFinish": true,
+      "installerSidebar": "assets/images/characters/aldrich_installer.bmp",
+      "uninstallerSidebar": "assets/images/characters/aldrich_installer.bmp"
     },
     "directories": {
       "output": "dist"

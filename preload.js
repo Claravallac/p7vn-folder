@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // ── Auto-updater ────────────────────────────────────────────────────────────
   updateDownload:       (url) => ipcRenderer.invoke('update-download', url),
   updateCancel:         ()    => ipcRenderer.invoke('update-cancel'),
+  updateRestart:        ()    => ipcRenderer.invoke('update-restart'),
   updateCheckPartial:   ()    => ipcRenderer.invoke('update-check-partial'),
   updateDiscardPartial: ()    => ipcRenderer.invoke('update-discard-partial'),
   checkPendingUpdate:   ()    => ipcRenderer.invoke('update-check-pending'),
