@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.4",
+    "date": "22/03/2026",
+    "notes": "O menu de updates agora tem animações, yay"
+  },
+  {
     "version": "1.0.3",
     "date": "22/03/2026",
     "notes": "Update DEBUG"

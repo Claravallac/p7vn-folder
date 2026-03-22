@@ -25,8 +25,15 @@ try {
   } catch(e2) {}
 }
 
-// Filtra só arquivos que existem (ignora deletados)
-const files = changed.filter(f => fs.existsSync(f));
+// Arquivos que nunca devem entrar no delta
+const IGNORE = new Set([
+  'build.bat', 'make-delta.js', 'get-release-url.js', 'detect-removed.js',
+  'update-changelog.js', 'package.json', 'package-lock.json',
+  '_tmp.json', '_tmp.jsontype', 'r2-upload.js'
+]);
+
+// Filtra só arquivos que existem (ignora deletados e arquivos de dev)
+const files = changed.filter(f => fs.existsSync(f) && !IGNORE.has(path.basename(f)) && !f.startsWith('dist/') && !f.startsWith('node_modules/'));
 
 // Sempre inclui version.json, changelog.json e removed.json no delta
 for (const always of ['version.json', 'changelog.json', 'removed.json']) {

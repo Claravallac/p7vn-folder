@@ -789,6 +789,67 @@
         #update-screen.slide-in  { animation: updScreenSlideIn  0.38s cubic-bezier(0.22, 0.61, 0.36, 1) forwards; }
         #update-screen.slide-out { animation: updScreenSlideOut 0.34s cubic-bezier(0.55, 0, 0.85, 0.06) forwards; }
         #upd-screen-changelog-list::-webkit-scrollbar { width: 3px; }
+    /* ── Animações do menu de update ────────────────────────────────── */
+    #upd-screen-install, #upd-screen-back, #upd-screen-cancel-dl,
+    #upd-screen-check, #upd-screen-repair, #upd-repair-confirm, #upd-repair-cancel,
+    #upd-partial-resume, #upd-partial-discard {
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1) !important;
+    }
+    #upd-screen-install:hover:not(:disabled) {
+      filter: brightness(1.18);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(124,58,237,0.45);
+    }
+    #upd-screen-install:active:not(:disabled) {
+      transform: translateY(0px);
+      filter: brightness(0.95);
+    }
+    #upd-screen-back:hover, #upd-screen-cancel-dl:hover,
+    #upd-repair-cancel:hover, #upd-partial-discard:hover {
+      border-color: rgba(255,255,255,0.3) !important;
+      color: rgba(255,255,255,0.7) !important;
+      transform: translateY(-1px);
+    }
+    #upd-screen-cancel-dl:hover {
+      background: rgba(255,34,68,0.08) !important;
+      border-color: rgba(255,34,68,0.8) !important;
+      color: rgba(255,34,68,1) !important;
+    }
+    #upd-screen-check:hover {
+      background: rgba(var(--menu-accent-rgb),0.15) !important;
+      color: rgba(var(--menu-accent-rgb),1) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(124,58,237,0.2);
+    }
+    #upd-screen-repair:hover, #upd-repair-confirm:hover, #upd-partial-resume:hover {
+      filter: brightness(1.2);
+      transform: translateY(-1px);
+    }
+    /* Fade-in dos elementos ao entrar no estado de update */
+    @keyframes updFadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #upd-screen-nova-label { animation: updFadeUp 0.4s ease both; }
+    #upd-screen-version    { animation: updFadeUp 0.5s 0.05s ease both; }
+    #upd-screen-current    { animation: updFadeUp 0.5s 0.1s ease both; }
+    #upd-screen-notes      { animation: updFadeUp 0.5s 0.15s ease both; }
+    #upd-screen-install    { animation: updFadeUp 0.5s 0.2s ease both; }
+    /* Barra de progresso pulsante quando indeterminada */
+    @keyframes updPulse {
+      0%,100% { opacity: 0.3; }
+      50%      { opacity: 0.7; }
+    }
+    #upd-screen-prog-bar.indeterminate {
+      animation: updPulse 1.2s ease-in-out infinite;
+    }
+    /* Changelog entries animados */
+    @keyframes updSlideIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .upd-changelog-entry { animation: updSlideIn 0.3s ease both; }
+
         #upd-screen-changelog-list::-webkit-scrollbar-track { background: transparent; }
         #upd-screen-changelog-list::-webkit-scrollbar-thumb { background: rgba(var(--menu-accent-rgb), 0.35); border-radius: 2px; }
         #upd-screen-changelog-list::-webkit-scrollbar-thumb:hover { background: rgba(var(--menu-accent-rgb), 0.6); }
@@ -15912,18 +15973,17 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   _startObserver();
 
   electronAPI.onUpdateProgress(function(pct, speed){
-    // pct negativo = bytes recebidos sem content-length conhecido
     if(pct < 0) {
       var mb = ((-pct) / 1048576).toFixed(1);
       var txt = mb + ' MB baixados' + (speed ? '  · ' + speed : '');
-      if(progBar)  { progBar.style.width='100%'; progBar.style.opacity='0.3'; }
-      if(sProgBar) { sProgBar.style.width='100%'; sProgBar.style.opacity='0.3'; }
+      if(progBar)  { progBar.style.width='100%'; progBar.classList.add('indeterminate'); }
+      if(sProgBar) { sProgBar.style.width='100%'; sProgBar.classList.add('indeterminate'); }
       if(progPct)  progPct.textContent  = txt;
       if(sProgPct) sProgPct.textContent = txt;
       return;
     }
-    if(progBar)  progBar.style.opacity  = '1';
-    if(sProgBar) sProgBar.style.opacity = '1';
+    if(progBar)  { progBar.style.opacity='1'; progBar.classList.remove('indeterminate'); }
+    if(sProgBar) { sProgBar.style.opacity='1'; sProgBar.classList.remove('indeterminate'); }
     // pct negativo = bytes recebidos sem total conhecido
     if(pct < 0) {
       var mb = (-pct / 1048576).toFixed(1);
