@@ -3,3 +3,4 @@ dist/
 assets/ 
 *.zip 
 *.exe 
+secrets.json 

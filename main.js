@@ -45,7 +45,7 @@ function createEditorWindow() {
     height: 860,
     minWidth: 900,
     minHeight: 600,
-    title: 'Himari Editor — P7VN',
+    title: 'Himari Editor — VRChat Story',
     icon: path.join(__dirname, 'assets/images/logo/icon.png'),
     webPreferences: {
       contextIsolation: true,
@@ -235,9 +235,16 @@ ipcMain.handle('get-version', () => {
 ipcMain.handle('submit-bug-report', async (_event, { title, body }) => {
   const https = require('https');
 
-  // Token com permissão apenas de criar issues (public_repo)
-  // Substitua pelo seu token gerado em github.com/settings/tokens
-  const GITHUB_TOKEN = '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';
+  // Token lido de secrets.json (nunca commitado no repositório)
+  let GITHUB_TOKEN = '';
+  try {
+    const secretsPath = path.join(path.dirname(process.execPath), 'resources', 'app', 'secrets.json');
+    const altPath     = path.join(__dirname, 'secrets.json');
+    const p = fs.existsSync(secretsPath) ? secretsPath : altPath;
+    if (fs.existsSync(p)) {
+      GITHUB_TOKEN = JSON.parse(fs.readFileSync(p, 'utf8')).githubToken || '';
+    }
+  } catch(e) {}
   const REPO_OWNER   = 'Claravallac';
   const REPO_NAME    = 'p7vn-folder';
 
