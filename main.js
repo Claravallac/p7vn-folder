@@ -45,7 +45,7 @@ function createEditorWindow() {
     height: 860,
     minWidth: 900,
     minHeight: 600,
-    title: 'Himari Editor — VRChat Story',
+    title: 'Himari Editor — P7VN',
     icon: path.join(__dirname, 'assets/images/logo/icon.png'),
     webPreferences: {
       contextIsolation: true,
