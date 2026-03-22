@@ -1,6 +1,6 @@
 [
-  "criar-branch-delta.bat",
-  "lista.txt",
-  "start-electron.bat",
-  "zip_maker.bat"
+  "build-installer.bat",
+  "build-linux.bat",
+  "capacitor.config.json",
+  "zip_maker.ps1"
 ]

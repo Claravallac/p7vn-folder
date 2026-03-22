@@ -12268,7 +12268,7 @@
                             var inner = document.getElementById('update-popup-inner');
                             if (vEl) vEl.textContent = 'v' + remote.version;
                             if (nEl) nEl.textContent = remote.notes || '';
-                            window._updDownloadUrl = remote.url;
+                            window._updDownloadUrl = remote.url || 'https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip';
                             if (popup && inner) {
                                 popup.style.display = 'block';
                                 requestAnimationFrame(function(){ requestAnimationFrame(function(){

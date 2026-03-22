@@ -100,8 +100,6 @@ node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({
 echo Subindo arquivos para o GitHub...
 git add --all -- . ":(exclude)assets/*"
 git commit -m "update leve: versao %VERSION%"
-git fetch origin main 2>nul
-git reset --soft origin/main 2>nul
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
 
@@ -138,8 +136,6 @@ git add -f assets/fonts/
 git add -f assets/images/
 git add -f assets/videos/
 git commit -m "update completo: versao %VERSION%"
-git fetch origin main 2>nul
-git reset --soft origin/main 2>nul
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
 
