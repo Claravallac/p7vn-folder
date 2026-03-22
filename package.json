@@ -1,6 +1,6 @@
 {
   "name": "himari-games-visual-novel",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "installerVersion": "1.0.5",
   "description": "Visual Novel da Himari Games",
   "main": "main.js",
