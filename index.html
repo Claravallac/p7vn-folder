@@ -4228,7 +4228,7 @@
             [SHOP_ITEM_IDS.THEME_DEEPSEA]:   { price: 50, title: 'Tema: Deep Sea',       theme: 'deepsea'   },
             [SHOP_ITEM_IDS.DIFF_LEGENDARY]:  { price: 500, title: 'Dificuldade: Legendary', difficulty: 'legendary' },
         });
-        const DEMO_ENDINGS_REQUIRED = ['ending-normal', 'ending-stupid', 'ending-alone', 'ending-9999'];
+        const DEMO_ENDINGS_REQUIRED = ['ending-praia', 'ending-alone', 'ending-birra'];
         const ACHIEVEMENTS_META = Object.freeze({
             [ACHIEVEMENT_IDS.SEVEN_SAVE_MASTER]: {
                 title: 'Seven, agora foi pessoal',
@@ -7163,6 +7163,7 @@
                     });
                 }
                 saveUnlockChapter(variant === 'birra' ? 'ending-birra' : 'ending-alone');
+                markEndingReached(variant === 'birra' ? 'ending-birra' : 'ending-alone');
             }, 1300);
         }
 
@@ -15531,18 +15532,6 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
         var _errActive = false;
 
         window.showDevErrorScreen = function(msg, src, line) {
-            // Se já está ativa e foi chamada via F10 (msg='f10'), fecha e volta ao menu
-            if (_errActive && msg === 'f10') {
-                var existing = document.getElementById('_dev-err-scr');
-                if (existing) {
-                    existing.style.opacity = '0';
-                    setTimeout(function(){ if(existing.parentNode) existing.parentNode.removeChild(existing); }, 600);
-                }
-                _errActive = false;
-                var menu = document.getElementById('menu-screen');
-                if (menu) menu.style.display = 'flex';
-                return;
-            }
             if (_errActive) return;
             _errActive = true;
 
@@ -15554,7 +15543,6 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
             });
 
             var scr = document.createElement('div');
-            scr.id = '_dev-err-scr';
             scr.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 1s ease;font-family:inherit;overflow:hidden';
 
             // Bloqueia cliques/teclas para não vazar para o jogo
@@ -15651,27 +15639,9 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
             btn.addEventListener('click', function(e){ e.stopPropagation(); location.reload(); });
             scr.appendChild(btn);
 
-            // Botão voltar ao menu
-            var backBtn = document.createElement('button');
-            backBtn.textContent = 'Voltar ao menu';
-            backBtn.style.cssText = 'margin-top:8px;padding:10px 28px;background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:rgba(255,255,255,0.45);font-size:12px;letter-spacing:2px;cursor:pointer;font-family:inherit;text-transform:uppercase;transition:all 0.2s';
-            backBtn.onmouseenter = function(){ backBtn.style.borderColor='rgba(255,255,255,0.5)'; backBtn.style.color='#fff'; };
-            backBtn.onmouseleave = function(){ backBtn.style.borderColor='rgba(255,255,255,0.2)'; backBtn.style.color='rgba(255,255,255,0.45)'; };
-            backBtn.addEventListener('click', function(e){
-                e.stopPropagation();
-                scr.style.opacity = '0';
-                setTimeout(function(){ if(scr.parentNode) scr.parentNode.removeChild(scr); }, 600);
-                _errActive = false;
-                var menu = document.getElementById('menu-screen');
-                if (menu) menu.style.display = 'flex';
-                var menuMus = document.getElementById('menu-music');
-                if (menuMus) { try { menuMus.volume=0.7; menuMus.play().catch(function(){}); } catch(e2){} }
-            });
-            scr.appendChild(backBtn);
-
             // Botão reportar bug (só se electronAPI disponível)
-            if ((msg === 'f10' || (msg && msg !== 'test')) && window.electronAPI && window.electronAPI.submitBugReport) {
-                var errContent = msg === 'f10' ? 'Report manual via F10' : (msg + (src ? '\n' + src + (line ? ':' + line : '') : ''));
+            if (msg && msg !== 'test' && window.electronAPI && window.electronAPI.submitBugReport) {
+                var errContent = msg + (src ? '\n' + src + (line ? ':' + line : '') : '');
 
                 var reportWrap = document.createElement('div');
                 reportWrap.style.cssText = 'margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:580px;width:90%';
@@ -15776,17 +15746,6 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
                 }
             } catch(e){}
         };
-
-        // F10 — abre a tela de erro/report de qualquer lugar
-        document.addEventListener('keydown', function(e) {
-            if (e.key !== 'F10') return;
-            e.preventDefault();
-            if (_errActive) {
-                window.showDevErrorScreen('f10');
-            } else {
-                window.showDevErrorScreen('f10', null, null);
-            }
-        });
 
         // Captura erros globais
         window.onerror = function(message, source, lineno, colno, error) {
