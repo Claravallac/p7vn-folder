@@ -65,6 +65,26 @@ function updateNeroHp() {
         els.neroHpFill.style.boxShadow  = '0 0 8px '+clr;
     }
     if (els.neroHpNum) els.neroHpNum.textContent = Math.max(0,ns.neroHp);
+
+    // Reações por threshold de HP
+    var hpPct = ns.neroHp / NS_MAX_HP;
+    if(!ns._phase2triggered && hpPct <= 0.66) {
+        ns._phase2triggered = true;
+        showNeroBubble('Chega de brincadeira.', 3000);
+    }
+    if(!ns._phase3triggered && hpPct <= 0.33) {
+        ns._phase3triggered = true;
+        showNeroBubble('Você vai se arrepender disso.', 3000);
+        if(els.arena){
+            els.arena.style.transition='background 0.2s';
+            els.arena.style.background='rgba(255,0,0,0.15)';
+            setTimeout(function(){ if(els.arena) els.arena.style.background=''; }, 400);
+        }
+    }
+    if(!ns._phase4triggered && hpPct <= 0.10) {
+        ns._phase4triggered = true;
+        showNeroBubble('...não.', 3000);
+    }
 }
 function updatePlayerHp() {
     var pct = Math.max(0,ns.playerHp/NS_PLAYER_MAX)*100;
@@ -140,7 +160,7 @@ function patBoneRain() {
             var gap=30+Math.floor(Math.random()*6)*30;
             [0,50,100,150,200,250,300].forEach(function(x){
                 if(Math.abs(x+22-gap)<38) return;
-                setTimeout(function(){ if(!ns.active) return; spawnBone({x:x,y:-14,w:44,h:12,vx:0,vy:2.6}); }, Math.random()*60);
+                setTimeout(function(){ if(!ns.active) return; spawnBone({x:x,y:-14,w:44,h:12,vx:0,vy:scaledV(2.6)}); }, Math.random()*60);
             });
         }, ww*1500);
     })(w);
@@ -153,14 +173,14 @@ function patBoneWall() {
             var gap=20+Math.floor(Math.random()*4)*42;
             [0,42,84,126,168].forEach(function(y){
                 if(Math.abs(y+21-gap)<46) return;
-                spawnBone({x:-50,y:y,w:44,h:18,vx:3.2,vy:0});
+                spawnBone({x:-50,y:y,w:44,h:18,vx:scaledV(3.2),vy:0});
             });
             setTimeout(function(){
                 if(!ns.active) return;
                 var gap2=20+Math.floor(Math.random()*4)*42;
                 [0,42,84,126,168].forEach(function(y){
                     if(Math.abs(y+21-gap2)<46) return;
-                    spawnBone({x:NS_ARENA_W+6,y:y,w:44,h:18,vx:-3.2,vy:0});
+                    spawnBone({x:NS_ARENA_W+6,y:y,w:44,h:18,vx:-scaledV(3.2),vy:0});
                 });
             }, 700);
         }, ww*1800);
@@ -175,7 +195,7 @@ function patCorridor() {
             for(var i=0;i<8;i++)(function(ii){
                 var x=(ii/7)*NS_ARENA_W;
                 if(Math.abs(x-gapX)<55) return;
-                setTimeout(function(){ if(!ns.active) return; spawnBone({x:x-20,y:-14,w:44,h:12,vx:0,vy:3.0}); }, ii*30);
+                setTimeout(function(){ if(!ns.active) return; spawnBone({x:x-20,y:-14,w:44,h:12,vx:0,vy:scaledV(3.0)}); }, ii*30);
             })(i);
         }, ww*2000);
     })(w);
@@ -217,7 +237,7 @@ function patSniper() {
             var corners=[{x:-5,y:-5},{x:NS_ARENA_W+5,y:-5},{x:-5,y:NS_ARENA_H+5},{x:NS_ARENA_W+5,y:NS_ARENA_H+5}];
             var c=corners[ss%4];
             var dx=tx-c.x, dy=ty-c.y, len=Math.sqrt(dx*dx+dy*dy)||1;
-            spawnProj({x:c.x,y:c.y,vx:dx/len*4.2,vy:dy/len*4.2,r:9,color:'#fff'});
+            spawnProj({x:c.x,y:c.y,vx:dx/len*scaledV(4.2),vy:dy/len*scaledV(4.2),r:9,color:'#fff'});
             SFX.dust();
         }, 300 + ss*1000); // começa em 300ms para o coração já estar posicionado
     })(s);
@@ -228,7 +248,7 @@ function patChaos() {
         setTimeout(function(){
             if(!ns.active||ns.phase!=='dodge') return;
             for(var i=0;i<3;i++){
-                var edge=Math.floor(Math.random()*4),x,y,vx,vy,spd=2.5+Math.random()*1.5;
+                var edge=Math.floor(Math.random()*4),x,y,vx,vy,spd=scaledV(2.5+Math.random()*1.5);
                 if(edge===0){x=Math.random()*NS_ARENA_W;y=-10;vx=(Math.random()-.5)*1.5;vy=spd;}
                 else if(edge===1){x=NS_ARENA_W+10;y=Math.random()*NS_ARENA_H;vx=-spd;vy=(Math.random()-.5)*1.5;}
                 else if(edge===2){x=Math.random()*NS_ARENA_W;y=NS_ARENA_H+10;vx=(Math.random()-.5)*1.5;vy=-spd;}
@@ -240,7 +260,32 @@ function patChaos() {
     })(w);
 }
 
-// ── Padrões novos ─────────────────────────────────────────────
+// ── Sistema de dificuldade por HP ─────────────────────────────
+// Retorna um multiplier de 1.0 (HP cheio) a 2.2 (HP zerado)
+function getDiffMult() {
+    var pct = ns.neroHp / NS_MAX_HP; // 1.0 = cheio, 0.0 = zero
+    return 1.0 + (1.0 - pct) * 1.2;
+}
+// Velocidade de projéteis escalada pelo HP
+function scaledV(base) {
+    return base * getDiffMult();
+}
+// Dano por projétil escalado pelo HP
+function scaledDmg() {
+    var pct = ns.neroHp / NS_MAX_HP;
+    if(pct > 0.66) return 18;
+    if(pct > 0.33) return 24;
+    return 32;
+}
+// Quantas ondas extras por fase de HP
+function extraWaves() {
+    var pct = ns.neroHp / NS_MAX_HP;
+    if(pct > 0.66) return 0;
+    if(pct > 0.33) return 2;
+    return 4;
+}
+
+
 
 // Chuva de projéteis em diagonal cruzada
 function patCross() {
@@ -298,7 +343,7 @@ function patHoming() {
             else if(side===2){sx=-8;sy=Math.random()*NS_ARENA_H;}
             else{sx=NS_ARENA_W+8;sy=Math.random()*NS_ARENA_H;}
             var dx=tx-sx,dy=ty-sy,len=Math.sqrt(dx*dx+dy*dy)||1;
-            spawnProj({x:sx,y:sy,vx:dx/len*3.8,vy:dy/len*3.8,r:9,color:'#f8f'});
+            spawnProj({x:sx,y:sy,vx:dx/len*scaledV(3.8),vy:dy/len*scaledV(3.8),r:9,color:'#f8f'});
             SFX.dust();
         }, 200+ss*600);
     })(s);
@@ -312,7 +357,7 @@ function patHeavyRain() {
             var gap=20+Math.floor(Math.random()*5)*26;
             [0,30,60,90,120,150,180,210,240,270,300].forEach(function(x){
                 if(Math.abs(x+22-gap)<30) return;
-                setTimeout(function(){ if(!ns.active) return; spawnBone({x:x,y:-14,w:36,h:10,vx:0,vy:3.4}); }, Math.random()*40);
+                setTimeout(function(){ if(!ns.active) return; spawnBone({x:x,y:-14,w:36,h:10,vx:0,vy:scaledV(3.4)}); }, Math.random()*40);
             });
             SFX.dust();
         }, ww*1000);
@@ -327,8 +372,8 @@ function patPincer() {
             var gapY=NS_ARENA_H*(0.25+Math.random()*0.5);
             [0,40,80,120,160].forEach(function(y){
                 if(Math.abs(y+20-gapY)<40) return;
-                spawnBone({x:-50,y:y,w:44,h:18,vx:3.6,vy:0});
-                spawnBone({x:NS_ARENA_W+6,y:y,w:44,h:18,vx:-3.6,vy:0});
+                spawnBone({x:-50,y:y,w:44,h:18,vx:scaledV(3.6),vy:0});
+                spawnBone({x:NS_ARENA_W+6,y:y,w:44,h:18,vx:-scaledV(3.6),vy:0});
             });
             SFX.dust();
         }, ww*1400);
@@ -349,7 +394,7 @@ function patDoubleSniper() {
             var pair=pairs[ss%pairs.length];
             pair.forEach(function(c){
                 var dx=tx-c.x,dy=ty-c.y,len=Math.sqrt(dx*dx+dy*dy)||1;
-                spawnProj({x:c.x,y:c.y,vx:dx/len*4.5,vy:dy/len*4.5,r:9,color:'#fff'});
+                spawnProj({x:c.x,y:c.y,vx:dx/len*scaledV(4.5),vy:dy/len*scaledV(4.5),r:9,color:'#fff'});
             });
             SFX.dust();
         }, 200+ss*800);
@@ -367,7 +412,7 @@ function patFastSpiral() {
                 var a=(i/total)*Math.PI*2+offset;
                 var sx=NS_ARENA_W/2+Math.cos(a)*(NS_ARENA_W/2+8);
                 var sy=NS_ARENA_H/2+Math.sin(a)*(NS_ARENA_H/2+8);
-                var vx=-Math.cos(a)*3.2, vy=-Math.sin(a)*3.2;
+                var vx=-Math.cos(a)*scaledV(3.2), vy=-Math.sin(a)*scaledV(3.2);
                 spawnProj({x:sx,y:sy,vx:vx,vy:vy,r:7,color:'#adf'});
             }
             SFX.dust();
@@ -404,7 +449,7 @@ function dodgeLoop() {
         if(!ns.invincible){
             var dx=hcx-p.x, dy=hcy-p.y, rSum=NS_HEART_R+p.r-3;
             if(dx*dx+dy*dy<rSum*rSum){
-                takeDamage(18);
+                takeDamage(scaledDmg());
                 if(p.el&&p.el.parentNode) p.el.parentNode.removeChild(p.el);
                 continue;
             }
@@ -619,8 +664,9 @@ function startDodgePhase() {
     var falas=['Consegue desviar?','Tô aquecendo.','Você vai se cansar.','Continue tentando.','Isso é só o começo.','Não vai adiantar.','Ficou lento.','Foca.','Decepcionante.','Nem começou.'];
     showNeroBubble(falas[(ns.turnNum-1)%falas.length],3000);
 
-    // Duração aumenta com os turnos, mínimo 7s
-    var dur = Math.min(7000 + ns.turnNum * 300, 12000);
+    // Duração escala tanto por turno quanto por HP da Nero
+    var hpMult = 1.0 + (1.0 - ns.neroHp/NS_MAX_HP) * 0.5;
+    var dur = Math.min((7000 + ns.turnNum * 200) * hpMult, 14000);
     if(ns.dodgeTimer) clearTimeout(ns.dodgeTimer);
     ns.dodgeTimer=setTimeout(function(){if(ns.phase==='dodge'&&ns.active)endDodgePhase();},dur);
 
@@ -631,14 +677,26 @@ function startDodgePhase() {
     ns._lastPattern = chosen;
     chosen();
 
-    // Em turnos avançados, dispara um segundo padrão diferente no meio da fase
-    if(ns.turnNum >= 4) {
-        var pool2 = PATTERNS.filter(function(p){ return p !== chosen && p !== ns._lastPattern; });
+    // Segundo padrão: começa no turno 4 em HP cheio, mas no turno 2 quando HP < 33%
+    var secondPatTurn = ns.neroHp/NS_MAX_HP < 0.33 ? 2 : ns.neroHp/NS_MAX_HP < 0.66 ? 3 : 4;
+    if(ns.turnNum >= secondPatTurn) {
+        var pool2 = PATTERNS.filter(function(p){ return p !== chosen; });
         if(pool2.length > 0) {
             var chosen2 = pool2[Math.floor(Math.random()*pool2.length)];
             setTimeout(function(){
                 if(ns.phase==='dodge'&&ns.active) chosen2();
             }, dur/2);
+        }
+    }
+
+    // Terceiro padrão quando HP crítico (<20%)
+    if(ns.neroHp/NS_MAX_HP < 0.20 && ns.turnNum >= 3) {
+        var pool3 = PATTERNS.filter(function(p){ return p !== chosen; });
+        if(pool3.length > 0) {
+            var chosen3 = pool3[Math.floor(Math.random()*pool3.length)];
+            setTimeout(function(){
+                if(ns.phase==='dodge'&&ns.active) chosen3();
+            }, dur*0.75);
         }
     }
 }
@@ -823,6 +881,7 @@ window.startNeroStoreBattle=function(){
     init();
     ns.active=false; ns.phase='idle'; ns.neroHp=NS_MAX_HP; ns.playerHp=NS_PLAYER_MAX;
     ns.invincible=false; ns.dead=false; ns.mercyCount=0; ns.turnNum=0; ns._lastPattern=null;
+    ns._phase2triggered=false; ns._phase3triggered=false; ns._phase4triggered=false;
     ns.keys={}; ns.projectiles=[]; ns.timingActive=false;
     if(ns.timingIv)  {clearInterval(ns.timingIv);  ns.timingIv=null;}
     if(ns.loop)      {clearInterval(ns.loop);       ns.loop=null;}
