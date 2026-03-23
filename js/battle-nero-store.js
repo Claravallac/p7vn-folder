@@ -240,7 +240,7 @@ function patChaos() {
     })(w);
 }
 
-var PATTERNS=[patBoneRain,patBoneWall,patCorridor,patExpand,patSpiral,patSniper,patChaos];
+var PATTERNS=[patBoneRain,patBoneWall,patCorridor,patSniper,patChaos];
 // ── Dodge loop ────────────────────────────────────────────────
 function dodgeLoop() {
     if(!ns.active||ns.phase!=='dodge') return;
@@ -696,6 +696,25 @@ window.startNeroStoreBattle=function(){
 
     var bm=document.getElementById('battle-music');
     if(bm){try{bm.volume=0.3;bm.currentTime=0;bm.play().catch(function(){});}catch(e){}}
+
+    // Para músicas da loja antes de iniciar a batalha
+    var nsm=document.getElementById('nero-store-music');
+    var nsmo=document.getElementById('nero-store-music-other');
+    if(nsm){try{nsm.pause();nsm.currentTime=0;}catch(e){}}
+    if(nsmo){try{nsmo.pause();nsmo.currentTime=0;}catch(e){}}
+
+    // Adiciona 5 itens de cura no inventário da batalha (curam HP inteiro)
+    if(typeof inventory!=='undefined'){
+        inventory.items = inventory.items.filter(function(i){ return i.id !== 'ns_cura'; });
+        for(var _h=0;_h<5;_h++){
+            inventory.items.push({
+                id: 'ns_cura',
+                name: '💊 ITEM DE CURA',
+                heal: NS_PLAYER_MAX,
+                color: '#00ff88'
+            });
+        }
+    }
 
     document.removeEventListener('keydown',onKD);
     document.removeEventListener('keyup',  onKU);
