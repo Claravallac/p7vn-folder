@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.27",
+    "date": "23/03/2026",
+    "notes": "Consertando versões legadas no log"
+  },
+  {
     "version": "1.0.25",
     "date": "23/03/2026",
     "notes": "Novo painel de configurações mais espaçoso (beta)"
