@@ -6,9 +6,9 @@
 
 var NS_MAX_HP        = 5000;
 var NS_PLAYER_MAX    = 92;
-var NS_ARENA_W       = 340;
+var NS_ARENA_W       = 480;
 var NS_ARENA_H       = 200;
-var NS_HEART_R       = 8;
+var NS_HEART_R       = 9;
 var NS_INVINCIBLE_MS = 900;
 var NS_TICK          = 16;
 
@@ -239,7 +239,7 @@ function patSniper() {
             var dx=tx-c.x, dy=ty-c.y, len=Math.sqrt(dx*dx+dy*dy)||1;
             spawnProj({x:c.x,y:c.y,vx:dx/len*scaledV(4.2),vy:dy/len*scaledV(4.2),r:9,color:'#fff'});
             SFX.dust();
-        }, 300 + ss*1000); // começa em 300ms para o coração já estar posicionado
+        }, ss*800); // começa em 300ms para o coração já estar posicionado
     })(s);
 }
 
@@ -345,7 +345,7 @@ function patHoming() {
             var dx=tx-sx,dy=ty-sy,len=Math.sqrt(dx*dx+dy*dy)||1;
             spawnProj({x:sx,y:sy,vx:dx/len*scaledV(3.8),vy:dy/len*scaledV(3.8),r:9,color:'#f8f'});
             SFX.dust();
-        }, 200+ss*600);
+        }, ss*500);
     })(s);
 }
 
@@ -397,7 +397,7 @@ function patDoubleSniper() {
                 spawnProj({x:c.x,y:c.y,vx:dx/len*scaledV(4.5),vy:dy/len*scaledV(4.5),r:9,color:'#fff'});
             });
             SFX.dust();
-        }, 200+ss*800);
+        }, ss*800);
     })(s);
 }
 
@@ -675,6 +675,16 @@ function startDodgePhase() {
     if(pool.length===0) pool = PATTERNS.slice();
     var chosen = pool[Math.floor(Math.random()*pool.length)];
     ns._lastPattern = chosen;
+
+    // Ataque imediato garantido — dispara alguns projéteis das bordas antes do padrão principal
+    (function immediateAttack(){
+        if(!ns.active||ns.phase!=='dodge') return;
+        var sides=[[0,-8,0,3],[NS_ARENA_W,NS_ARENA_H/2,-3,0],[-8,NS_ARENA_H/2,3,0],[NS_ARENA_W/2,NS_ARENA_H+8,0,-3]];
+        sides.forEach(function(s){
+            spawnProj({x:s[0],y:s[1],vx:s[2]*getDiffMult(),vy:s[3]*getDiffMult(),r:8,color:'#fff'});
+        });
+    })();
+
     chosen();
 
     // Segundo padrão: começa no turno 4 em HP cheio, mas no turno 2 quando HP < 33%

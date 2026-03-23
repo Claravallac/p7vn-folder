@@ -2595,7 +2595,7 @@
             <img id="ns-nero-sprite"
                  src="./assets/images/characters/nerobattle-store.gif"
                  onerror="this.src='./assets/images/characters/nero_pixel.png'"
-                 style="max-height:min(55vh,420px);width:auto;image-rendering:unset;opacity:0;transition:opacity 0.8s;position:relative;z-index:1;">
+                 style="max-height:min(48vh,380px);width:auto;image-rendering:pixelated;opacity:0;transition:opacity 0.8s;position:relative;z-index:1;">
             <!-- Balão de fala da Nero — estilo Undertale (branco/preto) -->
             <div id="ns-nero-bubble" style="
                 position:absolute; right:calc(50% + 100px); bottom:50px;
@@ -2613,7 +2613,7 @@
         </div>
 
         <!-- HUD da Nero -->
-        <div style="width:100%;max-width:560px;padding:4px 16px 2px;box-sizing:border-box;">
+        <div style="width:100%;max-width:900px;padding:4px 16px 2px;box-sizing:border-box;">
             <div style="display:flex;align-items:center;gap:10px;">
                 <span style="font-size:18px;min-width:50px;letter-spacing:1px;color:#cc88ff;">NERO</span>
                 <div style="flex:1;height:16px;background:#1a001a;border:2px solid #aa00ff;border-radius:2px;overflow:hidden;">
@@ -2624,12 +2624,12 @@
         </div>
 
         <!-- Arena de dodge -->
-        <div id="ns-arena" style="display:none;width:340px;height:200px;border:3px solid #fff;position:relative;background:#000;box-sizing:border-box;overflow:hidden;">
-            <div id="ns-heart" style="position:absolute;width:16px;height:16px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;pointer-events:none;opacity:0;"></div>
+        <div id="ns-arena" style="display:none;width:min(900px,98vw);height:min(52vh,480px);border:3px solid #fff;position:relative;background:#000;box-sizing:border-box;overflow:hidden;">
+            <div id="ns-heart" style="position:absolute;width:22px;height:22px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;pointer-events:none;opacity:0;"></div>
         </div>
 
         <!-- Barra de timing -->
-        <div id="ns-timing-wrap" style="display:none;width:340px;margin:2px 0;">
+        <div id="ns-timing-wrap" style="display:none;width:min(900px,98vw);margin:2px 0;">
             <div style="font-size:13px;text-align:center;color:#aaa;margin-bottom:3px;letter-spacing:1px;">TIMING — acerte na zona amarela!</div>
             <div style="width:100%;height:22px;background:#111;border:2px solid #fff;position:relative;overflow:hidden;border-radius:2px;">
                 <div id="ns-timing-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#550099,#aa00ff,#ff44ff);transition:none;"></div>
@@ -2639,31 +2639,31 @@
         </div>
 
         <!-- Mensagem -->
-        <div id="ns-message" style="width:100%;max-width:560px;min-height:34px;font-size:21px;padding:2px 16px;box-sizing:border-box;color:#eee;"></div>
+        <div id="ns-message" style="width:100%;max-width:900px;min-height:40px;font-size:26px;padding:2px 16px;box-sizing:border-box;color:#eee;"></div>
 
         <!-- HUD do jogador -->
-        <div style="width:100%;max-width:560px;padding:2px 16px 4px;box-sizing:border-box;">
+        <div style="width:100%;max-width:900px;padding:2px 16px 4px;box-sizing:border-box;">
             <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:16px;white-space:nowrap;">ABBYL &nbsp;LV 19 &nbsp;HP</span>
-                <div style="flex:1;height:13px;background:#1a0000;border:1px solid #555;overflow:hidden;">
-                    <div id="ns-player-hp-fill" style="height:100%;width:100%;background:#ff6060;transition:width 0.2s,background 0.3s;"></div>
+                <span style="font-size:22px;white-space:nowrap;color:#ff8c00;">ABBYL &nbsp;LV 19 &nbsp;HP</span>
+                <div style="flex:1;height:16px;background:#1a0000;border:2px solid #ff8c00;overflow:hidden;">
+                    <div id="ns-player-hp-fill" style="height:100%;width:100%;background:#ffdd00;transition:width 0.2s,background 0.3s;"></div>
                 </div>
-                <span id="ns-player-hp-num" style="font-size:16px;min-width:72px;text-align:right;">92 / 92</span>
+                <span id="ns-player-hp-num" style="font-size:22px;min-width:72px;text-align:right;color:#ff8c00;">92 / 92</span>
             </div>
         </div>
 
         <!-- Botões de ação -->
         <div id="ns-action-panel" style="display:none;gap:12px;flex-wrap:wrap;justify-content:center;padding:0 8px;">
-            <div id="ns-btn-fight" style="cursor:pointer;border:2px solid #fff;padding:8px 20px;font-size:26px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s,border-color 0.12s;opacity:0;transform:translateY(20px);">
+            <div id="ns-btn-fight" style="cursor:pointer;border:3px solid #ff8c00;padding:8px 22px;font-size:28px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s,border-color 0.12s;opacity:0;transform:translateY(20px);color:#ff8c00;">
                 <span class="ns-btn-heart" style="width:18px;height:18px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;display:inline-block;opacity:0;"></span>⚔ FIGHT
             </div>
-            <div id="ns-btn-act" style="cursor:pointer;border:2px solid #fff;padding:8px 20px;font-size:26px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);">
+            <div id="ns-btn-act" style="cursor:pointer;border:3px solid #ff8c00;padding:8px 22px;font-size:28px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);color:#ff8c00;">
                 <span class="ns-btn-heart" style="width:18px;height:18px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;display:inline-block;opacity:0;"></span>ACT
             </div>
-            <div id="ns-btn-item" style="cursor:pointer;border:2px solid #fff;padding:8px 20px;font-size:26px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);">
+            <div id="ns-btn-item" style="cursor:pointer;border:3px solid #ff8c00;padding:8px 22px;font-size:28px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);color:#ff8c00;">
                 <span class="ns-btn-heart" style="width:18px;height:18px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;display:inline-block;opacity:0;"></span>ITEM
             </div>
-            <div id="ns-btn-mercy" style="cursor:pointer;border:2px solid #fff;padding:8px 20px;font-size:26px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);">
+            <div id="ns-btn-mercy" style="cursor:pointer;border:3px solid #ff8c00;padding:8px 22px;font-size:28px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);color:#ff8c00;">
                 <span class="ns-btn-heart" style="width:18px;height:18px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;display:inline-block;opacity:0;"></span>MERCY
             </div>
         </div>
@@ -15826,52 +15826,6 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 </div>
 
 <script>
-// ── Sons do sistema de update ─────────────────────────────────
-(function(){
-  var _actx = null;
-  function getCtx() {
-    if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
-    return _actx;
-  }
-  function tone(freq, type, dur, vol) {
-    try {
-      var ctx = getCtx();
-      var osc = ctx.createOscillator();
-      var gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = type || 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(vol || 0.07, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
-    } catch(e) {}
-  }
-  window._updSoundPopup = function() {
-    tone(440, 'sine', 0.09, 0.14);
-    setTimeout(function(){ tone(660, 'sine', 0.13, 0.12); }, 80);
-  };
-  window._updSoundClick = function() {
-    tone(520, 'sine', 0.07, 0.15);
-    setTimeout(function(){ tone(780, 'sine', 0.1, 0.12); }, 50);
-  };
-  window._updSoundDismiss = function() {
-    tone(300, 'sine', 0.12, 0.13);
-  };
-  window._updSoundRepair = function() {
-    tone(380, 'triangle', 0.1, 0.14);
-    setTimeout(function(){ tone(340, 'triangle', 0.1, 0.12); }, 90);
-    setTimeout(function(){ tone(300, 'triangle', 0.14, 0.1); }, 180);
-  };
-  window._updSoundTick = function() {
-    tone(260, 'sine', 0.04, 0.04);
-  };
-  window._updSoundDone = function() {
-    tone(523, 'sine', 0.15, 0.14);
-    setTimeout(function(){ tone(659, 'sine', 0.15, 0.12); }, 60);
-    setTimeout(function(){ tone(784, 'sine', 0.2,  0.12); }, 120);
-  };
-})();
-
 // ── Versão no menu e painel de update ────────────────────────
 (function(){
   function setMenuVersion(v){
@@ -16155,7 +16109,6 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 
   // Entra no modo de reparo
   if(sRepair) sRepair.addEventListener('click', function(){
-    if(window._updSoundRepair) window._updSoundRepair();
     sRepair.disabled = true;
     if(sRepairStatus){ sRepairStatus.textContent = 'Buscando versão...'; }
     fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/version.json')
@@ -16176,28 +16129,13 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 
   // Cancela modo de reparo — volta ao normal
   if(sRepairCancel) sRepairCancel.addEventListener('click', function(){
-    if(window._updSoundDismiss) window._updSoundDismiss();
     _repairUrl = null;
-    if(sRepairActive){
-      sRepairActive.style.transition = 'opacity 0.25s';
-      sRepairActive.style.opacity = '0';
-      setTimeout(function(){
-        sRepairActive.style.display = 'none';
-        sRepairActive.classList.remove('visible');
-        sRepairActive.style.opacity = '1';
-        if(sRepairIdle){
-          sRepairIdle.style.opacity = '0';
-          sRepairIdle.style.display = '';
-          sRepairIdle.style.transition = 'opacity 0.25s';
-          setTimeout(function(){ sRepairIdle.style.opacity = '1'; }, 10);
-        }
-      }, 250);
-    }
+    if(sRepairActive) sRepairActive.style.display = 'none';
+    if(sRepairIdle)   sRepairIdle.style.display   = '';
   });
 
   // Confirma reparo — inicia download da versão atual
   if(sRepairConfirm) sRepairConfirm.addEventListener('click', function(){
-    if(window._updSoundClick) window._updSoundClick();
     if(!_repairUrl) return;
     _downloadUrl = _repairUrl;
     window._updDownloadUrl = _repairUrl;
@@ -16235,47 +16173,15 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   });
 
   if(sCheck) sCheck.addEventListener('click', function(){
-    if(window._updSoundClick) window._updSoundClick();
-    sCheck.disabled=true;
-    // Barra de loading animada
-    sCheckStatus.style.color='rgba(255,255,255,0.3)';
-    sCheckStatus.textContent='';
-    var _loadBar = document.getElementById('upd-check-loadbar');
-    if(!_loadBar){
-      _loadBar = document.createElement('div');
-      _loadBar.id = 'upd-check-loadbar';
-      _loadBar.style.cssText = 'height:1px;background:rgba(255,255,255,0.06);border-radius:1px;overflow:hidden;margin-top:10px;margin-bottom:4px;';
-      var _loadFill = document.createElement('div');
-      _loadFill.id = 'upd-check-loadbar-fill';
-      _loadFill.style.cssText = 'height:100%;width:0%;background:rgba(var(--menu-accent-rgb),0.7);border-radius:1px;transition:width 0.15s ease;';
-      _loadBar.appendChild(_loadFill);
-      sCheckStatus.parentNode.insertBefore(_loadBar, sCheckStatus);
-    }
-    _loadBar.style.display = '';
-    var _fill = document.getElementById('upd-check-loadbar-fill');
-    if(_fill) _fill.style.width = '0%';
-    var _pct = 0;
-    var _loadInterval = setInterval(function(){
-      _pct = Math.min(_pct + Math.random() * 12, 88);
-      if(_fill) _fill.style.width = _pct + '%';
-      if(window._updSoundTick) window._updSoundTick();
-    }, 300);
-    function _finishLoad(ok){
-      clearInterval(_loadInterval);
-      if(_fill){ _fill.style.width='100%'; setTimeout(function(){ if(_loadBar){ _loadBar.style.transition='opacity 0.3s'; _loadBar.style.opacity='0'; setTimeout(function(){ _loadBar.style.display='none'; _loadBar.style.opacity='1'; if(_fill) _fill.style.width='0%'; },300); } },400); }
-    }
+    sCheck.disabled=true; sCheckStatus.textContent='Verificando...';
     fetch('https://raw.githubusercontent.com/Claravallac/p7vn-folder/main/version.json')
       .then(function(r){ return r.json(); })
       .then(function(remote){
         electronAPI.getVersion().then(function(local){
           var rv=remote.version.split('.').map(Number), lv=local.split('.').map(Number), newer=false;
           for(var i=0;i<3;i++){ if((rv[i]||0)>(lv[i]||0)){newer=true;break;} if((rv[i]||0)<(lv[i]||0)) break; }
-          _finishLoad(true);
-          if(newer){
-            if(window._updSoundPopup) window._updSoundPopup();
-            fillUpdate(remote); sCheckStatus.textContent=''; sCheck.disabled=false;
-          } else {
-            if(window._updSoundDone) window._updSoundDone();
+          if(newer){ fillUpdate(remote); sCheckStatus.textContent=''; sCheck.disabled=false; }
+          else {
             sCheck.disabled=false;
             electronAPI.getVersion().then(function(v){ _showOkState(v); });
             sCheckStatus.style.color='#4ade80'; sCheckStatus.textContent='Você já tem a versão mais recente!';
@@ -16283,7 +16189,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
           }
         });
       })
-      .catch(function(){ _finishLoad(false); sCheck.disabled=false; sCheckStatus.style.color='#f87171'; sCheckStatus.textContent='Sem conexão.'; setTimeout(function(){ sCheckStatus.textContent=''; },3000); });
+      .catch(function(){ sCheck.disabled=false; sCheckStatus.style.color='#f87171'; sCheckStatus.textContent='Sem conexão.'; setTimeout(function(){ sCheckStatus.textContent=''; },3000); });
   });
 
   // ── Banner especial Aldrich — v1.0.40 ─────────────────────────────────────
