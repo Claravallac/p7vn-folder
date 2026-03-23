@@ -2387,7 +2387,7 @@
                     <button class="menu-btn" id="boss-nero-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num">07</span><span class="mb-label">Boss Nero</span></button>
                     <button class="menu-btn" id="battle-test-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num">⚔</span><span class="mb-label">Modo de Batalha</span></button>
                     <button class="menu-btn" id="nero-legendary-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num">NL</span><span class="mb-label">Nero Legendary Stuff</span></button>
-                    <button class="menu-btn" id="debug-menu-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num">🔧</span><span class="mb-label">Debug Menu</span></button>
+                    <button class="menu-btn" id="debug-menu-btn"><span class="mb-bar"></span><span class="mb-num">🔧</span><span class="mb-label">Debug Menu</span></button>
                     <button class="menu-btn sair" id="sair-btn"><span class="mb-bar"></span><span class="mb-num">—</span><span class="mb-label">Sair</span></button>
                 </div>
                 <!-- Submenu: Capítulos -->
@@ -5791,7 +5791,7 @@
         function refreshDebugMenuAccess() {
             const btn = document.getElementById('debug-menu-btn');
             if (!btn) return;
-            btn.style.display = hasShopItem(SHOP_ITEM_IDS.DEBUG_MENU) ? 'flex' : 'none';
+            btn.style.display = 'flex';
         }
 
         function applyPurchasedFeaturesState() {
@@ -10679,14 +10679,6 @@
                     // End card
                     '.end-main',
                     '.end-sub',
-                    // Final da praia
-                    '#praia-video',
-                    '.praia-char img',
-                    '#praia-dialogue-box',
-                    '#praia-speaker',
-                    '#praia-text',
-                    '#praia-narrator',
-                    '#praia-credits',
                 ];
 
                 // Retorna todos os elementos visíveis que podem girar agora
@@ -11583,7 +11575,6 @@
             }
 
             document.getElementById('debug-menu-btn').addEventListener('click', () => {
-                if (!hasShopItem(SHOP_ITEM_IDS.DEBUG_MENU)) return;
                 menuScreen.style.display = 'none';
                 document.getElementById('debug-screen').style.display = 'flex';
             });
@@ -11595,9 +11586,7 @@
                 var dbg = document.getElementById('debug-screen');
                 if (dbg.style.display === 'flex') {
                     dbg.style.display = 'none';
-                    var praiaScreen = document.getElementById('ending-praia');
-                    var praiaActive = praiaScreen && praiaScreen.classList.contains('active');
-                    if (!praiaActive && menuScreen.style.display !== 'flex' && gameScreen.style.display !== 'block' && prologueScreen.style.display !== 'flex') {
+                    if (menuScreen.style.display !== 'flex' && gameScreen.style.display !== 'block' && prologueScreen.style.display !== 'flex') {
                         menuScreen.style.display = 'flex';
                     }
                 } else {
@@ -15542,6 +15531,18 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
         var _errActive = false;
 
         window.showDevErrorScreen = function(msg, src, line) {
+            // Se já está ativa e foi chamada via F10 (msg='f10'), fecha e volta ao menu
+            if (_errActive && msg === 'f10') {
+                var existing = document.getElementById('_dev-err-scr');
+                if (existing) {
+                    existing.style.opacity = '0';
+                    setTimeout(function(){ if(existing.parentNode) existing.parentNode.removeChild(existing); }, 600);
+                }
+                _errActive = false;
+                var menu = document.getElementById('menu-screen');
+                if (menu) menu.style.display = 'flex';
+                return;
+            }
             if (_errActive) return;
             _errActive = true;
 
@@ -15553,6 +15554,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
             });
 
             var scr = document.createElement('div');
+            scr.id = '_dev-err-scr';
             scr.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 1s ease;font-family:inherit;overflow:hidden';
 
             // Bloqueia cliques/teclas para não vazar para o jogo
@@ -15649,9 +15651,27 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
             btn.addEventListener('click', function(e){ e.stopPropagation(); location.reload(); });
             scr.appendChild(btn);
 
+            // Botão voltar ao menu
+            var backBtn = document.createElement('button');
+            backBtn.textContent = 'Voltar ao menu';
+            backBtn.style.cssText = 'margin-top:8px;padding:10px 28px;background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:rgba(255,255,255,0.45);font-size:12px;letter-spacing:2px;cursor:pointer;font-family:inherit;text-transform:uppercase;transition:all 0.2s';
+            backBtn.onmouseenter = function(){ backBtn.style.borderColor='rgba(255,255,255,0.5)'; backBtn.style.color='#fff'; };
+            backBtn.onmouseleave = function(){ backBtn.style.borderColor='rgba(255,255,255,0.2)'; backBtn.style.color='rgba(255,255,255,0.45)'; };
+            backBtn.addEventListener('click', function(e){
+                e.stopPropagation();
+                scr.style.opacity = '0';
+                setTimeout(function(){ if(scr.parentNode) scr.parentNode.removeChild(scr); }, 600);
+                _errActive = false;
+                var menu = document.getElementById('menu-screen');
+                if (menu) menu.style.display = 'flex';
+                var menuMus = document.getElementById('menu-music');
+                if (menuMus) { try { menuMus.volume=0.7; menuMus.play().catch(function(){}); } catch(e2){} }
+            });
+            scr.appendChild(backBtn);
+
             // Botão reportar bug (só se electronAPI disponível)
-            if (msg && msg !== 'test' && window.electronAPI && window.electronAPI.submitBugReport) {
-                var errContent = msg + (src ? '\n' + src + (line ? ':' + line : '') : '');
+            if ((msg === 'f10' || (msg && msg !== 'test')) && window.electronAPI && window.electronAPI.submitBugReport) {
+                var errContent = msg === 'f10' ? 'Report manual via F10' : (msg + (src ? '\n' + src + (line ? ':' + line : '') : ''));
 
                 var reportWrap = document.createElement('div');
                 reportWrap.style.cssText = 'margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:10px;max-width:580px;width:90%';
@@ -15756,6 +15776,17 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
                 }
             } catch(e){}
         };
+
+        // F10 — abre a tela de erro/report de qualquer lugar
+        document.addEventListener('keydown', function(e) {
+            if (e.key !== 'F10') return;
+            e.preventDefault();
+            if (_errActive) {
+                window.showDevErrorScreen('f10');
+            } else {
+                window.showDevErrorScreen('f10', null, null);
+            }
+        });
 
         // Captura erros globais
         window.onerror = function(message, source, lineno, colno, error) {

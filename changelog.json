@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.23",
+    "date": "22/03/2026",
+    "notes": "Agora você pode reportar a qualquer momento, só apertar F10!"
+  },
+  {
     "version": "1.0.22",
     "date": "22/03/2026",
     "notes": "Arrumei o codigo maroto do aug e as batalhas e bla bla bla"
