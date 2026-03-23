@@ -240,7 +240,143 @@ function patChaos() {
     })(w);
 }
 
-var PATTERNS=[patBoneRain,patBoneWall,patCorridor,patSniper,patChaos];
+// ── Padrões novos ─────────────────────────────────────────────
+
+// Chuva de projéteis em diagonal cruzada
+function patCross() {
+    for(var w=0;w<4;w++)(function(ww){
+        setTimeout(function(){
+            if(!ns.active||ns.phase!=='dodge') return;
+            var cx=NS_ARENA_W/2, cy=NS_ARENA_H/2;
+            // Cruz diagonal: 4 diagonais + 4 retas
+            [{vx:3.5,vy:0},{vx:-3.5,vy:0},{vx:0,vy:3.5},{vx:0,vy:-3.5},
+             {vx:2.5,vy:2.5},{vx:-2.5,vy:2.5},{vx:2.5,vy:-2.5},{vx:-2.5,vy:-2.5}
+            ].forEach(function(d){
+                // Spawn das bordas, não do centro
+                var sx = d.vx>0?-8:d.vx<0?NS_ARENA_W+8:cx;
+                var sy = d.vy>0?-8:d.vy<0?NS_ARENA_H+8:cy;
+                if(d.vx===0) sx = cx + (Math.random()-0.5)*NS_ARENA_W*0.6;
+                if(d.vy===0) sy = cy + (Math.random()-0.5)*NS_ARENA_H*0.6;
+                spawnProj({x:sx,y:sy,vx:d.vx,vy:d.vy,r:8,color:'#fff'});
+            });
+            SFX.dust();
+        }, ww*900);
+    })(w);
+}
+
+// Rajada da borda — vários projéteis saindo de uma lateral aleatória
+function patBurst() {
+    for(var w=0;w<5;w++)(function(ww){
+        setTimeout(function(){
+            if(!ns.active||ns.phase!=='dodge') return;
+            var side=Math.floor(Math.random()*4); // 0=top 1=bot 2=left 3=right
+            for(var i=0;i<6;i++){
+                var sx,sy,vx,vy;
+                var spread=(Math.random()-0.5)*1.5;
+                if(side===0){sx=(i/5)*NS_ARENA_W;sy=-8;vx=spread;vy=3.0+Math.random();}
+                else if(side===1){sx=(i/5)*NS_ARENA_W;sy=NS_ARENA_H+8;vx=spread;vy=-3.0-Math.random();}
+                else if(side===2){sx=-8;sy=(i/5)*NS_ARENA_H;vx=3.0+Math.random();vy=spread;}
+                else{sx=NS_ARENA_W+8;sy=(i/5)*NS_ARENA_H;vx=-3.0-Math.random();vy=spread;}
+                spawnProj({x:sx,y:sy,vx:vx,vy:vy,r:7,color:'#fff'});
+            }
+            SFX.dust();
+        }, ww*700);
+    })(w);
+}
+
+// Perseguidor — projétil que mira onde o coração está no momento do spawn
+function patHoming() {
+    for(var s=0;s<8;s++)(function(ss){
+        setTimeout(function(){
+            if(!ns.active||ns.phase!=='dodge') return;
+            var tx=ns.hx+NS_HEART_R, ty=ns.hy+NS_HEART_R;
+            // Spawn de lado aleatório
+            var sx,sy;
+            var side=ss%4;
+            if(side===0){sx=Math.random()*NS_ARENA_W;sy=-8;}
+            else if(side===1){sx=Math.random()*NS_ARENA_W;sy=NS_ARENA_H+8;}
+            else if(side===2){sx=-8;sy=Math.random()*NS_ARENA_H;}
+            else{sx=NS_ARENA_W+8;sy=Math.random()*NS_ARENA_H;}
+            var dx=tx-sx,dy=ty-sy,len=Math.sqrt(dx*dx+dy*dy)||1;
+            spawnProj({x:sx,y:sy,vx:dx/len*3.8,vy:dy/len*3.8,r:9,color:'#f8f'});
+            SFX.dust();
+        }, 200+ss*600);
+    })(s);
+}
+
+// Chuva densa — muitos ossos caindo rápido com gap menor
+function patHeavyRain() {
+    for(var w=0;w<5;w++)(function(ww){
+        setTimeout(function(){
+            if(!ns.active||ns.phase!=='dodge') return;
+            var gap=20+Math.floor(Math.random()*5)*26;
+            [0,30,60,90,120,150,180,210,240,270,300].forEach(function(x){
+                if(Math.abs(x+22-gap)<30) return;
+                setTimeout(function(){ if(!ns.active) return; spawnBone({x:x,y:-14,w:36,h:10,vx:0,vy:3.4}); }, Math.random()*40);
+            });
+            SFX.dust();
+        }, ww*1000);
+    })(w);
+}
+
+// Pincer — ossos dos dois lados ao mesmo tempo, gap no centro
+function patPincer() {
+    for(var w=0;w<4;w++)(function(ww){
+        setTimeout(function(){
+            if(!ns.active||ns.phase!=='dodge') return;
+            var gapY=NS_ARENA_H*(0.25+Math.random()*0.5);
+            [0,40,80,120,160].forEach(function(y){
+                if(Math.abs(y+20-gapY)<40) return;
+                spawnBone({x:-50,y:y,w:44,h:18,vx:3.6,vy:0});
+                spawnBone({x:NS_ARENA_W+6,y:y,w:44,h:18,vx:-3.6,vy:0});
+            });
+            SFX.dust();
+        }, ww*1400);
+    })(w);
+}
+
+// Sniper duplo — dois projéteis mirando de cantos opostos ao mesmo tempo
+function patDoubleSniper() {
+    for(var s=0;s<6;s++)(function(ss){
+        setTimeout(function(){
+            if(!ns.active||ns.phase!=='dodge') return;
+            var tx=ns.hx+NS_HEART_R, ty=ns.hy+NS_HEART_R;
+            var pairs=[
+                [{x:-5,y:-5},{x:NS_ARENA_W+5,y:NS_ARENA_H+5}],
+                [{x:NS_ARENA_W+5,y:-5},{x:-5,y:NS_ARENA_H+5}],
+                [{x:-5,y:NS_ARENA_H/2},{x:NS_ARENA_W+5,y:NS_ARENA_H/2}]
+            ];
+            var pair=pairs[ss%pairs.length];
+            pair.forEach(function(c){
+                var dx=tx-c.x,dy=ty-c.y,len=Math.sqrt(dx*dx+dy*dy)||1;
+                spawnProj({x:c.x,y:c.y,vx:dx/len*4.5,vy:dy/len*4.5,r:9,color:'#fff'});
+            });
+            SFX.dust();
+        }, 200+ss*800);
+    })(s);
+}
+
+// Espiral acelerada — mais ondas e mais rápida que patSpiral original
+function patFastSpiral() {
+    for(var w=0;w<5;w++)(function(ww){
+        setTimeout(function(){
+            if(!ns.active||ns.phase!=='dodge') return;
+            // Spawn das bordas em padrão espiral, não do centro
+            var total=10, offset=ww*(Math.PI/5);
+            for(var i=0;i<total;i++){
+                var a=(i/total)*Math.PI*2+offset;
+                var sx=NS_ARENA_W/2+Math.cos(a)*(NS_ARENA_W/2+8);
+                var sy=NS_ARENA_H/2+Math.sin(a)*(NS_ARENA_H/2+8);
+                var vx=-Math.cos(a)*3.2, vy=-Math.sin(a)*3.2;
+                spawnProj({x:sx,y:sy,vx:vx,vy:vy,r:7,color:'#adf'});
+            }
+            SFX.dust();
+        }, ww*1000);
+    })(w);
+}
+
+var PATTERNS=[patBoneRain,patBoneWall,patCorridor,patSniper,patChaos,
+              patCross,patBurst,patHoming,patHeavyRain,patPincer,patDoubleSniper,patFastSpiral];
 // ── Dodge loop ────────────────────────────────────────────────
 function dodgeLoop() {
     if(!ns.active||ns.phase!=='dodge') return;
@@ -480,18 +616,31 @@ function startDodgePhase() {
     ns.hx=NS_ARENA_W/2-NS_HEART_R; ns.hy=NS_ARENA_H/2-NS_HEART_R;
     if(els.heart){els.heart.style.left=ns.hx+'px';els.heart.style.top=ns.hy+'px';els.heart.style.opacity='1';}
     if(els.arena) els.arena.style.display='block';
-    var falas=['Consegue desviar?','Tô aquecendo.','Você vai se cansar.','Continue tentando.','Isso é só o começo.','Não vai adiantar.'];
+    var falas=['Consegue desviar?','Tô aquecendo.','Você vai se cansar.','Continue tentando.','Isso é só o começo.','Não vai adiantar.','Ficou lento.','Foca.','Decepcionante.','Nem começou.'];
     showNeroBubble(falas[(ns.turnNum-1)%falas.length],3000);
-    var dur=6000;
+
+    // Duração aumenta com os turnos, mínimo 7s
+    var dur = Math.min(7000 + ns.turnNum * 300, 12000);
     if(ns.dodgeTimer) clearTimeout(ns.dodgeTimer);
     ns.dodgeTimer=setTimeout(function(){if(ns.phase==='dodge'&&ns.active)endDodgePhase();},dur);
 
-    // todos os padrões disponíveis desde o início, sem repetir o último
+    // Garante que sempre haja pelo menos um padrão ativo
     var pool = PATTERNS.filter(function(p){ return p !== ns._lastPattern; });
     if(pool.length===0) pool = PATTERNS.slice();
     var chosen = pool[Math.floor(Math.random()*pool.length)];
     ns._lastPattern = chosen;
     chosen();
+
+    // Em turnos avançados, dispara um segundo padrão diferente no meio da fase
+    if(ns.turnNum >= 4) {
+        var pool2 = PATTERNS.filter(function(p){ return p !== chosen && p !== ns._lastPattern; });
+        if(pool2.length > 0) {
+            var chosen2 = pool2[Math.floor(Math.random()*pool2.length)];
+            setTimeout(function(){
+                if(ns.phase==='dodge'&&ns.active) chosen2();
+            }, dur/2);
+        }
+    }
 }
 function endDodgePhase() {
     ns.phase='transitioning'; clearProjs();
