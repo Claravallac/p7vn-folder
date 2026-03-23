@@ -2595,7 +2595,7 @@
             <img id="ns-nero-sprite"
                  src="./assets/images/characters/nerobattle-store.gif"
                  onerror="this.src='./assets/images/characters/nero_pixel.png'"
-                 style="max-height:min(48vh,380px);width:auto;image-rendering:pixelated;opacity:0;transition:opacity 0.8s;position:relative;z-index:1;">
+                 style="max-height:min(55vh,420px);width:auto;image-rendering:unset;opacity:0;transition:opacity 0.8s;position:relative;z-index:1;">
             <!-- Balão de fala da Nero — estilo Undertale (branco/preto) -->
             <div id="ns-nero-bubble" style="
                 position:absolute; right:calc(50% + 100px); bottom:50px;
@@ -2613,7 +2613,7 @@
         </div>
 
         <!-- HUD da Nero -->
-        <div style="width:100%;max-width:900px;padding:4px 16px 2px;box-sizing:border-box;">
+        <div style="width:100%;max-width:560px;padding:4px 16px 2px;box-sizing:border-box;">
             <div style="display:flex;align-items:center;gap:10px;">
                 <span style="font-size:18px;min-width:50px;letter-spacing:1px;color:#cc88ff;">NERO</span>
                 <div style="flex:1;height:16px;background:#1a001a;border:2px solid #aa00ff;border-radius:2px;overflow:hidden;">
@@ -2624,12 +2624,12 @@
         </div>
 
         <!-- Arena de dodge -->
-        <div id="ns-arena" style="display:none;width:min(900px,98vw);height:min(52vh,480px);border:3px solid #fff;position:relative;background:#000;box-sizing:border-box;overflow:hidden;">
-            <div id="ns-heart" style="position:absolute;width:22px;height:22px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;pointer-events:none;opacity:0;"></div>
+        <div id="ns-arena" style="display:none;width:340px;height:200px;border:3px solid #fff;position:relative;background:#000;box-sizing:border-box;overflow:hidden;">
+            <div id="ns-heart" style="position:absolute;width:16px;height:16px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;pointer-events:none;opacity:0;"></div>
         </div>
 
         <!-- Barra de timing -->
-        <div id="ns-timing-wrap" style="display:none;width:min(900px,98vw);margin:2px 0;">
+        <div id="ns-timing-wrap" style="display:none;width:340px;margin:2px 0;">
             <div style="font-size:13px;text-align:center;color:#aaa;margin-bottom:3px;letter-spacing:1px;">TIMING — acerte na zona amarela!</div>
             <div style="width:100%;height:22px;background:#111;border:2px solid #fff;position:relative;overflow:hidden;border-radius:2px;">
                 <div id="ns-timing-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#550099,#aa00ff,#ff44ff);transition:none;"></div>
@@ -2639,31 +2639,31 @@
         </div>
 
         <!-- Mensagem -->
-        <div id="ns-message" style="width:100%;max-width:900px;min-height:40px;font-size:26px;padding:2px 16px;box-sizing:border-box;color:#eee;"></div>
+        <div id="ns-message" style="width:100%;max-width:560px;min-height:34px;font-size:21px;padding:2px 16px;box-sizing:border-box;color:#eee;"></div>
 
         <!-- HUD do jogador -->
-        <div style="width:100%;max-width:900px;padding:2px 16px 4px;box-sizing:border-box;">
+        <div style="width:100%;max-width:560px;padding:2px 16px 4px;box-sizing:border-box;">
             <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:22px;white-space:nowrap;color:#ff8c00;">ABBYL &nbsp;LV 19 &nbsp;HP</span>
-                <div style="flex:1;height:16px;background:#1a0000;border:2px solid #ff8c00;overflow:hidden;">
-                    <div id="ns-player-hp-fill" style="height:100%;width:100%;background:#ffdd00;transition:width 0.2s,background 0.3s;"></div>
+                <span style="font-size:16px;white-space:nowrap;">ABBYL &nbsp;LV 19 &nbsp;HP</span>
+                <div style="flex:1;height:13px;background:#1a0000;border:1px solid #555;overflow:hidden;">
+                    <div id="ns-player-hp-fill" style="height:100%;width:100%;background:#ff6060;transition:width 0.2s,background 0.3s;"></div>
                 </div>
-                <span id="ns-player-hp-num" style="font-size:22px;min-width:72px;text-align:right;color:#ff8c00;">92 / 92</span>
+                <span id="ns-player-hp-num" style="font-size:16px;min-width:72px;text-align:right;">92 / 92</span>
             </div>
         </div>
 
         <!-- Botões de ação -->
         <div id="ns-action-panel" style="display:none;gap:12px;flex-wrap:wrap;justify-content:center;padding:0 8px;">
-            <div id="ns-btn-fight" style="cursor:pointer;border:3px solid #ff8c00;padding:8px 22px;font-size:28px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s,border-color 0.12s;opacity:0;transform:translateY(20px);color:#ff8c00;">
+            <div id="ns-btn-fight" style="cursor:pointer;border:2px solid #fff;padding:8px 20px;font-size:26px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s,border-color 0.12s;opacity:0;transform:translateY(20px);">
                 <span class="ns-btn-heart" style="width:18px;height:18px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;display:inline-block;opacity:0;"></span>⚔ FIGHT
             </div>
-            <div id="ns-btn-act" style="cursor:pointer;border:3px solid #ff8c00;padding:8px 22px;font-size:28px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);color:#ff8c00;">
+            <div id="ns-btn-act" style="cursor:pointer;border:2px solid #fff;padding:8px 20px;font-size:26px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);">
                 <span class="ns-btn-heart" style="width:18px;height:18px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;display:inline-block;opacity:0;"></span>ACT
             </div>
-            <div id="ns-btn-item" style="cursor:pointer;border:3px solid #ff8c00;padding:8px 22px;font-size:28px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);color:#ff8c00;">
+            <div id="ns-btn-item" style="cursor:pointer;border:2px solid #fff;padding:8px 20px;font-size:26px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);">
                 <span class="ns-btn-heart" style="width:18px;height:18px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;display:inline-block;opacity:0;"></span>ITEM
             </div>
-            <div id="ns-btn-mercy" style="cursor:pointer;border:3px solid #ff8c00;padding:8px 22px;font-size:28px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);color:#ff8c00;">
+            <div id="ns-btn-mercy" style="cursor:pointer;border:2px solid #fff;padding:8px 20px;font-size:26px;font-family:'VT323',monospace;display:flex;align-items:center;gap:8px;user-select:none;transition:background 0.12s;opacity:0;transform:translateY(20px);">
                 <span class="ns-btn-heart" style="width:18px;height:18px;background:url('./assets/images/ui/cursor.png') no-repeat center/contain;display:inline-block;opacity:0;"></span>MERCY
             </div>
         </div>
@@ -10679,6 +10679,14 @@
                     // End card
                     '.end-main',
                     '.end-sub',
+                    // Final da praia
+                    '#praia-video',
+                    '.praia-char img',
+                    '#praia-dialogue-box',
+                    '#praia-speaker',
+                    '#praia-text',
+                    '#praia-narrator',
+                    '#praia-credits',
                 ];
 
                 // Retorna todos os elementos visíveis que podem girar agora
@@ -11587,7 +11595,9 @@
                 var dbg = document.getElementById('debug-screen');
                 if (dbg.style.display === 'flex') {
                     dbg.style.display = 'none';
-                    if (menuScreen.style.display !== 'flex' && gameScreen.style.display !== 'block' && prologueScreen.style.display !== 'flex') {
+                    var praiaScreen = document.getElementById('ending-praia');
+                    var praiaActive = praiaScreen && praiaScreen.classList.contains('active');
+                    if (!praiaActive && menuScreen.style.display !== 'flex' && gameScreen.style.display !== 'block' && prologueScreen.style.display !== 'flex') {
                         menuScreen.style.display = 'flex';
                     }
                 } else {

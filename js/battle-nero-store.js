@@ -10,6 +10,15 @@ var NS_ARENA_W       = 480;
 var NS_ARENA_H       = 200;
 var NS_HEART_R       = 9;
 var NS_INVINCIBLE_MS = 900;
+
+// Atualiza dimensões reais da arena antes de cada fase
+function refreshArenaDims() {
+    var a = document.getElementById('ns-arena');
+    if(a) {
+        NS_ARENA_W = a.clientWidth  || 480;
+        NS_ARENA_H = a.clientHeight || 200;
+    }
+}
 var NS_TICK          = 16;
 
 var ns = {
@@ -657,6 +666,7 @@ function neroDefeated() {
 function startDodgePhase() {
     if(!ns.active) return;
     ns.phase='dodge'; ns.turnNum++;
+    refreshArenaDims();
     clearProjs();
     ns.hx=NS_ARENA_W/2-NS_HEART_R; ns.hy=NS_ARENA_H/2-NS_HEART_R;
     if(els.heart){els.heart.style.left=ns.hx+'px';els.heart.style.top=ns.hy+'px';els.heart.style.opacity='1';}
