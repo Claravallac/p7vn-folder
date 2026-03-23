@@ -421,6 +421,98 @@
         .debug-btn:hover { background: #0f0; color: #000; transform: scale(1.05); }
         /* ── Settings Submenu ── */
         .menu-settings { width: min(480px, 90%); display: flex; flex-direction: column; max-height: 80vh; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; padding-right: 4px; }
+        /* ── SETTINGS FULLSCREEN ── */
+        #settings-submenu {
+            position: fixed !important; inset: 0 !important;
+            width: 100% !important; max-height: 100% !important;
+            background: #07000c;
+            display: none; flex-direction: column !important;
+            z-index: 910;
+        }
+        #settings-submenu::before {
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background: repeating-linear-gradient(-55deg, transparent 0, transparent 18px, rgba(204,0,255,0.018) 18px, rgba(204,0,255,0.018) 19px);
+        }
+        #settings-topbar {
+            display: flex; align-items: center; gap: 0;
+            height: 60px; flex-shrink: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            padding: 0 32px 0 0; position: relative; z-index: 2;
+        }
+        #settings-topbar #settings-back-btn {
+            flex-shrink: 0; height: 60px; margin-bottom: 0;
+        }
+        #settings-topbar-title {
+            flex: 1; font-size: clamp(10px,1vw,12px); letter-spacing: 8px;
+            color: rgba(255,255,255,0.25); text-transform: uppercase;
+            font-weight: 700; padding-left: 16px;
+        }
+        #settings-body {
+            display: flex; flex: 1; overflow: hidden; position: relative; z-index: 1;
+        }
+        #cfg-sidebar {
+            width: 200px; flex-shrink: 0;
+            border-right: 1px solid rgba(255,255,255,0.07);
+            display: flex; flex-direction: column;
+            padding: 24px 0;
+            gap: 2px;
+        }
+        #cfg-sidebar .cfg-tab {
+            display: flex; align-items: center; gap: 14px;
+            background: transparent; border: none; border-left: 3px solid transparent;
+            color: rgba(255,255,255,0.3); font-family: inherit;
+            font-size: clamp(9px,0.9vw,11px); font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase;
+            padding: 14px 24px; cursor: pointer;
+            transition: all .15s; text-align: left; width: 100%;
+        }
+        #cfg-sidebar .cfg-tab:hover { color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.03); }
+        #cfg-sidebar .cfg-tab.active {
+            color: #fff; border-left-color: var(--menu-accent);
+            background: rgba(var(--menu-accent-rgb),0.07);
+        }
+        #cfg-sidebar .cfg-tab-icon { font-size: 15px; flex-shrink: 0; }
+        #cfg-content {
+            flex: 1; overflow-y: auto; padding: 40px 64px 40px 52px;
+            scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.12) transparent;
+        }
+        #cfg-content::-webkit-scrollbar { width: 4px; }
+        #cfg-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius:2px; }
+        #cfg-content .cfg-panel { display: none; max-width: 700px; }
+        #cfg-content .cfg-panel.active { display: block; }
+        #cfg-content .settings-section-title {
+            font-size: clamp(9px,.9vw,10px); letter-spacing: 6px;
+            color: rgba(var(--menu-accent-rgb),.45); text-transform: uppercase;
+            margin: 36px 0 4px; font-weight: 700;
+        }
+        #cfg-content .settings-section-title:first-child { margin-top: 0; }
+        #cfg-content .settings-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        #cfg-content .settings-row:last-of-type { border-bottom: none; }
+        #cfg-content .settings-label {
+            font-size: clamp(11px,1.1vw,13px); font-weight: 800;
+            letter-spacing: 3px; color: rgba(255,255,255,.7); text-transform: uppercase;
+        }
+        #cfg-content .settings-volume-wrap { display: flex; align-items: center; gap: 14px; min-width: 280px; justify-content: flex-end; }
+        #cfg-content input[type=range].volume-slider { width: 220px; }
+        #cfg-content .settings-volume-val { min-width: 40px; text-align: right; }
+        #settings-footer {
+            flex-shrink: 0; border-top: 1px solid rgba(255,255,255,0.07);
+            padding: 0 32px; display: flex; align-items: center; gap: 16px;
+            min-height: 56px; position: relative; z-index: 2;
+        }
+        #settings-apply-wrap {
+            display: none; flex: 1;
+            padding: 0 !important; border-top: none !important; margin-top: 0 !important;
+        }
+        #settings-apply-wrap #settings-apply-btn { margin-bottom: 0; }
+        #settings-discard-confirm {
+            display: none; flex: 1; align-items: center; gap: 10px;
+            padding: 0 16px !important; background: rgba(180,20,20,0.12) !important;
+            clip-path: none !important; border-radius: 4px; min-height: 44px;
+        }
         /* Conquistas grid */
         .conquista-card { background:#07000f; border:1px solid rgba(255,255,255,0.07); border-radius:4px; display:flex; align-items:center; gap:0; overflow:hidden; transition:border-color .15s; }
         .conquista-card.locked { opacity:0.4; filter:grayscale(1); }
@@ -432,9 +524,7 @@
         .conquista-desc  { font-size:9px; color:rgba(255,255,255,0.3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .conquista-coins { font-size:9px; color:rgba(255,200,60,0.5); margin-top:3px; letter-spacing:1px; }
 
-        .cfg-tab { background:transparent;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,0.3);font-family:inherit;font-size:clamp(9px,0.9vw,11px);font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:8px 14px;cursor:pointer;transition:all .15s; }
-        .cfg-tab:hover { color:rgba(255,255,255,0.65); }
-        .cfg-tab.active { color:#fff;border-bottom-color:var(--menu-accent); }
+        /* cfg-tab styles moved to #cfg-sidebar .cfg-tab */
         .cfg-panel { display:none; }
         .cfg-panel.active { display:block; }
         .menu-settings::-webkit-scrollbar { width: 4px; }
@@ -2418,17 +2508,23 @@
                 </div>
 
                 <!-- Submenu: Configurações -->
-                <div id="settings-submenu" style="display:none;flex-direction:column;width:min(520px,92%);max-height:82vh">
-                    <button class="menu-btn" id="settings-back-btn" style="flex-shrink:0"><span class="mb-bar"></span><span class="mb-num">←</span><span class="mb-label">Voltar</span></button>
-                    <!-- Tabs -->
-                    <div id="cfg-tabs" style="display:flex;gap:0;flex-shrink:0;margin-top:10px;border-bottom:1px solid rgba(255,255,255,0.08)">
-                        <button class="cfg-tab active" data-cfg="jogo">Jogo</button>
-                        <button class="cfg-tab" data-cfg="audio">Áudio</button>
-                        <button class="cfg-tab" data-cfg="visual">Visual</button>
-                        <button class="cfg-tab" data-cfg="controle">Controle</button>
+                <div id="settings-submenu" style="display:none">
+                    <!-- Topbar -->
+                    <div id="settings-topbar">
+                        <button class="menu-btn" id="settings-back-btn"><span class="mb-bar"></span><span class="mb-num">←</span><span class="mb-label">Voltar</span></button>
+                        <span id="settings-topbar-title">Configurações</span>
                     </div>
-                    <!-- Painéis -->
-                    <div id="cfg-panels" style="overflow-y:auto;flex:1;padding:4px 2px 8px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.15) transparent">
+                    <!-- Body: sidebar + conteúdo -->
+                    <div id="settings-body">
+                        <!-- Sidebar de tabs -->
+                        <div id="cfg-sidebar">
+                            <button class="cfg-tab active" data-cfg="jogo"><span class="cfg-tab-icon">⚙</span> Jogo</button>
+                            <button class="cfg-tab" data-cfg="audio"><span class="cfg-tab-icon">♪</span> Áudio</button>
+                            <button class="cfg-tab" data-cfg="visual"><span class="cfg-tab-icon">◈</span> Visual</button>
+                            <button class="cfg-tab" data-cfg="controle"><span class="cfg-tab-icon">⊕</span> Controle</button>
+                        </div>
+                        <!-- Conteúdo dos painéis -->
+                        <div id="cfg-content">
 
                         <!-- JOGO -->
                         <div class="cfg-panel active" data-cfg="jogo">
@@ -2528,13 +2624,25 @@
                             <button class="menu-btn" id="kb-map-reset-btn" type="button"><span class="mb-bar"></span><span class="mb-num">↺</span><span class="mb-label">Resetar Teclado</span></button>
                         </div>
 
-                    </div>
-                </div>
+                        </div><!-- /cfg-content -->
+                    </div><!-- /settings-body -->
+                    <!-- Footer: Aplicar / Descartar -->
+                    <div id="settings-footer">
+                        <div id="settings-apply-wrap">
+                            <button class="menu-btn" id="settings-apply-btn" type="button"><span class="mb-bar"></span><span class="mb-num">✓</span><span class="mb-label">Aplicar Mudanças</span></button>
+                        </div>
+                        <div id="settings-discard-confirm">
+                            <span style="flex:1;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.7)">Aplicar mudanças antes de sair?</span>
+                            <button id="settings-discard-yes" style="background:rgba(var(--menu-accent-rgb),0.18);border:1px solid rgba(var(--menu-accent-rgb),0.5);color:#fff;border-radius:4px;padding:5px 14px;font-size:11px;font-family:inherit;cursor:pointer;letter-spacing:1px;">Aplicar</button>
+                            <button id="settings-discard-no"  style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);border-radius:4px;padding:5px 14px;font-size:11px;font-family:inherit;cursor:pointer;letter-spacing:1px;">Descartar</button>
+                        </div>
+                    </div><!-- /settings-footer -->
+                </div><!-- /settings-submenu -->
             </div>
         </div>
         <div id="menu-footer">
             <span>© 2026 Himari Games</span>
-            <span>VR Chat Story</span>
+            <span>P7VN</span>
         </div>
     </div>
 
@@ -2561,9 +2669,7 @@
                     <button class="menu-btn store-item-btn" id="store-item-auto" data-store-item="autoAdvance"><span class="mb-bar"></span><span class="mb-num">05</span><span class="mb-label">Auto-Texto</span></button>
                     <button class="menu-btn store-item-btn" id="store-item-hide" data-store-item="hideDialogue"><span class="mb-bar"></span><span class="mb-num">05</span><span class="mb-label">Ocultar Diálogo</span></button>
                     <button class="menu-btn store-item-btn" id="store-item-debug" data-store-item="debugMenu"><span class="mb-bar"></span><span class="mb-num">20</span><span class="mb-label">Acesso Debug Menu</span></button>
-                    <button class="menu-btn store-item-btn" id="store-item-secret" data-store-item="neroSecret"><span class="mb-bar"></span><span class="mb-num">2000</span><span class="mb-label">Segredo da Nero</span></button>
-                    <button class="menu-btn store-item-btn" id="store-item-dlc-mestre" data-store-item="dlcMestre"><span class="mb-bar"></span><span class="mb-num">300</span><span class="mb-label">Mestre do Giro - DLC</span></button>
-                    <button class="menu-btn store-item-btn" id="store-item-dlc-volken" data-store-item="dlcVolken"><span class="mb-bar"></span><span class="mb-num">300</span><span class="mb-label">Volken is Real - DLC</span></button>
+                    <button class="menu-btn store-item-btn" id="store-item-secret" data-store-item="neroSecret"><span class="mb-bar"></span><span class="mb-num">2000</span><span class="mb-label">Segredo da Nero</span></button>              
                     <button class="menu-btn store-item-btn store-item-fight" id="store-item-fight" data-store-item="fightNero"><span class="mb-bar"></span><span class="mb-num">9999</span><span class="mb-label">Brigar comigo</span></button>
                     <div class="nero-store-products-head" style="margin-top:8px">Temas de Menu</div>
                     <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-blood"     data-store-item="themeBlood"    ><span class="mb-bar"></span><span class="mb-num">50</span><span class="mb-label">Tema: Blood Slash</span></button>
@@ -4214,81 +4320,79 @@
         });
 
         const SHOP_ITEMS = Object.freeze({
-            [SHOP_ITEM_IDS.AUTO_ADVANCE]:  { price: 5,    title: 'Auto-Texto' },
-            [SHOP_ITEM_IDS.HIDE_DIALOGUE]: { price: 5,    title: 'Ocultar Dialogo' },
-            [SHOP_ITEM_IDS.DEBUG_MENU]:    { price: 20,   title: 'Acesso Debug Menu' },
-            [SHOP_ITEM_IDS.NERO_SECRET]:   { price: 2000, title: 'Segredo da Nero' },
-            [SHOP_ITEM_IDS.DLC_MESTRE]:    { price: 300,  title: 'Mestre do Giro - DLC',  dlcFolder: 'Mestre do Giro - DLC' },
-            [SHOP_ITEM_IDS.DLC_VOLKEN]:    { price: 300,  title: 'Volken is Real - DLC',  dlcFolder: 'Volken is Real - DLC' },
+            [SHOP_ITEM_IDS.AUTO_ADVANCE]:  { price: 50,    title: 'Auto-Texto' },
+            [SHOP_ITEM_IDS.HIDE_DIALOGUE]: { price: 50,    title: 'Ocultar Dialogo' },
+            [SHOP_ITEM_IDS.DEBUG_MENU]:    { price: 200,   title: 'Acesso Debug Menu' },
+            [SHOP_ITEM_IDS.NERO_SECRET]:   { price: 8000, title: 'Segredo da Nero' },       
             [SHOP_ITEM_IDS.FIGHT_NERO]:    { price: 9999, title: 'Brigar comigo' },
-            [SHOP_ITEM_IDS.THEME_BLOOD]:     { price: 50, title: 'Tema: Blood Slash',   theme: 'blood'     },
-            [SHOP_ITEM_IDS.THEME_TERMINAL]:  { price: 50, title: 'Tema: Terminal',       theme: 'terminal'  },
-            [SHOP_ITEM_IDS.THEME_SYNTHWAVE]: { price: 50, title: 'Tema: Synthwave',      theme: 'synthwave' },
-            [SHOP_ITEM_IDS.THEME_EDITORIAL]: { price: 50, title: 'Tema: Editorial',      theme: 'editorial' },
-            [SHOP_ITEM_IDS.THEME_DEEPSEA]:   { price: 50, title: 'Tema: Deep Sea',       theme: 'deepsea'   },
-            [SHOP_ITEM_IDS.DIFF_LEGENDARY]:  { price: 500, title: 'Dificuldade: Legendary', difficulty: 'legendary' },
+            [SHOP_ITEM_IDS.THEME_BLOOD]:     { price: 500, title: 'Tema: Blood Slash',   theme: 'blood'     },
+            [SHOP_ITEM_IDS.THEME_TERMINAL]:  { price: 500, title: 'Tema: Terminal',       theme: 'terminal'  },
+            [SHOP_ITEM_IDS.THEME_SYNTHWAVE]: { price: 500, title: 'Tema: Synthwave',      theme: 'synthwave' },
+            [SHOP_ITEM_IDS.THEME_EDITORIAL]: { price: 500, title: 'Tema: Editorial',      theme: 'editorial' },
+            [SHOP_ITEM_IDS.THEME_DEEPSEA]:   { price: 500, title: 'Tema: Deep Sea',       theme: 'deepsea'   },
+            [SHOP_ITEM_IDS.DIFF_LEGENDARY]:  { price: 50000, title: 'Dificuldade: Legendary', difficulty: 'legendary' },
         });
-        const DEMO_ENDINGS_REQUIRED = ['ending-praia', 'ending-alone', 'ending-birra'];
+        const DEMO_ENDINGS_REQUIRED = ['ending-normal', 'ending-stupid', 'ending-alone', 'ending-9999'];
         const ACHIEVEMENTS_META = Object.freeze({
             [ACHIEVEMENT_IDS.SEVEN_SAVE_MASTER]: {
                 title: 'Seven, agora foi pessoal',
                 description: 'Clique no avatar do Seven 10x e use os 3 slots de save.',
                 image: 'assets/images/characters/seven.png',
-                rewardCoins: 15
+                rewardCoins: 10000
             },
             [ACHIEVEMENT_IDS.REELS_BUG_ATTEMPT]: {
                 title: 'Boa tentativa, aug',
                 description: 'Tentou bugar os reels segurando o clique.',
                 image: 'assets/images/logo/icon.png',
-                rewardCoins: 8
+                rewardCoins: 800
             },
             [ACHIEVEMENT_IDS.ABBYL_CHEAT]: {
                 title: 'Garotas Cavalos, quero todas!',
                 description: 'Codigo da Abbyl ativado.',
                 image: 'assets/images/characters/abbyl.png',
-                rewardCoins: 10
+                rewardCoins: 2000
             },
             [ACHIEVEMENT_IDS.AUG_CHEAT]: {
                 title: 'Tá tudo girandoooo',
                 description: 'Codigo do Aug ativado.',
                 image: 'assets/images/characters/aug.jpg',
-                rewardCoins: 10
+                rewardCoins: 2100
             },
             [ACHIEVEMENT_IDS.SKIP_PROLOGUE]: {
                 title: 'Prologo? Tô fora',
                 description: 'Pulou o prologo por botao ou segurando Y.',
                 image: 'assets/images/intro/vrchat.png',
-                rewardCoins: 7
+                rewardCoins: 300
             },
             [ACHIEVEMENT_IDS.ALL_ENDINGS]: {
                 title: 'Eu amo finais, felizes ou nao',
                 description: 'Viu todos os finais da demo.',
                 image: 'assets/images/logo/menutitle (6).png',
-                rewardCoins: 20
+                rewardCoins: 6000
             },
             [ACHIEVEMENT_IDS.FULLSCREEN]: {
                 title: 'Alt+Enter pra quê, né?',
                 description: 'Ativou o modo tela cheia.',
                 image: 'assets/images/logo/icon.png',
-                rewardCoins: 5
+                rewardCoins: 500
             },
             [ACHIEVEMENT_IDS.DISCORD_DARK]: {
                 title: 'Eu tô dark hoje',
                 description: 'Saiu da call com a Abbyl.',
                 image: 'assets/images/characters/head/abbyl-triste.png',
-                rewardCoins: 9
+                rewardCoins: 700
             },
             [ACHIEVEMENT_IDS.NERO_LEGENDARY]: {
                 title: 'Nero? Eu sou Nero legendary',
                 description: 'Acertou a resposta secreta inicial.',
                 image: 'assets/images/characters/nero.png',
-                rewardCoins: 12
+                rewardCoins: 1200
             },
             [ACHIEVEMENT_IDS.DEBUG_MATRIX]: {
                 title: 'Eu estou na matrix!',
                 description: 'Debug menu ativado.',
                 image: 'assets/images/ui/cursor.png',
-                rewardCoins: 14
+                rewardCoins: 300
             }
         });
 
@@ -4717,6 +4821,18 @@
             showAutosaveToast('Salvando progresso...');
         }
 
+        // Enforce volume global a cada 500ms em elementos criados dinamicamente
+        setInterval(function(){
+            if (_globalVolume === 1.0) return;
+            document.querySelectorAll('audio, video').forEach(function(el){
+                var base = parseFloat(el.dataset.baseVol);
+                if (!isNaN(base)) {
+                    var expected = Math.min(1, base * _globalVolume);
+                    if (Math.abs(el.volume - expected) > 0.05) el.volume = expected;
+                }
+            });
+        }, 500);
+
         function doAutoLoad() {
             try {
                 const raw = GameStorage.getItem(AUTOSAVE_KEY);
@@ -5074,6 +5190,27 @@
             }
         }
         function saveSettings(s) { GameStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+
+        function _markSettingsDirty() {
+            var wrap = document.getElementById('settings-apply-wrap');
+            if (wrap) wrap.style.display = 'block';
+        }
+        function _clearSettingsDirty() {
+            var wrap = document.getElementById('settings-apply-wrap');
+            if (wrap) wrap.style.display = 'none';
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            var applyBtn = document.getElementById('settings-apply-btn');
+            if (applyBtn) {
+                applyBtn.addEventListener('click', function() {
+                    var cfg = getSettings();
+                    cfg.globalVolume = _globalVolume;
+                    cfg.sfxVolume    = _sfxVolume;
+                    saveSettings(cfg);
+                    _clearSettingsDirty();
+                });
+            }
+        });
         let musicMuted = false;
         let fullscreenMode = false;
         let _globalVolume = 1.0; window._globalVolume = 1.0;
@@ -5405,6 +5542,11 @@
 
         function applyGlobalVolume(vol) {
             _globalVolume = Math.max(0, Math.min(1, vol)); window._globalVolume = _globalVolume;
+            // Aplica em TODOS os elementos de audio/video da página
+            document.querySelectorAll('audio, video').forEach(function(el) {
+                if (el.dataset.baseVol === undefined) el.dataset.baseVol = el.volume || 0.7;
+                el.volume = Math.min(1, parseFloat(el.dataset.baseVol) * _globalVolume);
+            });
             var tracks = { menuMusic, prologueMusic, ostP, sevenLab, battleMusic, neroStoreMusic };
             Object.keys(tracks).forEach(function(name) {
                 var el = tracks[name];
@@ -5480,7 +5622,12 @@
         function showMenuView(viewId, animate) {
             ['main-menu-buttons', 'chapters-submenu', 'settings-submenu', 'conquistas-submenu'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.style.display = id === viewId ? '' : 'none';
+                if (!el) return;
+                if (id === viewId) {
+                    el.style.display = id === 'settings-submenu' ? 'flex' : '';
+                } else {
+                    el.style.display = 'none';
+                }
             });
             if (animate !== false) {
                 const active = document.getElementById(viewId);
@@ -7163,7 +7310,6 @@
                     });
                 }
                 saveUnlockChapter(variant === 'birra' ? 'ending-birra' : 'ending-alone');
-                markEndingReached(variant === 'birra' ? 'ending-birra' : 'ending-alone');
             }, 1300);
         }
 
@@ -11086,10 +11232,43 @@
             });
 
             document.getElementById('settings-back-btn').addEventListener('click', () => {
+                var wrap = document.getElementById('settings-apply-wrap');
+                if (wrap && wrap.style.display !== 'none') {
+                    // Tem mudanças pendentes — mostra popup
+                    var confirm = document.getElementById('settings-discard-confirm');
+                    if (confirm) confirm.style.display = 'flex';
+                    return;
+                }
                 (function(){ var b=document.getElementById('sfx-back'); if(b){b.currentTime=0;b.play().catch(function(){});} })();
                 playSelectSfx();
                 showMenuView('main-menu-buttons');
             });
+            (function() {
+                var confirmEl  = document.getElementById('settings-discard-confirm');
+                var yesBtn     = document.getElementById('settings-discard-yes');
+                var noBtn      = document.getElementById('settings-discard-no');
+                function _doBack() {
+                    (function(){ var b=document.getElementById('sfx-back'); if(b){b.currentTime=0;b.play().catch(function(){});} })();
+                    playSelectSfx();
+                    showMenuView('main-menu-buttons');
+                }
+                if (yesBtn) yesBtn.addEventListener('click', function() {
+                    // Aplica e vai embora
+                    var cfg = getSettings();
+                    cfg.globalVolume = _globalVolume;
+                    cfg.sfxVolume    = _sfxVolume;
+                    saveSettings(cfg);
+                    _clearSettingsDirty();
+                    if (confirmEl) confirmEl.style.display = 'none';
+                    _doBack();
+                });
+                if (noBtn) noBtn.addEventListener('click', function() {
+                    // Descarta e vai embora
+                    _clearSettingsDirty();
+                    if (confirmEl) confirmEl.style.display = 'none';
+                    _doBack();
+                });
+            })();
             document.getElementById('nero-store-back-btn').addEventListener('click', () => {
                 // Sons só tocam se não estiver já saindo
                 if (!_neroStoreExitArmed) {
@@ -11146,11 +11325,10 @@
                     slider.style.setProperty('--pct', slider.value + '%');
                     if (valEl) valEl.textContent = slider.value + '%';
                     applyGlobalVolume(vol);
+                    _markSettingsDirty();
                 });
                 slider.addEventListener('change', function() {
-                    const cfg = getSettings();
-                    cfg.globalVolume = _globalVolume;
-                    saveSettings(cfg);
+                    _markSettingsDirty();
                 });
             })();
             // ── SFX Volume Slider ──
@@ -11166,11 +11344,10 @@
                     slider.style.setProperty('--pct', slider.value + '%');
                     if (valEl) valEl.textContent = slider.value + '%';
                     applySfxVolume(vol);
+                    _markSettingsDirty();
                 });
                 slider.addEventListener('change', function() {
-                    const cfg = getSettings();
-                    cfg.sfxVolume = _sfxVolume;
-                    saveSettings(cfg);
+                    _markSettingsDirty();
                 });
             })();
             // ── Fullscreen / Windowed Toggle ──
@@ -13685,11 +13862,11 @@
         var polaroidData = [
             { src: './assets/images/characters/abbyl.png',   label: 'Abbyl',   side: 'left',  delay: 5500,   rot: '-5deg', size: 140 },
             { src: './assets/images/characters/aldrich.png', label: 'Aldrich', side: 'right', delay: 14500,   rot: '4deg',  size: 140 },
-            { src: './assets/images/characters/arabel.gif',  label: 'Arabel',  side: 'left',  delay: 24500,   rot: '-3deg', size: 140 },
+            { src: './assets/images/characters/arabel.png',  label: 'Arabel',  side: 'left',  delay: 24500,   rot: '-3deg', size: 140 },
             { src: './assets/images/characters/nero.png',    label: 'Nero',    side: 'right', delay: 35500,   rot: '6deg',  size: 140 },
             { src: './assets/images/characters/abbyl.png',   label: 'Abbyl',   side: 'right', delay: 47500,   rot: '-7deg', size: 140 },
             { src: './assets/images/characters/aldrich.png', label: 'Aldrich', side: 'left',  delay: 59500,   rot: '3deg',  size: 140 },
-            { src: './assets/images/characters/arabel.gif',  label: 'Arabel',  side: 'right', delay: 72500,   rot: '-4deg', size: 140 },
+            { src: './assets/images/characters/arabel.png',  label: 'Arabel',  side: 'right', delay: 72500,   rot: '-4deg', size: 140 },
             { src: './assets/images/characters/nero.png',    label: 'Nero',    side: 'left',  delay: 84500,   rot: '5deg',  size: 140 },
             { src: './assets/images/characters/abbyl.png',   label: 'Abbyl',   side: 'left',  delay: 97500,   rot: '-6deg', size: 140 },
             { src: './assets/images/characters/aldrich.png', label: 'Aldrich', side: 'right', delay: 110500,   rot: '4deg',  size: 140 },
@@ -13697,7 +13874,7 @@
             { src: './assets/images/characters/nero.png',    label: 'Nero',    side: 'right', delay: 140500,   rot: '7deg',  size: 140 },
             { src: './assets/images/characters/abbyl.png',   label: 'Abbyl',   side: 'right', delay: 155500,   rot: '-5deg', size: 140 },
             { src: './assets/images/characters/aldrich.png', label: 'Aldrich', side: 'left',  delay: 170500,   rot: '3deg',  size: 140 },
-            { src: './assets/images/characters/arabel.gif',  label: 'Arabel',  side: 'right', delay: 184500,   rot: '-4deg', size: 140 },
+            { src: './assets/images/characters/arabel.png',  label: 'Arabel',  side: 'right', delay: 184500,   rot: '-4deg', size: 140 },
         ];
 
         function spawnPolaroid(data) {

@@ -446,6 +446,7 @@ function dodgeLoop() {
     var kept=[], len=ns.projectiles.length;
     for(var i=0;i<len;i++){
         var p=ns.projectiles[i];
+        if(!p) continue;
         p.x+=p.vx; p.y+=p.vy;
         if(p.x<-p.r*2||p.x>NS_ARENA_W+p.r*2||p.y<-p.r*2||p.y>NS_ARENA_H+p.r*2){
             if(p.el&&p.el.parentNode) p.el.parentNode.removeChild(p.el);

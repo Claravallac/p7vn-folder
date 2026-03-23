@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.25",
+    "date": "23/03/2026",
+    "notes": "Novo painel de configurações mais espaçoso (beta)"
+  },
+  {
     "version": "1.0.24",
     "date": "22/03/2026",
     "notes": "Arrumei a conquista dos finais, agora você só precisa fazer os finais: Birra, Praia, Alone"
