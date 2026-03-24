@@ -199,61 +199,19 @@ goto :publicar_delta
 echo.
 echo  Checkpoint leve - ZIP da branch como URL (so codigo, sem assets)
 echo.
-call :_checkpoint_setup
-if errorlevel 1 goto :eof
 
-git add --all -- . ":(exclude)assets/*"
-git commit -m "checkpoint leve: versao %VERSION%"
-git push --force origin main
-if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
-
-call :_checkpoint_finish
-goto :eof
-
-:: ══════════════════════════════════════════════════════════════════════════════
-:checkpoint_completo
-:: ══════════════════════════════════════════════════════════════════════════════
-echo.
-echo  Checkpoint completo - ZIP da branch como URL (codigo + assets)
-echo.
-call :_checkpoint_setup
-if errorlevel 1 goto :eof
-
-git add --all .
-git add -f assets/audio/
-git add -f assets/fonts/
-git add -f assets/images/
-git add -f assets/videos/
-git commit -m "checkpoint completo: versao %VERSION%"
-git push --force origin main
-if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
-
-call :_checkpoint_finish
-goto :eof
-
-:: ── sub-rotina compartilhada: valida ferramentas, pede versao e notas ────────
-:_checkpoint_setup
 where node >nul 2>&1
-if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & exit /b 1 )
-where gh >nul 2>&1
-if errorlevel 1 ( echo [ERRO] GitHub CLI nao encontrado. & exit /b 1 )
+if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & pause & exit /b 1 )
 where git >nul 2>&1
-if errorlevel 1 ( echo [ERRO] Git nao encontrado. & exit /b 1 )
+if errorlevel 1 ( echo [ERRO] Git nao encontrado. & pause & exit /b 1 )
 
 git config --global user.email "claravallac@github.com"
 git config --global user.name "Claravallac"
-if not exist ".git\" (
-    git init
-    git remote add origin https://github.com/Claravallac/p7vn-folder.git
-    git add .
-    git commit -m "inicial"
-    git push --set-upstream origin main
-)
 
 for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"version\"" package.json') do (
-    set RAW_VER=%%~v & goto :_got_ver_cp
+    set RAW_VER=%%~v & goto :_cpl_ver
 )
-:_got_ver_cp
+:_cpl_ver
 set CURRENT_VER=%RAW_VER:"=%
 echo  Versao atual: %CURRENT_VER%
 set /p VERSION= Nova versao (ex: 1.0.31): 
@@ -264,14 +222,12 @@ echo  Versao definida: %VERSION%
 set /p NOTES= Notas desta versao: 
 if "%NOTES%"=="" set NOTES=Checkpoint.
 
-set ZIP_URL=https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip
-
 echo Detectando arquivos removidos...
 node detect-removed.js
 echo Atualizando changelog...
 node update-changelog.js
 
-:: Usa arquivo JS temporario para evitar problemas com caracteres especiais nas notas
+echo %NOTES%> _cp_notes.txt
 echo const fs=require('fs'); > _cp_write.js
 echo const ver='%VERSION%'; >> _cp_write.js
 echo const notes=fs.readFileSync('_cp_notes.txt','utf8').trim(); >> _cp_write.js
@@ -280,16 +236,14 @@ echo fs.writeFileSync('version.json',JSON.stringify({version:ver,notes:notes,url
 echo const cl=JSON.parse(fs.readFileSync('changelog.json','utf8')); >> _cp_write.js
 echo const e=cl.find(function(x){return x.version===ver;}); >> _cp_write.js
 echo if(e){e.url=zip;fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');} >> _cp_write.js
-
-:: Grava as notas em arquivo separado para preservar caracteres especiais
-echo %NOTES%> _cp_notes.txt
-
 node _cp_write.js
 del _cp_write.js _cp_notes.txt 2>nul
-exit /b 0
 
-:: ── sub-rotina compartilhada: mostra resultado ───────────────────────────────
-:_checkpoint_finish
+git add --all -- . ":(exclude)assets/*"
+git commit -m "checkpoint leve: versao %VERSION%"
+git push --force origin main
+if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
+
 echo.
 echo  ============================================
 echo   Checkpoint v%VERSION% publicado!
@@ -298,7 +252,72 @@ echo   recebem o estado completo do jogo.
 echo  ============================================
 echo.
 pause
-exit /b 0
+goto :eof
+
+:: ══════════════════════════════════════════════════════════════════════════════
+:checkpoint_completo
+:: ══════════════════════════════════════════════════════════════════════════════
+echo.
+echo  Checkpoint completo - ZIP da branch como URL (codigo + assets)
+echo.
+
+where node >nul 2>&1
+if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & pause & exit /b 1 )
+where git >nul 2>&1
+if errorlevel 1 ( echo [ERRO] Git nao encontrado. & pause & exit /b 1 )
+
+git config --global user.email "claravallac@github.com"
+git config --global user.name "Claravallac"
+
+for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"version\"" package.json') do (
+    set RAW_VER=%%~v & goto :_cpc_ver
+)
+:_cpc_ver
+set CURRENT_VER=%RAW_VER:"=%
+echo  Versao atual: %CURRENT_VER%
+set /p VERSION= Nova versao (ex: 1.0.31): 
+if "%VERSION%"=="" set VERSION=%CURRENT_VER%
+node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='%VERSION%';fs.writeFileSync('package.json',JSON.stringify(p,null,2),'utf8');"
+echo  Versao definida: %VERSION%
+
+set /p NOTES= Notas desta versao: 
+if "%NOTES%"=="" set NOTES=Checkpoint.
+
+echo Detectando arquivos removidos...
+node detect-removed.js
+echo Atualizando changelog...
+node update-changelog.js
+
+echo %NOTES%> _cp_notes.txt
+echo const fs=require('fs'); > _cp_write.js
+echo const ver='%VERSION%'; >> _cp_write.js
+echo const notes=fs.readFileSync('_cp_notes.txt','utf8').trim(); >> _cp_write.js
+echo const zip='https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip'; >> _cp_write.js
+echo fs.writeFileSync('version.json',JSON.stringify({version:ver,notes:notes,url:zip},null,2),'utf8'); >> _cp_write.js
+echo const cl=JSON.parse(fs.readFileSync('changelog.json','utf8')); >> _cp_write.js
+echo const e=cl.find(function(x){return x.version===ver;}); >> _cp_write.js
+echo if(e){e.url=zip;fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');} >> _cp_write.js
+node _cp_write.js
+del _cp_write.js _cp_notes.txt 2>nul
+
+git add --all .
+git add -f assets/audio/
+git add -f assets/fonts/
+git add -f assets/images/
+git add -f assets/videos/
+git commit -m "checkpoint completo: versao %VERSION%"
+git push --force origin main
+if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
+
+echo.
+echo  ============================================
+echo   Checkpoint v%VERSION% publicado!
+echo   Jogadores que passarem por esta versao
+echo   recebem o estado completo do jogo.
+echo  ============================================
+echo.
+pause
+goto :eof
 
 :: ══════════════════════════════════════════════════════════════════════════════
 :publicar_delta
