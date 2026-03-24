@@ -428,7 +428,23 @@
             background: #07000c;
             display: none; flex-direction: column !important;
             z-index: 910;
+            transform: translateX(100%);
+            transition: transform 0s;
         }
+        #settings-submenu.cfg-entering {
+            transform: translateX(0);
+            transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        #settings-submenu.cfg-leaving {
+            transform: translateX(100%);
+            transition: transform 0.30s cubic-bezier(0.55, 0, 0.85, 0.06);
+        }
+        @keyframes cfgFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        #settings-submenu.cfg-entering #settings-body { animation: cfgFadeIn 0.35s ease 0.1s both; }
+        #settings-submenu.cfg-entering #settings-topbar { animation: cfgFadeIn 0.28s ease both; }
         #settings-submenu::before {
             content:''; position:absolute; inset:0; pointer-events:none;
             background: repeating-linear-gradient(-55deg, transparent 0, transparent 18px, rgba(204,0,255,0.018) 18px, rgba(204,0,255,0.018) 19px);
@@ -458,6 +474,19 @@
         }
         #settings-back-btn-wrap:hover { color: rgba(255,255,255,0.7); }
         #settings-back-btn-wrap .back-arrow { font-size: 14px; color: var(--menu-accent); }
+        /* Override: settings-back-btn uses this div style inline */
+        #settings-back-btn {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 9px; letter-spacing: 4px; text-transform: uppercase;
+            color: rgba(255,255,255,0.35); font-weight: 700;
+            padding: 8px 20px 8px 8px; transition: color .15s, background .15s;
+            margin-right: 16px; border-right: 1px solid rgba(255,255,255,0.07);
+            border-radius: 4px; cursor: pointer; user-select: none;
+            background: rgba(255,255,255,0.03);
+        }
+        #settings-back-btn:hover { color: rgba(255,255,255,0.8); background: rgba(var(--menu-accent-rgb),0.08); }
+        #settings-back-btn .back-arrow { font-size: 16px; color: var(--menu-accent); transition: transform .15s; }
+        #settings-back-btn:hover .back-arrow { transform: translateX(-3px); }
         #settings-topbar-logo {
             position: absolute; left: 50%; transform: translateX(-50%);
             display: block; pointer-events: none;
@@ -2719,16 +2748,17 @@
 
                         </div><!-- /cfg-content -->
                     </div><!-- /settings-body -->
-                    <!-- Footer: Aplicar / Descartar -->
+                    <!-- Footer: auto-save indicator -->
                     <div id="settings-footer">
-                        <div id="settings-apply-wrap">
+                        <div id="settings-apply-wrap" style="display:none">
                             <button class="menu-btn" id="settings-apply-btn" type="button"><span class="mb-bar"></span><span class="mb-num">✓</span><span class="mb-label">Aplicar Mudanças</span></button>
                         </div>
-                        <div id="settings-discard-confirm">
+                        <div id="settings-discard-confirm" style="display:none">
                             <span style="flex:1;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.7)">Aplicar mudanças antes de sair?</span>
                             <button id="settings-discard-yes" style="background:rgba(var(--menu-accent-rgb),0.18);border:1px solid rgba(var(--menu-accent-rgb),0.5);color:#fff;border-radius:4px;padding:5px 14px;font-size:11px;font-family:inherit;cursor:pointer;letter-spacing:1px;">Aplicar</button>
                             <button id="settings-discard-no"  style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);border-radius:4px;padding:5px 14px;font-size:11px;font-family:inherit;cursor:pointer;letter-spacing:1px;">Descartar</button>
                         </div>
+                        <span id="settings-autosave-label" style="font-size:9px;letter-spacing:3px;color:rgba(255,255,255,0.15);text-transform:uppercase;">● Configurações salvas automaticamente</span>
                     </div><!-- /settings-footer -->
                 </div><!-- /settings-submenu -->
             </div>
@@ -3326,7 +3356,14 @@
         <div id="praia-narrator"></div>
         <div id="praia-credits">
             <div id="credits-scroll">
-                <div class="cr-title-big">VRChat Story</div>
+                <div class="cr-title-big" style="display:flex;justify-content:center;margin:30px 0 8px 0;">
+                    <svg viewBox="0 0 320 116" xmlns="http://www.w3.org/2000/svg" style="width:220px;height:auto;filter:drop-shadow(0 0 18px rgba(255,220,100,0.5));">
+                        <path d="M14 10 L14 106 M14 10 L62 10 Q92 10 92 38 Q92 66 62 66 L14 66" fill="none" stroke="#ffdd88" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M106 10 L180 10 L136 106" fill="none" stroke="#ffdd88" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M192 10 L222 88 L252 10" fill="none" stroke="#ffdd88" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M264 106 L264 10 L306 106 L306 10" fill="none" stroke="#ffdd88" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
                 <div class="cr-subtitle">— Final da Praia —</div>
                 <div class="cr-divider"></div>
 
@@ -5732,6 +5769,72 @@
                     });
                 }
             }
+        }
+
+        // ── Minimalist Menu SFX via Web Audio ────────────────────────────────
+        var _menuAudioCtx = null;
+        function _getMenuAudioCtx() {
+            if (!_menuAudioCtx) {
+                try { _menuAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+            }
+            return _menuAudioCtx;
+        }
+        function _playMenuTone(freq, type, dur, vol, delay) {
+            var ctx = _getMenuAudioCtx();
+            if (!ctx) return;
+            var t = ctx.currentTime + (delay || 0);
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = type || 'sine';
+            osc.frequency.setValueAtTime(freq, t);
+            var v = Math.min(0.18, (vol || 0.08) * Math.min(1, _sfxVolume * _globalVolume));
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(v, t + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.12));
+            osc.start(t);
+            osc.stop(t + (dur || 0.12) + 0.01);
+        }
+        function _playMenuClickSfx(type) {
+            if (type === 'open') {
+                // Dois tons ascendentes suaves
+                _playMenuTone(320, 'sine', 0.10, 0.07);
+                _playMenuTone(480, 'sine', 0.12, 0.06, 0.07);
+            } else if (type === 'close') {
+                // Tom descendente
+                _playMenuTone(420, 'sine', 0.10, 0.07);
+                _playMenuTone(260, 'sine', 0.12, 0.05, 0.06);
+            } else if (type === 'nav') {
+                // Tick suave de navegação
+                _playMenuTone(380, 'triangle', 0.08, 0.05);
+            } else if (type === 'hover') {
+                _playMenuTone(500, 'sine', 0.05, 0.03);
+            }
+        }
+        window._playMenuClickSfx = _playMenuClickSfx;
+
+        // ── Settings transition helpers ───────────────────────────────────────
+        function _showSettingsWithTransition() {
+            var el = document.getElementById('settings-submenu');
+            if (!el) { showMenuView('settings-submenu'); return; }
+            el.style.display = 'flex';
+            el.classList.remove('cfg-leaving', 'cfg-entering');
+            void el.offsetWidth; // reflow
+            el.classList.add('cfg-entering');
+            _playMenuClickSfx('open');
+        }
+        function _hideSettingsWithTransition(cb) {
+            var el = document.getElementById('settings-submenu');
+            if (!el) { showMenuView('main-menu-buttons'); if (cb) cb(); return; }
+            el.classList.remove('cfg-entering');
+            el.classList.add('cfg-leaving');
+            _playMenuClickSfx('close');
+            setTimeout(function() {
+                el.classList.remove('cfg-leaving');
+                el.style.display = 'none';
+                showMenuView('main-menu-buttons');
+                if (cb) cb();
+            }, 310);
         }
 
         var _wooshSnd = null;
@@ -11222,7 +11325,7 @@
             document.getElementById('settings-menu-btn').addEventListener('click', () => {
                 playSelectSfx();
                 refreshSettingsThemes();
-                showMenuView('settings-submenu');
+                _showSettingsWithTransition();
             });
             document.getElementById('nero-store-menu-btn').addEventListener('click', () => {
                 if (_isNeroBanned()) return; // bloqueado pelo ban
@@ -11252,6 +11355,34 @@
             document.getElementById('chapters-back-btn').addEventListener('click', () => {
                 (function(){ var b=document.getElementById('sfx-back'); if(b){b.currentTime=0;b.play().catch(function(){});} })();
                 showMenuView('main-menu-buttons');
+            });
+
+            // ESC fecha configurações / conquistas / capítulos
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Escape') return;
+                if (isTextInputTarget(e)) return;
+                var settingsEl = document.getElementById('settings-submenu');
+                if (settingsEl && settingsEl.style.display === 'flex') {
+                    e.preventDefault();
+                    _clearSettingsDirty();
+                    (function(){ var b=document.getElementById('sfx-back'); if(b){b.currentTime=0;b.play().catch(function(){});} })();
+                    _hideSettingsWithTransition(function(){ showMenuView('main-menu-buttons'); });
+                    return;
+                }
+                var chapEl = document.getElementById('chapters-submenu');
+                if (chapEl && chapEl.style.display !== 'none') {
+                    e.preventDefault();
+                    (function(){ var b=document.getElementById('sfx-back'); if(b){b.currentTime=0;b.play().catch(function(){});} })();
+                    showMenuView('main-menu-buttons');
+                    return;
+                }
+                var conquEl = document.getElementById('conquistas-submenu');
+                if (conquEl && conquEl.style.display !== 'none') {
+                    e.preventDefault();
+                    (function(){ var b=document.getElementById('sfx-back'); if(b){b.currentTime=0;b.play().catch(function(){});} })();
+                    showMenuView('main-menu-buttons', true);
+                    return;
+                }
             });
 
             // Toggle expansível do grupo Capítulo 1
@@ -11325,41 +11456,24 @@
             });
 
             document.getElementById('settings-back-btn').addEventListener('click', () => {
-                var wrap = document.getElementById('settings-apply-wrap');
-                if (wrap && wrap.style.display !== 'none') {
-                    // Tem mudanças pendentes — mostra popup
-                    var confirm = document.getElementById('settings-discard-confirm');
-                    if (confirm) confirm.style.display = 'flex';
-                    return;
-                }
+                _clearSettingsDirty();
                 (function(){ var b=document.getElementById('sfx-back'); if(b){b.currentTime=0;b.play().catch(function(){});} })();
-                playSelectSfx();
-                showMenuView('main-menu-buttons');
+                _playMenuClickSfx('nav');
+                _hideSettingsWithTransition(function(){ showMenuView('main-menu-buttons'); });
             });
             (function() {
                 var confirmEl  = document.getElementById('settings-discard-confirm');
                 var yesBtn     = document.getElementById('settings-discard-yes');
                 var noBtn      = document.getElementById('settings-discard-no');
-                function _doBack() {
-                    (function(){ var b=document.getElementById('sfx-back'); if(b){b.currentTime=0;b.play().catch(function(){});} })();
-                    playSelectSfx();
-                    showMenuView('main-menu-buttons');
-                }
                 if (yesBtn) yesBtn.addEventListener('click', function() {
-                    // Aplica e vai embora
-                    var cfg = getSettings();
-                    cfg.globalVolume = _globalVolume;
-                    cfg.sfxVolume    = _sfxVolume;
-                    saveSettings(cfg);
                     _clearSettingsDirty();
                     if (confirmEl) confirmEl.style.display = 'none';
-                    _doBack();
+                    _hideSettingsWithTransition(function(){ showMenuView('main-menu-buttons'); });
                 });
                 if (noBtn) noBtn.addEventListener('click', function() {
-                    // Descarta e vai embora
                     _clearSettingsDirty();
                     if (confirmEl) confirmEl.style.display = 'none';
-                    _doBack();
+                    _hideSettingsWithTransition(function(){ showMenuView('main-menu-buttons'); });
                 });
             })();
             document.getElementById('nero-store-back-btn').addEventListener('click', () => {
@@ -11420,10 +11534,9 @@
                     slider.style.setProperty('--pct', slider.value + '%');
                     if (valEl) valEl.textContent = slider.value + '%';
                     applyGlobalVolume(vol);
-                    if (_gvReady) _markSettingsDirty();
-                });
-                slider.addEventListener('change', function() {
-                    if (_gvReady) _markSettingsDirty();
+                    if (_gvReady) {
+                        var cfg = getSettings(); cfg.globalVolume = vol; saveSettings(cfg);
+                    }
                 });
             })();
             // ── SFX Volume Slider ──
@@ -11441,10 +11554,9 @@
                     slider.style.setProperty('--pct', slider.value + '%');
                     if (valEl) valEl.textContent = slider.value + '%';
                     applySfxVolume(vol);
-                    if (_sfxReady) _markSettingsDirty();
-                });
-                slider.addEventListener('change', function() {
-                    if (_sfxReady) _markSettingsDirty();
+                    if (_sfxReady) {
+                        var cfg = getSettings(); cfg.sfxVolume = vol; saveSettings(cfg);
+                    }
                 });
             })();
             // ── Fullscreen / Windowed Toggle ──
@@ -13679,9 +13791,29 @@
         whiteOv.style.transition = 'none';
         whiteOv.style.opacity    = '1';
 
+        // Música da praia toca no início e vai baixando gradualmente
+        var praiaMusic = new Audio('assets/audio/praia.mp3');
+        praiaMusic.loop   = true;
+        praiaMusic.volume = 1.0 * (window._globalVolume || 1);
+        praiaMusic.play().catch(function() {});
+        window._beachPraiaMusic = praiaMusic;
+
+        // Fade out da praia.mp3 ao longo de 30s
+        (function() {
+            var startVol = praiaMusic.volume;
+            var steps = 300, stepTime = 100;
+            var count = 0;
+            var iv = setInterval(function() {
+                if (!_beachActive) { clearInterval(iv); return; }
+                count++;
+                praiaMusic.volume = Math.max(0, startVol * (1 - count / steps));
+                if (count >= steps) { clearInterval(iv); try { praiaMusic.pause(); } catch(e) {} }
+            }, stepTime);
+        })();
+
+        // credits.mp3 só inicia quando os créditos aparecerem
         var creditsMusic = new Audio('assets/audio/credits.mp3');
-        creditsMusic.volume = 0.18;
-        creditsMusic.play().catch(function() {});
+        creditsMusic.volume = 0;
         window._beachCreditsMusic = creditsMusic;
 
         var fadedOut = false;
@@ -13718,7 +13850,7 @@
             _beachTimeout(function() { showNarratorChunk(chunk.text); }, chunk.delay);
         });
 
-        _beachTimeout(function() { fadeBeachMusicUp(creditsMusic, 0.72, 4000); }, 26000);
+        // credits.mp3 sobe dentro de startPraiaCredits
         _beachTimeout(function() {
             var darkOv = document.getElementById('praia-dark-overlay');
             if (darkOv) { darkOv.style.transition = 'opacity 4s ease'; darkOv.style.opacity = '1'; }
@@ -13881,6 +14013,13 @@
 
     function startPraiaCredits(creditsMusic) {
         if (!_beachActive) return;
+        // Inicia credits.mp3 do zero agora
+        try {
+            creditsMusic.currentTime = 0;
+            creditsMusic.volume = 0;
+            creditsMusic.play().catch(function() {});
+            fadeBeachMusicUp(creditsMusic, 0.72 * (window._globalVolume || 1), 4000);
+        } catch(e) {}
         // Esconde personagens, diálogo e narrador antes dos créditos
         _praiaSetChar(null, null);
         var box = document.getElementById('praia-dialogue-box');
