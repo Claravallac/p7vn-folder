@@ -271,8 +271,21 @@ node detect-removed.js
 echo Atualizando changelog...
 node update-changelog.js
 
-node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%',url:'%ZIP_URL%'},null,2),'utf8');"
-node -e "const fs=require('fs');const cl=JSON.parse(fs.readFileSync('changelog.json','utf8'));const e=cl.find(function(x){return x.version==='%VERSION%';});if(e){e.url='%ZIP_URL%';fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');}"
+:: Usa arquivo JS temporario para evitar problemas com caracteres especiais nas notas
+echo const fs=require('fs'); > _cp_write.js
+echo const ver='%VERSION%'; >> _cp_write.js
+echo const notes=fs.readFileSync('_cp_notes.txt','utf8').trim(); >> _cp_write.js
+echo const zip='https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip'; >> _cp_write.js
+echo fs.writeFileSync('version.json',JSON.stringify({version:ver,notes:notes,url:zip},null,2),'utf8'); >> _cp_write.js
+echo const cl=JSON.parse(fs.readFileSync('changelog.json','utf8')); >> _cp_write.js
+echo const e=cl.find(function(x){return x.version===ver;}); >> _cp_write.js
+echo if(e){e.url=zip;fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');} >> _cp_write.js
+
+:: Grava as notas em arquivo separado para preservar caracteres especiais
+echo %NOTES%> _cp_notes.txt
+
+node _cp_write.js
+del _cp_write.js _cp_notes.txt 2>nul
 exit /b 0
 
 :: ── sub-rotina compartilhada: mostra resultado ───────────────────────────────
