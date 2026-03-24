@@ -216,7 +216,11 @@ if "%DELTA_URL%"=="" (
 echo URL do delta: %DELTA_URL%
 
 node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%',url:'%DELTA_URL%'},null,2),'utf8');"
-git add version.json
+
+:: Atualiza changelog.json com URL do delta desta versao
+node -e "const fs=require('fs');const cl=JSON.parse(fs.readFileSync('changelog.json','utf8'));const e=cl.find(function(x){return x.version==='%VERSION%';});if(e){e.url='%DELTA_URL%';fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');console.log('changelog.json atualizado com URL');}"
+
+git add version.json changelog.json
 git commit -m "update: url delta v%VERSION%"
 git push --force origin main
 

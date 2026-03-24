@@ -16089,6 +16089,19 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     if(sNotes)   sNotes.textContent   = info.notes || '';
     if(updMenuBadge){ updMenuBadge.textContent = '— v' + info.version + ' disponível'; }
     if(sCheckWrap)   sCheckWrap.style.display  = 'none';
+    // Mostra quantas versões serão instaladas
+    var pendingCount = (info.pending && info.pending.length > 1) ? info.pending.length : 0;
+    var seqEl = document.getElementById('upd-seq-label');
+    if(pendingCount > 1) {
+      if(!seqEl) {
+        seqEl = document.createElement('div');
+        seqEl.id = 'upd-seq-label';
+        seqEl.style.cssText = 'font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-top:6px;';
+        if(sNotes && sNotes.parentNode) sNotes.parentNode.insertBefore(seqEl, sNotes.nextSibling);
+      }
+      seqEl.textContent = pendingCount + ' versões para instalar';
+      seqEl.style.display = '';
+    } else if(seqEl) { seqEl.style.display = 'none'; }
     electronAPI.getVersion().then(function(v){ if(sCurrent) sCurrent.textContent = 'atual: v' + v; });
   }
 
@@ -16208,6 +16221,19 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
       }
     }
   });
+
+  // Atualiza UI a cada versão instalada sequencialmente
+  if(electronAPI.onUpdateSequenceStep) {
+    electronAPI.onUpdateSequenceStep(function(step, total, version){
+      var stepTxt = 'Instalando v' + version + ' (' + step + '/' + total + ')';
+      if(progPct)  progPct.textContent  = stepTxt;
+      if(sProgPct) sProgPct.textContent = stepTxt;
+      if(progBar)  { progBar.style.width='0%'; progBar.classList.remove('indeterminate'); progBar.style.opacity='1'; }
+      if(sProgBar) { sProgBar.style.width='0%'; sProgBar.classList.remove('indeterminate'); sProgBar.style.opacity='1'; }
+      var seqEl = document.getElementById('upd-seq-label');
+      if(seqEl && total > 1) seqEl.textContent = 'Instalando ' + step + ' de ' + total + ' versões';
+    });
+  }
 
   electronAPI.onUpdateReady(function(){
     if(progBar)  { progBar.style.width='100%'; progBar.style.opacity='1'; }

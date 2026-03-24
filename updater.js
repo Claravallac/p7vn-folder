@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// updater.js — update via GitHub
+// updater.js — update sequencial via GitHub
 // ══════════════════════════════════════════════════════════════════════════════
 
 const { app, ipcMain } = require('electron');
@@ -10,21 +10,22 @@ const path   = require('path');
 const os     = require('os');
 const { spawn } = require('child_process');
 
-const REPO_OWNER       = 'Claravallac';
-const REPO_NAME        = 'p7vn-folder';
-const BRANCH           = 'main';
-const VERSION_JSON_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/version.json`;
-const ZIP_URL          = `https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${BRANCH}.zip`;
+const REPO_OWNER         = 'Claravallac';
+const REPO_NAME          = 'p7vn-folder';
+const BRANCH             = 'main';
+const VERSION_JSON_URL   = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/version.json`;
+const CHANGELOG_JSON_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/changelog.json`;
+const ZIP_URL            = `https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${BRANCH}.zip`;
 
-const APPDATA_DIR = app.isPackaged ? path.join(path.dirname(process.execPath), "resources", "app") : app.getAppPath();
+const APPDATA_DIR = app.isPackaged
+  ? path.join(path.dirname(process.execPath), 'resources', 'app')
+  : app.getAppPath();
 
 let _mainWindow    = null;
 let _pendingUpdate = null;
 
 ipcMain.handle('update-check-pending', () => _pendingUpdate);
 
-
-// Procura o diretório real dos arquivos do game
 function findGameDir() {
   const candidates = [
     path.join(path.dirname(process.execPath), 'resources', 'app'),
@@ -35,23 +36,32 @@ function findGameDir() {
   for (const dir of candidates) {
     try {
       if (fs.existsSync(path.join(dir, 'index.html')) &&
-          fs.existsSync(path.join(dir, 'main.js'))) {
-        return dir;
-      }
+          fs.existsSync(path.join(dir, 'main.js'))) return dir;
     } catch(e) {}
   }
-  // Fallback
   return candidates[0];
 }
 
+function toNum(v) {
+  return v.replace(/[^0-9.]/g, '').split('.').map(Number);
+}
+
 function isNewer(remote, local) {
-  const toNum = v => v.replace(/[^0-9.]/g, '').split('.').map(Number);
   const r = toNum(remote), l = toNum(local);
   for (let i = 0; i < Math.max(r.length, l.length); i++) {
     const a = r[i] || 0, b = l[i] || 0;
     if (a > b) return true; if (a < b) return false;
   }
   return false;
+}
+
+function compareVersions(a, b) {
+  const na = toNum(a), nb = toNum(b);
+  for (let i = 0; i < Math.max(na.length, nb.length); i++) {
+    const x = na[i] || 0, y = nb[i] || 0;
+    if (x > y) return 1; if (x < y) return -1;
+  }
+  return 0;
 }
 
 function fetchText(url) {
@@ -82,13 +92,9 @@ function downloadFile(url, destPath, onProgress) {
           if (!loc) return reject(new Error('Redirect sem location'));
           return doGet(loc.startsWith('http') ? loc : new URL(loc, currentUrl).href, hops+1);
         }
-        if (res.statusCode !== 200)
-          return reject(new Error('HTTP ' + res.statusCode));
-
-        const total    = parseInt(res.headers['content-length'] || '0', 10);
-        let received   = 0;
-        let lastTime   = Date.now(), lastBytes = 0, lastSpeed = '';
-
+        if (res.statusCode !== 200) return reject(new Error('HTTP ' + res.statusCode));
+        const total = parseInt(res.headers['content-length'] || '0', 10);
+        let received = 0, lastTime = Date.now(), lastBytes = 0, lastSpeed = '';
         const file = fs.createWriteStream(destPath);
         res.on('data', chunk => {
           if (_cancelled) { res.destroy(); file.destroy(); return reject(new Error('CANCELLED')); }
@@ -100,14 +106,8 @@ function downloadFile(url, destPath, onProgress) {
             lastTime = now; lastBytes = received;
             lastSpeed = bps > 1048576 ? (bps/1048576).toFixed(1)+' MB/s' : (bps/1024).toFixed(0)+' KB/s';
           }
-          if (onProgress) {
-            if (total > 0) {
-              onProgress(Math.round((received / total) * 100), lastSpeed || null);
-            } else {
-              // Sem content-length: mostra MB recebidos
-              onProgress(-(received), lastSpeed || null);
-            }
-          }
+          if (onProgress)
+            onProgress(total > 0 ? Math.round((received/total)*100) : -received, lastSpeed || null);
         });
         res.on('end',   () => { if (!_cancelled) { file.end(); resolve(); } });
         res.on('error', err => { file.destroy(); reject(err); });
@@ -120,7 +120,6 @@ function downloadFile(url, destPath, onProgress) {
   return promise;
 }
 
-// Extrai ZIP via PowerShell (suporta ZIP64) — pula a pasta raiz do GitHub
 function extractZip(zipPath, destDir) {
   return new Promise((resolve, reject) => {
     const tmpExtract = path.join(os.tmpdir(), 'HimariGames_extract_' + Date.now());
@@ -132,8 +131,6 @@ function extractZip(zipPath, destDir) {
       if (code !== 0) return reject(new Error('Extracao falhou: ' + stderr));
       try {
         const entries = fs.readdirSync(tmpExtract);
-        // Se tem uma unica pasta e nenhum arquivo na raiz = ZIP do GitHub (tem pasta raiz)
-        // Se tem arquivos na raiz = ZIP delta (sem pasta raiz)
         const hasFiles = entries.some(e => fs.statSync(path.join(tmpExtract, e)).isFile());
         const rootDir = (!hasFiles && entries.length === 1)
           ? path.join(tmpExtract, entries[0])
@@ -171,79 +168,118 @@ function restartApp() {
   app.quit();
 }
 
+function getLocalVersion() {
+  let local = app.getVersion();
+  try {
+    const versionFile = path.join(APPDATA_DIR, 'version.json');
+    if (fs.existsSync(versionFile)) {
+      const data = JSON.parse(fs.readFileSync(versionFile, 'utf8'));
+      if (data.version) local = data.version;
+    }
+  } catch(e) {}
+  return local;
+}
+
 function setMainWindow(win) { _mainWindow = win; }
 
 async function checkForUpdates() {
   if (!app.isPackaged) return;
   try {
-    const raw    = await fetchText(VERSION_JSON_URL);
-    const remote = JSON.parse(raw);
+    const [rawVersion, rawChangelog] = await Promise.all([
+      fetchText(VERSION_JSON_URL),
+      fetchText(CHANGELOG_JSON_URL)
+    ]);
 
-    let local = app.getVersion();
-    try {
-      const versionFile = path.join(APPDATA_DIR, 'version.json');
-      if (fs.existsSync(versionFile)) {
-        const localData = JSON.parse(fs.readFileSync(versionFile, 'utf8'));
-        if (localData.version) local = localData.version;
-      }
-    } catch(e) {}
+    const remote    = JSON.parse(rawVersion);
+    const changelog = JSON.parse(rawChangelog);
+    const local     = getLocalVersion();
 
     if (!isNewer(remote.version, local)) return;
-    const updateUrl = remote.url || ZIP_URL;
-    _pendingUpdate = { version: remote.version, notes: remote.notes || '', url: updateUrl };
+
+    // Versões que o player ainda não tem, com URL, em ordem crescente
+    const pending = changelog
+      .filter(e => e.url && isNewer(e.version, local))
+      .sort((a, b) => compareVersions(a.version, b.version));
+
+    _pendingUpdate = {
+      version: remote.version,
+      notes:   remote.notes || '',
+      url:     remote.url || ZIP_URL,
+      pending: pending.length > 0 ? pending : null
+    };
+
     if (_mainWindow && !_mainWindow.isDestroyed())
       _mainWindow.webContents.send('update-available', _pendingUpdate);
+
   } catch(e) {
     console.log('[updater] Não foi possível checar atualizações:', e.message);
   }
 }
 
-ipcMain.handle('update-check-partial',   () => 0); // Resume desabilitado
+ipcMain.handle('update-check-partial',   () => 0);
 ipcMain.handle('update-discard-partial', () => {
   try { const p = _getTmpPath(); if (fs.existsSync(p)) fs.unlinkSync(p); } catch(e) {}
 });
 
 let _activeDownload = null;
+let _sequenceActive = false;
 
-ipcMain.handle('update-download', async (_event, url) => {
-  if (_activeDownload?.cancel) { _activeDownload.cancel(); _activeDownload = null; await new Promise(r => setTimeout(r, 150)); }
+async function installOne(url, version, step, total, gameDir) {
+  if (_mainWindow && !_mainWindow.isDestroyed())
+    _mainWindow.webContents.send('update-sequence-step', step, total, version);
 
-  // Sempre começa do zero — evita corrupção com ZIPs do GitHub
   const tmpPath = _getTmpPath();
   try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch(e) {}
 
+  _activeDownload = downloadFile(url, tmpPath, (pct, spd) => {
+    if (_mainWindow && !_mainWindow.isDestroyed())
+      _mainWindow.webContents.send('update-progress', pct, spd || '');
+  });
+
+  await _activeDownload;
+  _activeDownload = null;
+
+  await extractZip(tmpPath, gameDir);
+  try { fs.unlinkSync(tmpPath); } catch(e) {}
+
+  const removedPath = path.join(gameDir, 'removed.json');
+  if (fs.existsSync(removedPath)) {
+    try {
+      const removed = JSON.parse(fs.readFileSync(removedPath, 'utf8'));
+      for (const file of removed) {
+        const target = path.join(gameDir, ...file.split('/'));
+        try { if (fs.existsSync(target)) fs.unlinkSync(target); } catch(e) {}
+      }
+      fs.writeFileSync(removedPath, '[]', 'utf8');
+    } catch(e) {}
+  }
+}
+
+ipcMain.handle('update-download', async (_event, url) => {
+  if (_activeDownload?.cancel) { _activeDownload.cancel(); _activeDownload = null; await new Promise(r => setTimeout(r, 150)); }
+  _sequenceActive = true;
+
+  const gameDir = app.isPackaged ? findGameDir() : APPDATA_DIR;
+
   try {
-    _activeDownload = downloadFile(url, tmpPath, (pct, spd) => {
-      if (_mainWindow && !_mainWindow.isDestroyed())
-        _mainWindow.webContents.send('update-progress', pct, spd || '');
-    });
+    const updates = (_pendingUpdate && _pendingUpdate.pending && _pendingUpdate.pending.length > 0)
+      ? _pendingUpdate.pending
+      : [{ url: url || _pendingUpdate.url, version: _pendingUpdate ? _pendingUpdate.version : 'latest' }];
 
-    await _activeDownload;
-    _activeDownload = null;
-
-    const gameDir = app.isPackaged ? findGameDir() : APPDATA_DIR;
-    await extractZip(tmpPath, gameDir);
-    try { fs.unlinkSync(tmpPath); } catch(e) {}
-
-    // Remove arquivos deletados no repositorio
-    const removedPath = path.join(gameDir, 'removed.json');
-    if (fs.existsSync(removedPath)) {
-      try {
-        const removed = JSON.parse(fs.readFileSync(removedPath, 'utf8'));
-        for (const file of removed) {
-          const target = path.join(gameDir, ...file.split('/'));
-          try { if (fs.existsSync(target)) fs.unlinkSync(target); } catch(e) {}
-        }
-        fs.writeFileSync(removedPath, '[]', 'utf8');
-      } catch(e) { console.log('[updater] removed.json:', e.message); }
+    const total = updates.length;
+    for (let i = 0; i < total; i++) {
+      if (!_sequenceActive) throw new Error('CANCELLED');
+      await installOne(updates[i].url, updates[i].version, i + 1, total, gameDir);
     }
+
+    _sequenceActive = false;
 
     if (_mainWindow && !_mainWindow.isDestroyed())
       _mainWindow.webContents.send('update-ready');
 
-    // Nao reinicia automaticamente — aguarda o player confirmar
     return { ok: true };
   } catch(e) {
+    _sequenceActive = false;
     _activeDownload = null;
     if (e.message === 'CANCELLED') return { ok: false, error: 'CANCELLED' };
     return { ok: false, error: e.message };
@@ -251,11 +287,41 @@ ipcMain.handle('update-download', async (_event, url) => {
 });
 
 ipcMain.handle('update-cancel', () => {
+  _sequenceActive = false;
   if (_activeDownload?.cancel) { _activeDownload.cancel(); _activeDownload = null; }
 });
 
 ipcMain.handle('update-restart', () => {
   restartApp();
+});
+
+// Downgrade — instala versão mais velha explicitamente
+ipcMain.handle('update-downgrade', async (_event, targetVersion) => {
+  if (!app.isPackaged) return { ok: false, error: 'Só funciona no jogo instalado.' };
+  _sequenceActive = true;
+  const gameDir = findGameDir();
+
+  try {
+    const rawChangelog = await fetchText(CHANGELOG_JSON_URL);
+    const changelog    = JSON.parse(rawChangelog);
+    const entry        = changelog.find(e =>
+      e.version === targetVersion || e.version === 'v' + targetVersion
+    );
+    if (!entry || !entry.url)
+      return { ok: false, error: 'Versão não disponível para downgrade.' };
+
+    await installOne(entry.url, entry.version, 1, 1, gameDir);
+    _sequenceActive = false;
+
+    if (_mainWindow && !_mainWindow.isDestroyed())
+      _mainWindow.webContents.send('update-ready');
+
+    return { ok: true };
+  } catch(e) {
+    _sequenceActive = false;
+    _activeDownload = null;
+    return { ok: false, error: e.message };
+  }
 });
 
 module.exports = { setMainWindow, checkForUpdates };
