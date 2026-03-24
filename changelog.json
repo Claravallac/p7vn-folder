@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.37",
+    "date": "24/03/2026",
+    "notes": "Assets reajustados para combinar mais em seus respectivos tamanhos"
+  },
+  {
     "version": "1.0.36",
     "date": "24/03/2026",
     "notes": "Recalibrando imagens e assets",
