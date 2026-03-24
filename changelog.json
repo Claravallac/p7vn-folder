@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.36",
+    "date": "24/03/2026",
+    "notes": "Recalibrando imagens e assets"
+  },
+  {
     "version": "1.0.35",
     "date": "24/03/2026",
     "notes": "Configurações em um layout maior, algumas mudanças no ''final praia''",
