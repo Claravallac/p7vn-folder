@@ -197,11 +197,13 @@ goto :publicar_delta
 :checkpoint_leve
 :: ══════════════════════════════════════════════════════════════════════════════
 echo.
-echo  Checkpoint leve - ZIP da branch como URL (so codigo, sem assets)
+echo  Checkpoint leve - delta de todo o codigo (JS, HTML, CSS, JSON), sem assets
 echo.
 
 where node >nul 2>&1
 if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & pause & exit /b 1 )
+where gh >nul 2>&1
+if errorlevel 1 ( echo [ERRO] GitHub CLI nao encontrado. & pause & exit /b 1 )
 where git >nul 2>&1
 if errorlevel 1 ( echo [ERRO] Git nao encontrado. & pause & exit /b 1 )
 
@@ -214,41 +216,73 @@ for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"version\"" package.json') do
 :_cpl_ver
 set CURRENT_VER=%RAW_VER:"=%
 echo  Versao atual: %CURRENT_VER%
-set /p VERSION= Nova versao (ex: 1.0.31): 
+set /p VERSION= Nova versao (ex: 1.0.32): 
 if "%VERSION%"=="" set VERSION=%CURRENT_VER%
 node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='%VERSION%';fs.writeFileSync('package.json',JSON.stringify(p,null,2),'utf8');"
 echo  Versao definida: %VERSION%
 
 set /p NOTES= Notas desta versao: 
-if "%NOTES%"=="" set NOTES=Checkpoint.
+if "%NOTES%"=="" set NOTES=Checkpoint de codigo.
 
 echo Detectando arquivos removidos...
 node detect-removed.js
 echo Atualizando changelog...
 node update-changelog.js
+node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%'},null,2),'utf8');"
 
-echo %NOTES%> _cp_notes.txt
-echo const fs=require('fs'); > _cp_write.js
-echo const ver='%VERSION%'; >> _cp_write.js
-echo const notes=fs.readFileSync('_cp_notes.txt','utf8').trim(); >> _cp_write.js
-echo const zip='https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip'; >> _cp_write.js
-echo fs.writeFileSync('version.json',JSON.stringify({version:ver,notes:notes,url:zip},null,2),'utf8'); >> _cp_write.js
-echo const cl=JSON.parse(fs.readFileSync('changelog.json','utf8')); >> _cp_write.js
-echo const e=cl.find(function(x){return x.version===ver;}); >> _cp_write.js
-echo if(e){e.url=zip;fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');} >> _cp_write.js
-node _cp_write.js
-del _cp_write.js _cp_notes.txt 2>nul
-
+echo Subindo codigo para o GitHub...
 git add --all -- . ":(exclude)assets/*"
 git commit -m "checkpoint leve: versao %VERSION%"
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
 
+echo Gerando ZIP de codigo completo...
+node make-checkpoint.js %VERSION%
+if errorlevel 1 ( echo [ERRO] make-checkpoint.js falhou. & pause & exit /b 1 )
+
+set CP_FILE=checkpoint-v%VERSION%.zip
+if not exist "%CP_FILE%" ( echo [ERRO] ZIP nao gerado. & pause & exit /b 1 )
+
+echo Criando GitHub Release v%VERSION%...
+gh release create v%VERSION% "%CP_FILE%" --title "v%VERSION%" --notes "%NOTES%" --repo Claravallac/p7vn-folder
+if errorlevel 1 ( echo [AVISO] Release falhou. & del "%CP_FILE%" 2>nul & pause & goto :eof )
+
+:: Pega a URL do ZIP do Release
+gh release view v%VERSION% --repo Claravallac/p7vn-folder --json assets >_tmp_assets.json 2>nul
+for /f "delims=" %%u in ('node get-release-url.js') do set CP_URL=%%u
+del _tmp_assets.json 2>nul
+
+if "%CP_URL%"=="" (
+    echo [AVISO] URL nao obtida — usando ZIP da branch como fallback.
+    set CP_URL=https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip
+)
+
+echo URL: %CP_URL%
+
+:: Atualiza version.json e changelog.json com a URL do Release
+echo %NOTES%> _cp_notes.txt
+echo const fs=require('fs'); > _cp_write.js
+echo const ver='%VERSION%'; >> _cp_write.js
+echo const notes=fs.readFileSync('_cp_notes.txt','utf8').trim(); >> _cp_write.js
+echo const url='%CP_URL%'; >> _cp_write.js
+echo fs.writeFileSync('version.json',JSON.stringify({version:ver,notes:notes,url:url},null,2),'utf8'); >> _cp_write.js
+echo const cl=JSON.parse(fs.readFileSync('changelog.json','utf8')); >> _cp_write.js
+echo const e=cl.find(function(x){return x.version===ver;}); >> _cp_write.js
+echo if(e){e.url=url;fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');} >> _cp_write.js
+node _cp_write.js
+del _cp_write.js _cp_notes.txt 2>nul
+
+git add version.json changelog.json
+git commit -m "checkpoint leve: url v%VERSION%"
+git push --force origin main
+
+del "%CP_FILE%" 2>nul
+
 echo.
 echo  ============================================
-echo   Checkpoint v%VERSION% publicado!
-echo   Jogadores que passarem por esta versao
-echo   recebem o estado completo do jogo.
+echo   Checkpoint leve v%VERSION% publicado!
+echo   Contem todo o codigo JS/HTML/CSS/JSON.
+echo   Assets nao incluidos.
 echo  ============================================
 echo.
 pause

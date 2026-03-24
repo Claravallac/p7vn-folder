@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.33",
+    "date": "23/03/2026",
+    "notes": "Alterando alguns valores aqui e ali"
+  },
+  {
     "version": "1.0.32",
     "date": "23/03/2026",
     "notes": "checkpoint",
