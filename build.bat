@@ -14,12 +14,16 @@ echo.
 echo   [1] Gerar installer (primeira distribuicao)
 echo   [2] Update leve    (codigo: index.html, JS, CSS...)
 echo   [3] Update completo (codigo + assets de midia)
+echo   [4] Checkpoint leve    (ZIP da branch, so codigo)
+echo   [5] Checkpoint completo (ZIP da branch, codigo + assets)
 echo.
-set /p OPCAO= Escolha (1, 2 ou 3): 
+set /p OPCAO= Escolha (1, 2, 3, 4 ou 5): 
 
 if "%OPCAO%"=="1" goto :installer
 if "%OPCAO%"=="2" goto :update_leve
 if "%OPCAO%"=="3" goto :update_completo
+if "%OPCAO%"=="4" goto :checkpoint_leve
+if "%OPCAO%"=="5" goto :checkpoint_completo
 echo [ERRO] Opcao invalida.
 pause & exit /b 1
 
@@ -188,6 +192,100 @@ git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
 
 goto :publicar_delta
+
+:: ══════════════════════════════════════════════════════════════════════════════
+:checkpoint_leve
+:: ══════════════════════════════════════════════════════════════════════════════
+echo.
+echo  Checkpoint leve - ZIP da branch como URL (so codigo, sem assets)
+echo.
+call :_checkpoint_setup
+if errorlevel 1 goto :eof
+
+git add --all -- . ":(exclude)assets/*"
+git commit -m "checkpoint leve: versao %VERSION%"
+git push --force origin main
+if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
+
+call :_checkpoint_finish
+goto :eof
+
+:: ══════════════════════════════════════════════════════════════════════════════
+:checkpoint_completo
+:: ══════════════════════════════════════════════════════════════════════════════
+echo.
+echo  Checkpoint completo - ZIP da branch como URL (codigo + assets)
+echo.
+call :_checkpoint_setup
+if errorlevel 1 goto :eof
+
+git add --all .
+git add -f assets/audio/
+git add -f assets/fonts/
+git add -f assets/images/
+git add -f assets/videos/
+git commit -m "checkpoint completo: versao %VERSION%"
+git push --force origin main
+if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
+
+call :_checkpoint_finish
+goto :eof
+
+:: ── sub-rotina compartilhada: valida ferramentas, pede versao e notas ────────
+:_checkpoint_setup
+where node >nul 2>&1
+if errorlevel 1 ( echo [ERRO] Node.js nao encontrado. & exit /b 1 )
+where gh >nul 2>&1
+if errorlevel 1 ( echo [ERRO] GitHub CLI nao encontrado. & exit /b 1 )
+where git >nul 2>&1
+if errorlevel 1 ( echo [ERRO] Git nao encontrado. & exit /b 1 )
+
+git config --global user.email "claravallac@github.com"
+git config --global user.name "Claravallac"
+if not exist ".git\" (
+    git init
+    git remote add origin https://github.com/Claravallac/p7vn-folder.git
+    git add .
+    git commit -m "inicial"
+    git push --set-upstream origin main
+)
+
+for /f "tokens=2 delims=:, " %%v in ('findstr /i "\"version\"" package.json') do (
+    set RAW_VER=%%~v & goto :_got_ver_cp
+)
+:_got_ver_cp
+set CURRENT_VER=%RAW_VER:"=%
+echo  Versao atual: %CURRENT_VER%
+set /p VERSION= Nova versao (ex: 1.0.31): 
+if "%VERSION%"=="" set VERSION=%CURRENT_VER%
+node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version='%VERSION%';fs.writeFileSync('package.json',JSON.stringify(p,null,2),'utf8');"
+echo  Versao definida: %VERSION%
+
+set /p NOTES= Notas desta versao: 
+if "%NOTES%"=="" set NOTES=Checkpoint.
+
+set ZIP_URL=https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip
+
+echo Detectando arquivos removidos...
+node detect-removed.js
+echo Atualizando changelog...
+node update-changelog.js
+
+node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%',url:'%ZIP_URL%'},null,2),'utf8');"
+node -e "const fs=require('fs');const cl=JSON.parse(fs.readFileSync('changelog.json','utf8'));const e=cl.find(function(x){return x.version==='%VERSION%';});if(e){e.url='%ZIP_URL%';fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');}"
+exit /b 0
+
+:: ── sub-rotina compartilhada: mostra resultado ───────────────────────────────
+:_checkpoint_finish
+echo.
+echo  ============================================
+echo   Checkpoint v%VERSION% publicado!
+echo   Jogadores que passarem por esta versao
+echo   recebem o estado completo do jogo.
+echo  ============================================
+echo.
+pause
+exit /b 0
 
 :: ══════════════════════════════════════════════════════════════════════════════
 :publicar_delta
