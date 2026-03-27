@@ -4817,7 +4817,7 @@
             </div>
             <div id="dbg-dev-tour-status" style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-top:6px;margin-bottom:8px">—</div>
 
-            <div class="dbg-sub" style="margin-top:12px">Banner Aldrich (v1.0.50)</div>
+            <div class="dbg-sub" style="margin-top:12px">Banner Aldrich (v1.0.60)</div>
             <div class="dg2">
               <button class="db g" id="dbg-aldrich-on">Ativar Banner</button>
               <button class="db r" id="dbg-aldrich-off">Desativar Banner</button>
@@ -14011,7 +14011,7 @@
                                   var tag  = (r.tag_name||'').replace(/^v/,'');
                                   var note = (r.body||'').trim() || '—';
                                   var date = r.published_at ? new Date(r.published_at).toLocaleDateString('pt-BR') : '';
-                                  if(tag === '1.0.50' || window._dbgForceAldrichBanner){
+                                  if(tag === '1.0.60' || window._dbgForceAldrichBanner){
                                     entry.style.cssText = 'margin-bottom:4px';
                                     if(typeof window._buildAldrichBannerFn === 'function') entry.innerHTML = window._buildAldrichBannerFn(tag, note, date);
                                   } else {
@@ -17857,7 +17857,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
       .catch(function(){ sCheck.disabled=false; sCheckStatus.style.color='#f87171'; sCheckStatus.textContent='Sem conexão.'; setTimeout(function(){ sCheckStatus.textContent=''; },3000); });
   });
 
-  // ── Banner especial Aldrich — v1.0.50 ─────────────────────────────────────
+  // ── Banner especial Aldrich — v1.0.60 ─────────────────────────────────────
   window._dbgForceAldrichBanner = false;
 
   window._buildAldrichBannerFn = function _buildAldrichBanner(tag, note, date) {
@@ -17957,7 +17957,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
             var tag  = (r.version||'').replace(/^v/,'');
             var note = (r.notes||'').trim() || '—';
             var date = r.date || '';
-            if(tag === '1.0.50' || window._dbgForceAldrichBanner){
+            if(tag === '1.0.60' || window._dbgForceAldrichBanner){
               entry.style.cssText = 'margin-bottom:4px';
               entry.innerHTML = window._buildAldrichBannerFn(tag, note, date);
             } else {
