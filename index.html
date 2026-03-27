@@ -153,7 +153,7 @@
         #menu-lab-bg { position:absolute; inset:-8%; pointer-events:none; z-index:0;
             background-image: url('./assets/images/scenes/abbyl-laboratorio.jpeg');
             background-size: cover; background-position: center;
-            opacity: 0.07; filter: grayscale(0.4) brightness(0.6);
+            opacity: 0.15; filter: grayscale(0.2) brightness(0.75);
             animation: menuLabDrift 28s ease-in-out infinite alternate;
         }
         @keyframes menuLabDrift {
@@ -163,19 +163,44 @@
             75%  { transform: scale(1.12) translate(-1%, 2%); }
             100% { transform: scale(1.12) translate(-2%, -1%); }
         }
-        #menu-slash { position: absolute; top: 0; bottom: 0; left: 36%; right: 0; background: rgba(0,0,0,0.35); clip-path: polygon(55px 0, 100% 0, 100% 100%, 0 100%); pointer-events: none; }
-        #menu-scanlines { position: absolute; inset: 0; pointer-events: none; z-index: 10; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.07) 0, rgba(0,0,0,0.07) 1px, transparent 1px, transparent 3px); }
-        #menu-hline { position: absolute; top: 0; left: 36%; right: 0; height: 3px; background: linear-gradient(to right, transparent, var(--menu-accent), transparent); transition: background 0.9s; z-index: 11; }
+        /* ── Diagonal overlay: dark wedge no lado esquerdo atrás dos botões ── */
+        #menu-slash {
+            position: absolute; top: 0; bottom: 0; left: 0; right: 0;
+            background: rgba(4,0,10,0.62);
+            clip-path: polygon(0 0, 52% 0, calc(52% - 80px) 100%, 0 100%);
+            pointer-events: none; z-index: 2;
+        }
+        /* Linha brilhante na borda da diagonal */
+        #menu-hline { display: none; }
+        #menu-scanlines { position: absolute; inset: 0; pointer-events: none; z-index: 10; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.06) 0, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 3px); }
         .menu-corner { position: absolute; width: 30px; height: 30px; z-index: 11; transition: border-color 0.9s; }
         #menu-corner-tl { top: 18px; left: 18px; border-top: 2px solid rgba(var(--menu-accent-rgb), 0.6); border-left: 2px solid rgba(var(--menu-accent-rgb), 0.6); }
         #menu-corner-br { bottom: 18px; right: 18px; border-bottom: 2px solid rgba(var(--menu-accent-rgb), 0.6); border-right: 2px solid rgba(var(--menu-accent-rgb), 0.6); }
-        #menu-inner { position: relative; z-index: 5; display: flex; width: 100%; height: 100%; }
-        #menu-panel-left { flex: 0 0 42%; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 5vh 4vw 5vh 6vw; position: relative; }
-        #menu-panel-left::after { content: ''; position: absolute; right: 0; top: 12%; bottom: 12%; width: 1px; background: linear-gradient(to bottom, transparent, rgba(var(--menu-accent-rgb), 0.7) 30%, rgba(var(--menu-accent-rgb), 0.7) 70%, transparent); transition: background 0.9s; }
-        #menu-panel-right { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 0 0 6vw; position: relative; }
-        .game-title { margin-bottom: 60px; animation: titlePulse 3s infinite ease-in-out; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        #menu-logo-container { margin-bottom: 18px; animation: none; justify-content: flex-start; }
-        #menu-logo-img { width: min(280px, 36vw); height: auto; display: block; overflow: visible; pointer-events: none; filter: drop-shadow(0 0 18px rgba(var(--menu-accent-rgb), 0.7)); transition: filter 0.9s; }
+        /* ── Layout: tela única, logo em cima, botões embaixo do logo ── */
+        #menu-inner {
+            position: relative; z-index: 5;
+            display: flex; width: 100%; height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0 0 0 6vw;
+            overflow: hidden;
+        }
+        #menu-panel-left {
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: flex-start;
+            padding: 0; position: relative;
+            margin-bottom: clamp(8px, 2vh, 36px);
+        }
+        #menu-panel-left::after { display: none; }
+        #menu-panel-right {
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: flex-start;
+            padding: 0; position: relative;
+        }
+        .game-title { margin-bottom: 0; animation: none; cursor: pointer; display: flex; align-items: center; justify-content: flex-start; }
+        #menu-logo-container { margin-bottom: 10px; animation: none; justify-content: flex-start; }
+        #menu-logo-img { width: min(200px, 26vw, 28vh); height: auto; display: block; overflow: visible; pointer-events: none; filter: drop-shadow(0 0 18px rgba(var(--menu-accent-rgb), 0.7)); transition: filter 0.9s; }
         @keyframes logoGlitch {
             0%, 100% { transform: translate(0) skewX(0deg); filter: drop-shadow(0 0 14px rgba(var(--menu-accent-rgb), 0.55)); clip-path: none; opacity: 1; }
             12%  { transform: translate(-6px, 2px) skewX(-4deg); filter: hue-rotate(90deg) brightness(2) saturate(3) drop-shadow(4px 0 0 var(--menu-accent)); clip-path: inset(12% 0 28% 0); }
@@ -186,52 +211,60 @@
             80%  { transform: translate(2px, 1px); filter: drop-shadow(3px 0 6px var(--menu-accent)) drop-shadow(-3px 0 6px #00ffff); }
         }
         #menu-logo-img.glitching { animation: logoGlitch 0.38s steps(1) forwards; }
-        #menu-studio-tag { position: relative; z-index: 2; font-size: clamp(8px, 0.9vw, 11px); letter-spacing: 7px; color: rgba(var(--menu-accent-rgb), 0.55); text-transform: uppercase; font-weight: 700; margin-top: 6px; transition: color 0.9s; }
-        #menu-char-bg { position: absolute; bottom: 0; left: 50%; transform: translateX(-30%); height: 78%; pointer-events: none; z-index: 1; opacity: 0.06; filter: grayscale(1); }
-        #menu-char-bg img { height: 100%; width: auto; object-fit: contain; object-position: bottom; }
+        #menu-studio-tag { position: relative; z-index: 2; font-size: clamp(7px, 0.9vw, 11px); letter-spacing: 7px; color: rgba(var(--menu-accent-rgb), 0.55); text-transform: uppercase; font-weight: 700; margin-top: 4px; margin-bottom: clamp(10px, 2vh, 32px); transition: color 0.9s; }
+        /* Separador horizontal entre logo e botões */
+        #menu-studio-tag::after {
+            content: ''; display: block; width: clamp(120px, 18vw, 220px); height: 1px;
+            background: linear-gradient(90deg, rgba(var(--menu-accent-rgb),0.5), transparent);
+            margin-top: clamp(8px, 1.5vh, 18px);
+        }
+        #menu-char-bg { position: absolute; right: 0; bottom: 0; height: 95%; pointer-events: none; z-index: 1; opacity: 0.10; filter: grayscale(0.6) brightness(0.7); }
+        #menu-char-bg img { height: 100%; width: auto; object-fit: contain; object-position: bottom right; }
         #menu-footer { position: absolute; bottom: 18px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 5vw; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.15); text-transform: uppercase; z-index: 11; }
-        @keyframes titlePulse { 0%, 100% { transform: scale(1); text-shadow: 0 0 15px #ff0055, 0 0 30px #ff0055, 3px 3px 0px #00ffff; } 50% { transform: scale(1.02); text-shadow: 0 0 25px #ff0055, 0 0 50px #ff0055, -3px -3px 0px #00ffff; } }
-        .menu-buttons { display: flex; flex-direction: column; gap: 0; width: min(480px, 90%); }
-        .menu-btn { position: relative; display: flex; align-items: center; height: clamp(46px, 6.5vh, 62px); background: transparent; border: none; cursor: pointer; overflow: visible; font-family: inherit; outline: none; text-align: left; margin-bottom: 3px; transition: transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1); padding: 0 16px 0 0; }
-        .menu-btn::after { content: ''; position: absolute; inset: 3px 0; background: rgba(255,255,255,0.035); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transition: background 0.22s, clip-path 0.22s cubic-bezier(0.22, 0.61, 0.36, 1); pointer-events: none; }
-        .mb-bar { position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; background: var(--menu-accent); transition: width 0.18s, background 0.9s; pointer-events: none; }
-        .mb-num { position: relative; z-index: 2; font-size: clamp(9px, 0.9vw, 11px); color: rgba(var(--menu-accent-rgb), 0.5); font-weight: 800; letter-spacing: 1px; width: 36px; text-align: center; flex-shrink: 0; transition: color 0.9s; }
-        .mb-label { position: relative; z-index: 2; font-size: clamp(12px, 1.4vw, 15px); font-weight: 800; letter-spacing: 3px; color: rgba(255,255,255,0.65); text-transform: uppercase; transition: color 0.15s, letter-spacing 0.15s; }
-        .menu-btn:not(.locked):hover::after { background: rgba(var(--menu-accent-rgb), 0.26); clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%); transition: background 0.22s, clip-path 0.22s cubic-bezier(0.22, 0.61, 0.36, 1); }
-        .menu-btn:not(.locked):hover { transform: translateX(14px); }
-        .menu-btn:not(.locked):hover .mb-bar { width: 8px; }
-        .menu-btn:not(.locked):hover .mb-label { color: #fff; letter-spacing: 5px; text-shadow: 0 0 22px rgba(var(--menu-accent-rgb), 1); }
-        .menu-btn:not(.locked):hover .mb-num { color: var(--menu-accent); text-shadow: 0 0 10px rgba(var(--menu-accent-rgb), 0.8); }
-        .menu-btn.locked { opacity: 0.3; pointer-events: none; cursor: not-allowed; }
+        @keyframes titlePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.01); } }
+        .menu-buttons { display: flex; flex-direction: column; gap: 0; width: auto; min-width: min(380px, 80%); }
+        .menu-btn { position: relative; display: flex; align-items: center; height: clamp(36px, 5.5vh, 58px); background: transparent; border: none; cursor: pointer; overflow: visible; font-family: inherit; outline: none; text-align: left; margin-bottom: 1px; transition: transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1); padding: 0 24px 0 0; }
+        .menu-btn::after { content: none; }
+        .mb-bar { position: absolute; left: 0; top: 6px; bottom: 6px; width: 2px; background: rgba(var(--menu-accent-rgb), 0.2); transition: width 0.18s, background 0.18s, box-shadow 0.18s; pointer-events: none; }
+        .mb-num { position: relative; z-index: 2; font-size: clamp(11px, 1.4vw, 15px); color: rgba(var(--menu-accent-rgb), 0.4); font-weight: 800; letter-spacing: 1px; width: 44px; text-align: center; flex-shrink: 0; transition: color 0.18s; display: flex; align-items: center; justify-content: center; }
+        .mb-num svg { stroke: rgba(var(--menu-accent-rgb), 0.4); transition: stroke 0.18s; flex-shrink: 0; }
+        .mb-label { position: relative; z-index: 2; font-size: clamp(12px, 1.3vw, 14px); font-weight: 800; letter-spacing: 3px; color: rgba(255,255,255,0.4); text-transform: uppercase; transition: color 0.18s, letter-spacing 0.18s, text-shadow 0.18s; white-space: nowrap; }
+        /* Partículas inline por botão */
+        .menu-btn canvas.btn-sparks { position: absolute; inset: -4px -8px; width: calc(100% + 16px); height: calc(100% + 8px); pointer-events: none; z-index: 0; opacity: 0; transition: opacity 0.2s; }
+        .menu-btn:not(.locked):hover canvas.btn-sparks,
+        .menu-btn.gp-focus canvas.btn-sparks { opacity: 1; }
+        /* Hover — só efeito de texto, sem caixa */
+        .menu-btn:not(.locked):hover { transform: translateX(10px); }
+        .menu-btn:not(.locked):hover .mb-bar { width: 3px; background: var(--menu-accent); box-shadow: 0 0 8px rgba(var(--menu-accent-rgb), 0.9); }
+        .menu-btn:not(.locked):hover .mb-label { color: #fff; letter-spacing: 5px; text-shadow: 0 0 20px rgba(var(--menu-accent-rgb), 1); }
+        .menu-btn:not(.locked):hover .mb-num { color: var(--menu-accent); }
+        .menu-btn:not(.locked):hover .mb-num svg { stroke: var(--menu-accent); }
+        /* Gamepad focus */
+        .menu-btn.gp-focus { transform: translateX(8px); }
+        .menu-btn.gp-focus .mb-bar { width: 3px; background: var(--menu-accent); box-shadow: 0 0 8px rgba(var(--menu-accent-rgb), 0.9); }
+        .menu-btn.gp-focus .mb-label { color: #fff; letter-spacing: 5px; text-shadow: 0 0 20px rgba(var(--menu-accent-rgb), 1); }
+        .menu-btn.gp-focus .mb-num { color: var(--menu-accent); }
+        .menu-btn.gp-focus .mb-num svg { stroke: var(--menu-accent); }
+        /* Locked */
+        .menu-btn.locked { opacity: 0.22; pointer-events: none; cursor: not-allowed; }
         .menu-btn.locked .mb-label::after { content: ' 🔒'; font-size: 0.6em; opacity: 0.7; }
-        .menu-btn.sair { margin-top: 14px; }
-        .menu-btn.sair .mb-bar { background: #444; }
-        .menu-btn.sair .mb-label { color: #555; }
+        /* Sair */
+        .menu-btn.sair { margin-top: clamp(4px, 1vh, 14px); }
+        .menu-btn.sair::before { background: rgba(255,255,255,0.08); }
+        .menu-btn.sair .mb-label { color: rgba(255,255,255,0.2); }
         .menu-btn.sair:hover { transform: translateX(4px); }
-        /* Grupo expansível Capítulo 1 */
+        .menu-btn.sair:hover::before { background: rgba(255,255,255,0.3); box-shadow: none; }
+        .menu-btn.sair:hover .mb-label { color: rgba(255,255,255,0.55); text-shadow: none; letter-spacing: 3px; }
+        .menu-btn.sair:hover .mb-num svg { stroke: rgba(255,255,255,0.35); }
+        /* Grupo expansível */
         .menu-btn-group { cursor: pointer; }
         .menu-btn-group.open { opacity: 1; }
         #cap1-children { overflow: hidden; }
         .menu-btn-child { padding-left: 32px !important; opacity: 0.9; font-size: 0.92em; }
-        .menu-btn-child .mb-bar { background: rgba(var(--menu-accent-rgb), 0.5); }
-        .menu-btn-child:not(.locked):hover .mb-bar { background: var(--menu-accent); }
-        .menu-btn.sair:hover .mb-label { color: #aaa; text-shadow: none; }
-        .menu-btn.sair:hover .mb-bar { background: #888; width: 4px; }
-        .menu-btn.sair:hover::after { background: rgba(255,255,255,0.06); }
-        /* Indicador de botão A do controle */
+        /* Indicador gamepad */
         .gp-a { display: none; align-items: center; gap: 6px; pointer-events: none; }
         .gp-a-badge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #2a9d4e; border: 2px solid #5dde82; font-size: 11px; font-weight: 700; color: #fff; font-family: sans-serif; flex-shrink: 0; }
         body.has-gamepad .gp-a { display: inline-flex; }
-
-        /* Foco por controle */
-        .menu-btn.gp-focus { transform: translateX(8px); }
-        .menu-btn.gp-focus::after { background: rgba(var(--menu-accent-rgb), 0.22) !important; clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%) !important; }
-        .menu-btn.gp-focus .mb-bar { width: 5px; }
-        .menu-btn.gp-focus .mb-label { color: #fff; letter-spacing: 4px; text-shadow: 0 0 14px rgba(var(--menu-accent-rgb), 0.8); }
-        .menu-btn.gp-focus .mb-num { color: var(--menu-accent); }
-        .menu-btn.sair.gp-focus { transform: translateX(4px); }
-        .menu-btn.sair.gp-focus .mb-label { color: #aaa; text-shadow: none; }
-        .menu-btn.sair.gp-focus .mb-bar { background: #888; width: 4px; }
         .menu-btn:not(.locked) { pointer-events: auto; }
         /* ── Save Panel ── */
         #save-panel { position:fixed; inset:0; z-index:12000; display:flex; pointer-events:none; align-items:flex-start; justify-content:center; background:rgba(0,0,0,0); backdrop-filter:blur(0px); transition:background 0.65s ease, backdrop-filter 0.65s ease; }
@@ -343,7 +376,7 @@
         /* ── Achievement Popup ── */
         /* ── Achievement Popup — Dramático compacto ── */
         #achievement-popup {
-            position:fixed; right:20px; top:20px; z-index:13650; display:none;
+            position:fixed; right:20px; top:20px; z-index:99999999; display:none;
             width:min(340px,92vw);
             background:#07000f;
             border:1px solid rgba(255,255,255,0.07);
@@ -374,8 +407,8 @@
             background:var(--menu-accent); border-radius:50%; flex-shrink:0;
         }
         #achievement-popup-title {
-            font-size:14px; font-weight:900; color:#fff; line-height:1.2;
-            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+            font-size:14px; font-weight:900; color:#fff; line-height:1.3;
+            white-space:normal; overflow:visible; text-overflow:unset;
         }
         #achievement-popup-sub {
             font-size:10px; color:rgba(255,255,255,0.3); margin-top:2px;
@@ -2476,6 +2509,271 @@
 <body>
     <div id="debug-js-indicator" style="display:none">JS: index.html</div>
 
+<!-- ══ TELA DE PAUSA DO PROJETO ══════════════════════════════════════════════ -->
+<div id="neroblock" style="
+  position: fixed; inset: 0; background: #000; z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #fff; text-align: center; padding: 40px;
+  opacity: 1; transition: opacity 1.2s ease;
+">
+  <!-- Partícula decorativa superior -->
+  <div style="width: 1px; height: 60px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.15)); margin-bottom: 48px;"></div>
+
+  <!-- Conteúdo principal -->
+  <div id="neroblock-page-1" style="max-width: 540px; transition: opacity 0.8s ease, transform 0.8s ease;">
+    <p style="font-size: 10px; letter-spacing: 6px; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 32px;">Himari Games</p>
+    <h1 style="font-size: clamp(14px,1.6vw,18px); font-weight: 300; letter-spacing: 4px; color: rgba(255,255,255,0.9); text-transform: uppercase; margin-bottom: 40px; line-height: 1.4;">Aviso importante</h1>
+    <div style="width: 40px; height: 1px; background: rgba(255,255,255,0.15); margin: 0 auto 40px;"></div>
+    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65); margin-bottom: 16px;">
+      O desenvolvimento deste projeto foi pausado por tempo indeterminado.
+    </p>
+    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65); margin-bottom: 16px;">
+      A ideia sempre foi criar algo nosso.<br>
+      Um jogo feito entre amigos, para amigos.
+    </p>
+    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65); margin-bottom: 16px;">
+      Mas, com o tempo, eu acabei meio que só criando tudo sozinha.<br>
+      E isso me fez perceber algo bem ruim:<br>
+      não era algo que estávamos construindo juntos.
+    </p>
+    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65); margin-bottom: 16px;">
+      Pensando dessa forma… o projeto todo perdeu o sentido.<br>
+      Não tem culpa, só a certeza de que pode existir algo melhor,<br>que realmente envolva todos.
+    </p>
+    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65);">
+      Obrigada pelos testes lendários.
+    </p>
+
+    <!-- Botão próximo -->
+    <button id="neroblock-next-btn" onclick="neroblockNext()" style="
+      position: fixed; bottom: 36px; right: 40px;
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: 11px; letter-spacing: 5px;
+      color: rgba(255,255,255,0.3); text-transform: uppercase;
+      display: flex; align-items: center; gap: 10px;
+      transition: color 0.3s;
+      padding: 8px 0;
+    "
+    onmouseover="this.style.color='rgba(255,255,255,0.7)'"
+    onmouseout="this.style.color='rgba(255,255,255,0.3)'"
+    >
+      próximo
+      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 5H15M15 5L11 1M15 5L11 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Página 2 (oculta inicialmente) -->
+  <div id="neroblock-page-2" style="
+    max-width: 540px; display: none; opacity: 0;
+    transform: translateY(16px); transition: opacity 2.2s ease, transform 2.2s ease;
+  ">
+    <p style="font-size: clamp(15px,1.4vw,18px); font-weight: 300; line-height: 2.2; color: rgba(255,255,255,0.7);">
+      Mal posso esperar pra saber<br>o que vamos fazer juntos da próxima vez. ❤️
+    </p>
+  </div>
+
+  <!-- Botão fechar (oculto) -->
+  <button id="neroblock-close-btn" onclick="neroblockClose()" style="
+    display: none; margin-top: 48px;
+    background: none; border: 1px solid rgba(255,255,255,0.12); cursor: pointer;
+    font-family: inherit; font-size: 11px; letter-spacing: 5px;
+    color: rgba(255,255,255,0.35); text-transform: uppercase;
+    padding: 14px 36px; transition: all 0.3s;
+    opacity: 0; animation: none;
+  "
+  onmouseover="this.style.color='rgba(255,255,255,0.8)';this.style.borderColor='rgba(255,255,255,0.35)'"
+  onmouseout="this.style.color='rgba(255,255,255,0.35)';this.style.borderColor='rgba(255,255,255,0.12)'"
+  >
+    fechar jogo
+  </button>
+
+  <!-- Partícula decorativa inferior -->
+  <div style="width: 1px; height: 60px; background: linear-gradient(to top, transparent, rgba(255,255,255,0.15)); margin-top: 48px;"></div>
+</div>
+
+<script>
+(function() {
+  /* ── Trava total: intercepta tudo antes do jogo carregar ── */
+  var _pauseActive = true;
+  var _typedBuffer = '';
+  var _unlockCode = 'nero';
+
+  /* Bloqueia qualquer init do jogo */
+  window._pauseScreenActive = true;
+
+  /* Escuta a senha digitada a qualquer momento */
+  document.addEventListener('keydown', function(e) {
+    if (!_pauseActive) return;
+    /* bloqueia F12 / debug */
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
+      e.preventDefault(); e.stopImmediatePropagation(); return false;
+    }
+    _typedBuffer += e.key.toLowerCase();
+    if (_typedBuffer.length > _unlockCode.length) {
+      _typedBuffer = _typedBuffer.slice(-_unlockCode.length);
+    }
+    if (_typedBuffer === _unlockCode) {
+      _pauseActive = false;
+      var ps = document.getElementById('neroblock');
+      ps.style.opacity = '0';
+      ps.style.pointerEvents = 'none';
+      setTimeout(function() { ps.style.display = 'none'; window._pauseScreenActive = false; }, 1200);
+    }
+  }, true);
+
+  /* Bloqueia cliques fora da pause screen enquanto ativa */
+  document.addEventListener('click', function(e) {
+    if (!_pauseActive) return;
+    var ps = document.getElementById('neroblock');
+    if (!ps.contains(e.target)) { e.stopImmediatePropagation(); e.preventDefault(); }
+  }, true);
+
+  /* ── Funções de fluxo da tela ── */
+  window.neroblockNext = function() {
+    var page1 = document.getElementById('neroblock-page-1');
+    var page2 = document.getElementById('neroblock-page-2');
+    var nextBtn = document.getElementById('neroblock-next-btn');
+
+    /* Fade out página 1 — lento e suave */
+    page1.style.transition = 'opacity 1.4s ease, transform 1.4s ease';
+    page1.style.opacity = '0';
+    page1.style.transform = 'translateY(-12px)';
+    nextBtn.style.transition = 'opacity 1.0s ease';
+    nextBtn.style.opacity = '0';
+    nextBtn.style.pointerEvents = 'none';
+
+    setTimeout(function() {
+      page1.style.display = 'none';
+
+      /* Mostrar página 2 com fade bem lento */
+      page2.style.transition = 'opacity 2.2s ease, transform 2.2s ease';
+      page2.style.display = 'block';
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          page2.style.opacity = '1';
+          page2.style.transform = 'translateY(0)';
+        });
+      });
+
+      /* Fica visível por 7s antes de começar o fade out */
+      setTimeout(function() {
+        /* fade out lento e dramático */
+        page2.style.transition = 'opacity 3.0s ease, transform 3.0s ease';
+        page2.style.opacity = '0';
+        page2.style.transform = 'translateY(-8px)';
+
+        setTimeout(function() {
+          page2.style.display = 'none';
+
+          /* botão fechar aparece devagar */
+          var closeBtn = document.getElementById('neroblock-close-btn');
+          closeBtn.style.transition = 'opacity 1.8s ease';
+          closeBtn.style.display = 'inline-block';
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              closeBtn.style.opacity = '1';
+            });
+          });
+
+          /* Dispara conquista real do jogo — tenta agora e repete até conseguir */
+          (function _tryGrantPauseThanks() {
+            function _grant() {
+              if (typeof achievementsState === 'undefined' || !achievementsState) return false;
+
+              /* Substitui o som da conquista pelo fanfare emocional só desta vez */
+              var _origSfx = window.playAchievementUnlockSfx;
+              if (typeof playAchievementUnlockSfx !== 'undefined') {
+                window._pauseThanksOverrideSfx = true;
+                window._pauseThanksAmizade = true;
+              }
+
+              if (typeof hasAchievement === 'function' && hasAchievement('pause_thanks')) {
+                if (typeof queueAchievementPopup === 'function') {
+                  queueAchievementPopup({
+                    title: 'Obrigada por testar e acreditar na minha ideia',
+                    description: 'Você esteve aqui quando o projeto pausou. ❤️',
+                    image: 'assets/images/logo/icon.png',
+                    rewardCoins: 0
+                  });
+                }
+                return true;
+              }
+              if (typeof unlockAchievement === 'function') {
+                unlockAchievement('pause_thanks');
+                return true;
+              }
+              return false;
+            }
+            if (!_grant()) {
+              var _t = setInterval(function() { if (_grant()) clearInterval(_t); }, 300);
+            }
+            /* Estende a duração do popup para 8s nessa conquista específica */
+            (function _extendPopupDuration() {
+              function _tryExtend() {
+                if (typeof _achievementHideTimer === 'undefined') return false;
+                /* Espera o popup estar visível */
+                var popup = document.getElementById('achievement-popup');
+                if (!popup || popup.style.display === 'none') return false;
+                /* Cancela o timer original e redefine para 8s */
+                if (_achievementHideTimer) {
+                  clearTimeout(_achievementHideTimer);
+                  _achievementHideTimer = null;
+                }
+                var barEl = document.getElementById('achievement-popup-bar');
+                var coinsEl = document.getElementById('achievement-popup-coins');
+                if (barEl) {
+                  barEl.classList.remove('running');
+                  void barEl.offsetWidth;
+                  barEl.style.setProperty('--bar-duration', '8s');
+                  requestAnimationFrame(function(){ requestAnimationFrame(function(){ barEl.classList.add('running'); }); });
+                }
+                _achievementHideTimer = setTimeout(function() {
+                  _achievementHideTimer = null;
+                  popup.classList.remove('show');
+                  popup.classList.add('hide');
+                  setTimeout(function() {
+                    popup.classList.remove('hide');
+                    popup.style.display = 'none';
+                    if (coinsEl) coinsEl.classList.remove('visible');
+                    if (barEl) barEl.classList.remove('running');
+                    _achievementShowing = false;
+                    if (typeof showNextAchievementPopup === 'function') showNextAchievementPopup();
+                  }, 340);
+                }, 8000);
+                return true;
+              }
+              /* Tenta logo após o disparo, dá tempo do popup aparecer */
+              setTimeout(function() {
+                if (!_tryExtend()) {
+                  var _r = setInterval(function() { if (_tryExtend()) clearInterval(_r); }, 100);
+                }
+              }, 200);
+            })();
+          })();
+
+        }, 3200);
+      }, 7000);
+
+    }, 1500);
+  };
+
+  window.neroblockClose = function() {
+    var ps = document.getElementById('neroblock');
+    ps.style.opacity = '0';
+    setTimeout(function() {
+      /* Tenta fechar a janela — funciona se aberta via link/app */
+      window.close();
+      /* Fallback: mostra mensagem discreta */
+      document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:rgba(255,255,255,0.2);font-size:11px;letter-spacing:4px;text-transform:uppercase;">Pode fechar esta aba</div>';
+    }, 900);
+  };
+})();
+</script>
+<!-- ══ fim TELA DE PAUSA ══════════════════════════════════════════════════════ -->
+
     <div id="fade-overlay"></div>
     <div id="white-flash"></div>
 
@@ -2565,23 +2863,22 @@
                     </svg>
                 </div>
                 <div id="menu-studio-tag">Himari Games &nbsp;·&nbsp; 2026</div>
-                <div id="menu-char-bg"><img src="assets/images/characters/abbyl.png" alt=""></div>
             </div>
             <div id="menu-panel-right">
                 <!-- Menu Principal -->
                 <div class="menu-buttons" id="main-menu-buttons">
-                    <button class="menu-btn" id="chapters-menu-btn"><span class="mb-bar"></span><span class="mb-num">▶</span><span class="mb-label">Capítulos</span></button>
-                    <button class="menu-btn" id="save-btn"><span class="mb-bar"></span><span class="mb-num">💾</span><span class="mb-label">Salvar Jogo</span></button>
-                    <button class="menu-btn" id="load-btn"><span class="mb-bar"></span><span class="mb-num">📂</span><span class="mb-label">Carregar Jogo</span></button>
-                    <button class="menu-btn" id="settings-menu-btn"><span class="mb-bar"></span><span class="mb-num">⚙</span><span class="mb-label">Configurações</span></button>
-                    <button class="menu-btn" id="nero-store-menu-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="1em" height="1em" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:-0.15em"><circle cx="10" cy="10" r="9" fill="#e8a000" stroke="#b87800" stroke-width="1.2"/><circle cx="10" cy="10" r="6" fill="none" stroke="#ffd060" stroke-width="1"/><circle cx="7.5" cy="7.5" r="1.5" fill="#ffd060" opacity="0.7"/></svg></span><span class="mb-label"><span id="store-menu-name">Loja da Nero</span> <span id="nero-ban-timer" style="display:none;font-size:0.75em;color:#ff6666;margin-left:6px;"></span></span></button>
-                    <button class="menu-btn" id="conquistas-menu-btn"><span class="mb-bar"></span><span class="mb-num">★</span><span class="mb-label">Conquistas</span></button>
-                    <button class="menu-btn" id="update-menu-btn"><span class="mb-bar"></span><span class="mb-num">↓</span><span class="mb-label">Atualização <span id="update-menu-badge" style="font-size:9px;color:#a78bfa;letter-spacing:2px"></span></span></button>
-                    <button class="menu-btn" id="boss-nero-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num">07</span><span class="mb-label">Boss Nero</span></button>
-                    <button class="menu-btn" id="battle-test-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num">⚔</span><span class="mb-label">Modo de Batalha</span></button>
+                    <button class="menu-btn" id="chapters-menu-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span class="mb-label">Capítulos</span></button>
+                    <button class="menu-btn" id="save-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span><span class="mb-label">Salvar Jogo</span></button>
+                    <button class="menu-btn" id="load-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg></span><span class="mb-label">Carregar Jogo</span></button>
+                    <button class="menu-btn" id="settings-menu-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span><span class="mb-label">Configurações</span></button>
+                    <button class="menu-btn" id="nero-store-menu-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span><span class="mb-label"><span id="store-menu-name">Loja da Nero</span> <span id="nero-ban-timer" style="display:none;font-size:0.75em;color:#ff6666;margin-left:6px;"></span></span></button>
+                    <button class="menu-btn" id="conquistas-menu-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span><span class="mb-label">Conquistas</span></button>
+                    <button class="menu-btn" id="update-menu-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span><span class="mb-label">Atualização <span id="update-menu-badge" style="font-size:9px;color:#a78bfa;letter-spacing:2px"></span></span></button>
+                    <button class="menu-btn" id="boss-nero-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span><span class="mb-label">Boss Nero</span></button>
+                    <button class="menu-btn" id="battle-test-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span><span class="mb-label">Modo de Batalha</span></button>
                     <button class="menu-btn" id="nero-legendary-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num">NL</span><span class="mb-label">Nero Legendary Stuff</span></button>
-                    <button class="menu-btn" id="debug-menu-btn"><span class="mb-bar"></span><span class="mb-num">🔧</span><span class="mb-label">Debug Menu</span></button>
-                    <button class="menu-btn sair" id="sair-btn"><span class="mb-bar"></span><span class="mb-num">—</span><span class="mb-label">Sair</span></button>
+                    <button class="menu-btn" id="debug-menu-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span><span class="mb-label">Debug Menu</span></button>
+                    <button class="menu-btn sair" id="sair-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="mb-label">Sair</span></button>
                 </div>
                 <!-- Submenu: Capítulos -->
                 <div class="menu-buttons" id="chapters-submenu" style="display:none">
@@ -2767,6 +3064,7 @@
             <span>© 2026 Himari Games</span>
             <span>P7VN</span>
         </div>
+        <div id="menu-char-bg"><img src="assets/images/characters/abbyl.png" alt=""></div>
     </div>
 
     <div id="nero-store-screen">
@@ -2789,19 +3087,19 @@
             <div class="nero-store-layout">
                 <div class="nero-store-products">
                     <div class="nero-store-products-head">Produtos</div>
-                    <button class="menu-btn store-item-btn" id="store-item-auto" data-store-item="autoAdvance"><span class="mb-bar"></span><span class="mb-num">05</span><span class="mb-label">Auto-Texto</span></button>
-                    <button class="menu-btn store-item-btn" id="store-item-hide" data-store-item="hideDialogue"><span class="mb-bar"></span><span class="mb-num">05</span><span class="mb-label">Ocultar Diálogo</span></button>
-                    <button class="menu-btn store-item-btn" id="store-item-debug" data-store-item="debugMenu"><span class="mb-bar"></span><span class="mb-num">20</span><span class="mb-label">Acesso Debug Menu</span></button>
-                    <button class="menu-btn store-item-btn" id="store-item-secret" data-store-item="neroSecret"><span class="mb-bar"></span><span class="mb-num">2000</span><span class="mb-label">Segredo da Nero</span></button>              
+                    <button class="menu-btn store-item-btn" id="store-item-auto" data-store-item="autoAdvance"><span class="mb-bar"></span><span class="mb-num">50</span><span class="mb-label">Auto-Texto</span></button>
+                    <button class="menu-btn store-item-btn" id="store-item-hide" data-store-item="hideDialogue"><span class="mb-bar"></span><span class="mb-num">50</span><span class="mb-label">Ocultar Diálogo</span></button>
+                    <button class="menu-btn store-item-btn" id="store-item-debug" data-store-item="debugMenu"><span class="mb-bar"></span><span class="mb-num">200</span><span class="mb-label">Acesso Debug Menu</span></button>
+                    <button class="menu-btn store-item-btn" id="store-item-secret" data-store-item="neroSecret"><span class="mb-bar"></span><span class="mb-num">8000</span><span class="mb-label">Segredo da Nero</span></button>              
                     <button class="menu-btn store-item-btn store-item-fight" id="store-item-fight" data-store-item="fightNero"><span class="mb-bar"></span><span class="mb-num">9999</span><span class="mb-label">Brigar comigo</span></button>
                     <div class="nero-store-products-head" style="margin-top:8px">Temas de Menu</div>
-                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-blood"     data-store-item="themeBlood"    ><span class="mb-bar"></span><span class="mb-num">50</span><span class="mb-label">Tema: Blood Slash</span></button>
-                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-terminal"  data-store-item="themeTerminal" ><span class="mb-bar"></span><span class="mb-num">50</span><span class="mb-label">Tema: Terminal</span></button>
-                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-synthwave" data-store-item="themeSynthwave"><span class="mb-bar"></span><span class="mb-num">50</span><span class="mb-label">Tema: Synthwave</span></button>
-                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-editorial" data-store-item="themeEditorial"><span class="mb-bar"></span><span class="mb-num">50</span><span class="mb-label">Tema: Editorial</span></button>
-                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-deepsea"   data-store-item="themeDeepSea"  ><span class="mb-bar"></span><span class="mb-num">50</span><span class="mb-label">Tema: Deep Sea</span></button>
+                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-blood"     data-store-item="themeBlood"    ><span class="mb-bar"></span><span class="mb-num">500</span><span class="mb-label">Tema: Blood Slash</span></button>
+                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-terminal"  data-store-item="themeTerminal" ><span class="mb-bar"></span><span class="mb-num">500</span><span class="mb-label">Tema: Terminal</span></button>
+                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-synthwave" data-store-item="themeSynthwave"><span class="mb-bar"></span><span class="mb-num">500</span><span class="mb-label">Tema: Synthwave</span></button>
+                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-editorial" data-store-item="themeEditorial"><span class="mb-bar"></span><span class="mb-num">500</span><span class="mb-label">Tema: Editorial</span></button>
+                    <button class="menu-btn store-item-btn store-item-theme" id="store-item-theme-deepsea"   data-store-item="themeDeepSea"  ><span class="mb-bar"></span><span class="mb-num">500</span><span class="mb-label">Tema: Deep Sea</span></button>
                     <div class="nero-store-products-head" style="margin-top:8px">Game Time</div>
-                    <button class="menu-btn store-item-btn store-item-legendary" id="store-item-diff-legendary" data-store-item="diffLegendary"><span class="mb-bar"></span><span class="mb-num">500</span><span class="mb-label">Dificuldade: Legendary</span></button>
+                    <button class="menu-btn store-item-btn store-item-legendary" id="store-item-diff-legendary" data-store-item="diffLegendary"><span class="mb-bar"></span><span class="mb-num">50000</span><span class="mb-label">Dificuldade: Legendary</span></button>
                 </div>
 
                 <div class="nero-store-character">
@@ -3887,14 +4185,17 @@
     <audio id="walking-sound" loop preload="auto"><source src="./assets/audio/walking.mp3" type="audio/mpeg"></audio>
     <audio id="distorted-sound" preload="auto"><source src="./assets/audio/distorted.mp3" type="audio/mpeg"></audio>
     <audio id="abbyl-text" preload="auto"><source src="./assets/audio/txt2.wav" type="audio/wav"></audio>
-    <audio id="sfx-confirmation" preload="auto"><source src="./assets/audio/menuconfirm.wav" type="audio/wav"></audio>
+    <!-- (Web Audio API) — substitui arquivos externos ══
+         Parâmetros em: assets/audio/menu-sounds.json
+         Os elementos abaixo são proxies fake que redirecionam .play() para síntese. -->
+    <span id="sfx-confirmation"  data-synth="confirm"   style="display:none"></span>
     <audio id="sfx-choose-confirm" preload="auto"><source src="./assets/audio/choose-confirm.mp3" type="audio/mpeg"></audio>
     <audio id="sfx-conquista"      preload="auto"><source src="./assets/audio/conquista.mp3"      type="audio/mpeg"></audio>
     <audio id="sfx-coin"           preload="auto"><source src="./assets/audio/coin.mp3"            type="audio/mpeg"></audio>
     <audio id="sfx-start-game"     preload="auto"><source src="./assets/audio/start-game.mp3"      type="audio/mpeg"></audio>
     <audio id="sfx-warning"        preload="auto"><source src="./assets/audio/warning.mp3"         type="audio/mpeg"></audio>
-    <audio id="sfx-click-menu"      preload="auto"><source src="./assets/audio/click-menu.mp3"       type="audio/mpeg"></audio>
-    <audio id="sfx-back"            preload="auto"><source src="./assets/audio/back.mp3"               type="audio/mpeg"></audio>
+    <span id="sfx-click-menu"       data-synth="click"     style="display:none"></span>
+    <span id="sfx-back"             data-synth="back"      style="display:none"></span>
     <audio id="sfx-clock"           preload="auto"><source src="./assets/audio/clock.mp3"              type="audio/mpeg"></audio>
     <audio id="sfx-attack" preload="auto"><source src="./assets/audio/slice.wav" type="audio/wav"></audio>
     <audio id="sfx-ut-hitsound" preload="auto"><source src="./assets/audio/hitsound.wav" type="audio/wav"></audio>
@@ -3915,7 +4216,7 @@
         <source src="./assets/audio/nero_tense.mp3" type="audio/mpeg">
     </audio>
     <audio id="sfx-options" preload="auto"><source src="./assets/audio/options.wav" type="audio/wav"></audio>
-    <audio id="sfx-selection" preload="auto"><source src="./assets/audio/menumove.wav" type="audio/wav"></audio>
+    <span id="sfx-selection"        data-synth="selection" style="display:none"></span>
     <audio id="nero-text" preload="auto"><source src="./assets/audio/txt2.wav" type="audio/wav"></audio>
     <audio id="heal-sound" preload="auto"><source src="./assets/audio/healsound.wav" type="audio/wav"></audio>
     <audio id="creeppy-music" loop preload="auto"><source src="./assets/audio/creeppy.mp3" type="audio/mpeg"></audio>
@@ -4384,15 +4685,14 @@
             FULLSCREEN: 'fullscreen',
             DISCORD_DARK: 'discord_dark',
             NERO_LEGENDARY: 'nero_legendary',
-            DEBUG_MATRIX: 'debug_matrix'
+            DEBUG_MATRIX: 'debug_matrix',
+            PAUSE_THANKS: 'pause_thanks'
         });
         const SHOP_ITEM_IDS = Object.freeze({
             AUTO_ADVANCE: 'autoAdvance',
             HIDE_DIALOGUE: 'hideDialogue',
             DEBUG_MENU: 'debugMenu',
             NERO_SECRET: 'neroSecret',
-            DLC_MESTRE: 'dlcMestre',
-            DLC_VOLKEN: 'dlcVolken',
             FIGHT_NERO: 'fightNero',
             THEME_BLOOD:     'themeBlood',
             THEME_TERMINAL:  'themeTerminal',
@@ -4438,8 +4738,6 @@
             hideDialogue: 'Esconde a caixinha de dialogo. Boa pra ver as cenas sem nada na frente.',
             debugMenu:    'Acesso ao menu de debug. Você realmente precisa disso?',
             neroSecret:   'Não vou spoilar. Mas vale.',
-            dlcMestre:    'Uma mini historia sobre o Mestre do Giro. Juro que e boa.',
-            dlcVolken:    'DLC do Volkenburt. Ele me pediu pra colocar aqui.',
             fightNero:    'Você quer mesmo brigar comigo? Interessante.',
             themeBlood:   'Deixa o menu vermelho sangue. Muito dramatico, gostei.',
             themeTerminal:'Estilo hacker anos 90. Verde fosforescente e tudo mais.',
@@ -4523,6 +4821,12 @@
                 description: 'Debug menu ativado.',
                 image: 'assets/images/ui/cursor.png',
                 rewardCoins: 300
+            },
+            [ACHIEVEMENT_IDS.PAUSE_THANKS]: {
+                title: 'Obrigada por testar e acreditar na minha ideia',
+                description: 'Você esteve aqui quando o projeto pausou. ❤️',
+                image: 'assets/images/logo/icon.png',
+                rewardCoins: 9999
             }
         });
 
@@ -4586,6 +4890,14 @@
         }
 
         function playAchievementUnlockSfx() {
+            /* Som especial para a conquista de despedida */
+            if (window._pauseThanksOverrideSfx) {
+                window._pauseThanksOverrideSfx = false;
+                if (typeof window._himariSfxPlay === 'function') {
+                    window._himariSfxPlay('pause_thanks_fanfare', 0.85);
+                    return;
+                }
+            }
             const sfxConq = document.getElementById('sfx-conquista');
             if (sfxConq) { sfxConq.currentTime = 0; sfxConq.play().catch(() => {}); }
             else if (sfxCorrect) { sfxCorrect.currentTime = 0; sfxCorrect.play().catch(() => {}); }
@@ -4660,6 +4972,149 @@
                     if (step >= steps) {
                         clearInterval(countTimer);
                         amountEl.textContent = '+' + reward;
+
+                        /* ── Easter egg pause_thanks: apaga o número e escreve "amizade" ── */
+                        if (window._pauseThanksAmizade) {
+                            window._pauseThanksAmizade = false;
+                            setTimeout(function() {
+                                /* Som de apagar — synth retrowave descendente */
+                                (function _playEraseSound() {
+                                    try {
+                                        var ctx = window._himariSfxPlay && window._actx;
+                                        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+                                        var ac = (window._actx && window._actx.state !== 'closed') ? window._actx : new AudioCtx();
+                                        if (ac.state === 'suspended') ac.resume();
+                                        var now = ac.currentTime;
+                                        /* Camada noise curta + tom descendente = efeito de "erase" */
+                                        var layers = [
+                                            { waveform:'noise',  duration:0.18, attack:0.005, decay:0.17, vol:0.10, offset:0.00 },
+                                            { waveform:'square', freqStart:600, freqEnd:120,  duration:0.22, attack:0.005, decay:0.20, vol:0.14, offset:0.00 },
+                                            { waveform:'sine',   freqStart:400, freqEnd:80,   duration:0.28, attack:0.008, decay:0.26, vol:0.10, offset:0.02 }
+                                        ];
+                                        var master = ac.createGain();
+                                        master.gain.setValueAtTime(0.7, now);
+                                        var filt = ac.createBiquadFilter();
+                                        filt.type = 'lowpass'; filt.frequency.value = 1800; filt.Q.value = 1.0;
+                                        filt.connect(master); master.connect(ac.destination);
+                                        layers.forEach(function(l) {
+                                            var t0 = now + (l.offset || 0);
+                                            var g = ac.createGain();
+                                            g.gain.setValueAtTime(0, t0);
+                                            g.gain.linearRampToValueAtTime(l.vol, t0 + l.attack);
+                                            g.gain.exponentialRampToValueAtTime(0.0001, t0 + l.decay);
+                                            g.connect(filt);
+                                            if (l.waveform === 'noise') {
+                                                var frames = Math.ceil(ac.sampleRate * (l.duration + 0.01));
+                                                var buf = ac.createBuffer(1, frames, ac.sampleRate);
+                                                var d = buf.getChannelData(0);
+                                                for (var i = 0; i < frames; i++) d[i] = Math.random() * 2 - 1;
+                                                var src = ac.createBufferSource();
+                                                src.buffer = buf; src.connect(g);
+                                                src.start(t0); src.stop(t0 + l.duration + 0.01);
+                                            } else {
+                                                var osc = ac.createOscillator();
+                                                osc.type = l.waveform;
+                                                osc.frequency.setValueAtTime(l.freqStart, t0);
+                                                osc.frequency.exponentialRampToValueAtTime(Math.max(l.freqEnd, 1), t0 + l.duration);
+                                                osc.connect(g); osc.start(t0); osc.stop(t0 + l.duration + 0.02);
+                                            }
+                                        });
+                                    } catch(e) {}
+                                })();
+
+                                /* Apaga o número caractere por caractere */
+                                var current = amountEl.textContent;
+                                var eraseIdx = current.length;
+                                var eraseTimer = setInterval(function() {
+                                    eraseIdx--;
+                                    amountEl.textContent = current.slice(0, eraseIdx);
+                                    if (eraseIdx <= 0) {
+                                        clearInterval(eraseTimer);
+                                        /* Pausa e então digita "amizade" */
+                                        setTimeout(function() {
+                                            var word = 'amizade';
+                                            var typeIdx = 0;
+                                            amountEl.style.color = '#c4a8ff';
+                                            amountEl.style.fontFamily = "'Segoe UI', sans-serif";
+                                            amountEl.style.fontSize = '13px';
+                                            amountEl.style.letterSpacing = '3px';
+                                            amountEl.textContent = '';
+
+                                            /* ── Moeda vira coração ── */
+                                            var coinIcon = document.getElementById('achievement-coin-icon');
+                                            if (coinIcon) {
+                                                coinIcon.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+                                                coinIcon.style.transform = 'scale(0)';
+                                                coinIcon.style.opacity = '0';
+                                                setTimeout(function() {
+                                                    coinIcon.innerHTML = '❤️';
+                                                    coinIcon.style.fontSize = '13px';
+                                                    coinIcon.style.animation = 'none';
+                                                    coinIcon.style.transform = 'scale(1.4)';
+                                                    coinIcon.style.opacity = '1';
+                                                    setTimeout(function() {
+                                                        coinIcon.style.transform = 'scale(1)';
+                                                    }, 200);
+                                                }, 400);
+                                            }
+
+                                            /* ── "moedas" cai pela tela ── */
+                                            var coinLabel = document.getElementById('achievement-coin-label');
+                                            if (coinLabel) {
+                                                var rect = coinLabel.getBoundingClientRect();
+                                                /* Cria clone flutuante */
+                                                var ghost = document.createElement('div');
+                                                ghost.textContent = 'moedas';
+                                                ghost.style.cssText = [
+                                                    'position:fixed',
+                                                    'left:' + rect.left + 'px',
+                                                    'top:' + rect.top + 'px',
+                                                    'font-size:8px',
+                                                    'letter-spacing:3px',
+                                                    'text-transform:uppercase',
+                                                    'color:rgba(255,200,60,0.5)',
+                                                    'font-weight:900',
+                                                    'pointer-events:none',
+                                                    'z-index:999999999',
+                                                    'transition:top 2.2s cubic-bezier(0.25,0.46,0.45,0.94), opacity 2.2s ease'
+                                                ].join(';');
+                                                document.body.appendChild(ghost);
+                                                /* Esconde o original */
+                                                coinLabel.style.opacity = '0';
+                                                /* Dispara a queda no próximo frame */
+                                                requestAnimationFrame(function() { requestAnimationFrame(function() {
+                                                    ghost.style.top = (window.innerHeight + 40) + 'px';
+                                                    ghost.style.opacity = '0';
+                                                }); });
+                                                setTimeout(function() {
+                                                    if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+                                                }, 2500);
+                                            }
+
+                                            var typeTimer = setInterval(function() {
+                                                amountEl.textContent += word[typeIdx];
+                                                typeIdx++;
+                                                /* Som de digitação leve para cada letra */
+                                                try {
+                                                    var AudioCtx2 = window.AudioContext || window.webkitAudioContext;
+                                                    var ac2 = (window._actx && window._actx.state !== 'closed') ? window._actx : new AudioCtx2();
+                                                    if (ac2.state === 'suspended') ac2.resume();
+                                                    var now2 = ac2.currentTime;
+                                                    var og = ac2.createGain(); og.gain.setValueAtTime(0.06, now2);
+                                                    var osc2 = ac2.createOscillator();
+                                                    osc2.type = 'sine';
+                                                    osc2.frequency.setValueAtTime(700 + typeIdx * 40, now2);
+                                                    og.gain.exponentialRampToValueAtTime(0.0001, now2 + 0.07);
+                                                    osc2.connect(og); og.connect(ac2.destination);
+                                                    osc2.start(now2); osc2.stop(now2 + 0.08);
+                                                } catch(e) {}
+                                                if (typeIdx >= word.length) clearInterval(typeTimer);
+                                            }, 110);
+                                        }, 300);
+                                    }
+                                }, 55);
+                            }, 1200); /* espera 1.2s após o contador chegar em 9999 */
+                        }
                     }
                 }, interval);
             }
@@ -6216,13 +6671,11 @@
                 const owned = hasShopItem(itemId);
                 const isSecret = itemId === SHOP_ITEM_IDS.NERO_SECRET;
                 const canAfford = getCoins() >= price;
-                const isDlc = itemId === SHOP_ITEM_IDS.DLC_MESTRE || itemId === SHOP_ITEM_IDS.DLC_VOLKEN;
                 if (label) {
-                    if (owned && isDlc)    label.textContent = '▶ ' + SHOP_ITEMS[itemId].title;
-                    else if (owned && !isSecret) label.textContent = SHOP_ITEMS[itemId].title + ' (Comprado)';
+                    if (owned && !isSecret) label.textContent = SHOP_ITEMS[itemId].title + ' (Comprado)';
                     else label.textContent = SHOP_ITEMS[itemId].title;
                 }
-                btn.classList.toggle('locked', !owned && !canAfford && !isSecret && !isDlc);
+                btn.classList.toggle('locked', !owned && !canAfford && !isSecret);
             });
 
             applyPurchasedFeaturesState();
@@ -6440,11 +6893,6 @@
             }
 
             if (hasShopItem(itemId)) {
-                // DLC já comprada → lançar direto
-                if (itemId === SHOP_ITEM_IDS.DLC_MESTRE || itemId === SHOP_ITEM_IDS.DLC_VOLKEN) {
-                    _launchDlc(item.dlcFolder);
-                    return;
-                }
                 setStoreLine('Esse ai ja ta no seu bolso.');
                 return;
             }
@@ -6458,24 +6906,7 @@
             refreshShopUi();
             if (sfxConfirmation) { sfxConfirmation.currentTime = 0; sfxConfirmation.play().catch(() => {}); }
             doAutoSave();
-            // DLC: fala especial + lança o minigame
-            if (itemId === SHOP_ITEM_IDS.DLC_MESTRE || itemId === SHOP_ITEM_IDS.DLC_VOLKEN) {
-                setStoreLine('Boa escolha. Abrindo agora...');
-                setTimeout(function() { _launchDlc(item.dlcFolder); }, 800);
-            } else {
-                setStoreLine(randomFrom(_storeLines(STORE_BUY_LINES, MUSUME_BUY_LINES)));
-            }
-        }
-
-        function _launchDlc(dlcFolder) {
-            var pid = dlcFolder === 'Mestre do Giro - DLC' ? 'dlcm' : 'dlcv';
-            var screen = document.getElementById(pid + '-screen');
-            if (!screen) { setStoreLine('DLC não encontrada.'); return; }
-            screen.style.display = 'block';
-            // Init DLC JS (only runs once per open)
-            if (pid === 'dlcm' && typeof _dlc_dlcm_init === 'function') _dlc_dlcm_init();
-            if (pid === 'dlcv' && typeof _dlc_dlcv_init === 'function') _dlc_dlcv_init();
-            setStoreLine('Divirta-se! ♥');
+            setStoreLine(randomFrom(_storeLines(STORE_BUY_LINES, MUSUME_BUY_LINES)));
         }
 
         function playStoreFightScene() {
@@ -7835,9 +8266,7 @@
             if (window.Chapter15 && typeof window.Chapter15.destroy === 'function') {
                 try { window.Chapter15.destroy(); } catch(e) {}
             }
-            // DLCs embutidas
-            if (typeof _dlc_dlcm_cleanup === 'function') try { _dlc_dlcm_cleanup(); } catch(e) {}
-            if (typeof _dlc_dlcv_cleanup === 'function') try { _dlc_dlcv_cleanup(); } catch(e) {}
+
             // Esconde o gameScreen — cada loadChapter o mostra de novo como precisa
             gameScreen.style.display = 'none';
             gameScreen.style.opacity = '';
@@ -11970,6 +12399,8 @@
             document.addEventListener('keydown', function(e) {
                 if (e.key !== "'" && e.key !== '\`') return;
                 if (isTextInputTarget(e)) return;
+                /* Bloqueia debug enquanto pause screen estiver ativa */
+                if (window._pauseScreenActive) return;
                 var dbg = document.getElementById('debug-screen');
                 if (dbg.style.display === 'flex') {
                     dbg.style.display = 'none';
@@ -12852,6 +13283,13 @@
 
 
                         // ── Boot sequence: Autosave → Vídeo Splash → Menu ────────────────
+            /* Aguarda a pause screen ser dispensada antes de iniciar o jogo */
+            (function waitForPauseScreen(cb) {
+                if (!window._pauseScreenActive) { cb(); return; }
+                var _t = setInterval(function() {
+                    if (!window._pauseScreenActive) { clearInterval(_t); cb(); }
+                }, 300);
+            })(function() {
             (function bootSequence() {
 
                 // Esconde o splash screen logo imediatamente
@@ -13044,6 +13482,7 @@
                     _playSplashVideo();
                 }
             })();
+            }); /* fim waitForPauseScreen */
 
 
             const splashLogo = document.getElementById('splash-logo-wrap');
@@ -13073,15 +13512,14 @@
             var ctx = canvas.getContext('2d');
             var particles = [];
             var rafId = null;
-            var PARTICLE_COUNT = 55;
+            var PARTICLE_COUNT = 22;
 
-            // Lê a cor de acento atual do CSS
             function getAccentRgb() {
                 var raw = getComputedStyle(document.documentElement)
                     .getPropertyValue('--menu-accent-rgb').trim();
                 var parts = raw.split(',').map(Number);
                 if (parts.length === 3 && !parts.some(isNaN)) return parts;
-                return [139, 92, 246]; // fallback roxo
+                return [139, 92, 246];
             }
 
             function resize() {
@@ -13095,13 +13533,12 @@
                 return {
                     x:      randomBetween(0, canvas.width),
                     y:      randomBetween(0, canvas.height),
-                    vx:     randomBetween(-0.18, 0.18),
-                    vy:     randomBetween(-0.32, -0.08), // sobe devagar
-                    r:      randomBetween(1.0, 2.6),
-                    alpha:  randomBetween(0.0, 0.7),
+                    vx:     randomBetween(-0.08, 0.08),
+                    vy:     randomBetween(-0.18, -0.04),
+                    r:      randomBetween(0.8, 1.6),
+                    alpha:  randomBetween(0.05, 0.35),
                     aDir:   Math.random() < 0.5 ? 1 : -1,
-                    aSpeed: randomBetween(0.003, 0.009),
-                    pulse:  randomBetween(0, Math.PI * 2), // fase do pulso
+                    aSpeed: randomBetween(0.002, 0.005),
                 };
             }
 
@@ -13109,35 +13546,27 @@
                 resize();
                 particles = [];
                 for (var i = 0; i < PARTICLE_COUNT; i++) {
-                    var p = createParticle();
-                    p.y = randomBetween(0, canvas.height); // distribuição inicial
-                    particles.push(p);
+                    particles.push(createParticle());
                 }
             }
 
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 var rgb = getAccentRgb();
-                var now = performance.now() / 1000;
 
                 for (var i = 0; i < particles.length; i++) {
                     var p = particles[i];
 
-                    // Movimento
                     p.x += p.vx;
                     p.y += p.vy;
-                    p.pulse += 0.016;
 
-                    // Pulso de alpha suave
                     p.alpha += p.aDir * p.aSpeed;
-                    if (p.alpha >= 0.75) { p.alpha = 0.75; p.aDir = -1; }
+                    if (p.alpha >= 0.35) { p.alpha = 0.35; p.aDir = -1; }
                     if (p.alpha <= 0.0)  { p.alpha = 0.0;  p.aDir =  1; }
 
-                    // Rebota horizontalmente
                     if (p.x < 0) p.x = canvas.width;
                     if (p.x > canvas.width) p.x = 0;
 
-                    // Quando sai pelo topo, recria na base
                     if (p.y < -4) {
                         var np = createParticle();
                         np.y = canvas.height + 4;
@@ -13145,21 +13574,8 @@
                         continue;
                     }
 
-                    // Tamanho com micro-pulso
-                    var r = p.r * (1 + 0.15 * Math.sin(p.pulse));
-
-                    // Glow suave (dois círculos: glow + núcleo)
-                    var grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 3);
-                    grd.addColorStop(0, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + (p.alpha * 0.5) + ')');
-                    grd.addColorStop(1, 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',0)');
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, r * 3, 0, Math.PI * 2);
-                    ctx.fillStyle = grd;
-                    ctx.fill();
-
-                    // Núcleo
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
                     ctx.fillStyle = 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + p.alpha + ')';
                     ctx.fill();
                 }
@@ -16832,6 +17248,265 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 })();
 </script>
 <!-- ══ fim AUTO-UPDATE POPUP ═════════════════════════════════════════════════ -->
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     HIMARI GAMES — MENU SFX SYNTH ENGINE v1.0
+     Sons do menu gerados via Web Audio API usando parâmetros de menu-sounds.json
+     Não requer nenhum arquivo de áudio externo para sfx-selection, sfx-confirmation,
+     sfx-click-menu e sfx-back.
+     ══════════════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  /* ── 1. PARÂMETROS DOS SONS (espelha menu-sounds.json) ─────────────────── */
+  var MENU_SFX_PARAMS = {
+    /* Navegar/hover entre itens — tick seco de alta frequência */
+    selection: {
+      layers: [
+        { waveform:'square',   freqStart:880,  freqEnd:660,  duration:0.055, attack:0.001, decay:0.045, vol:0.18 },
+        { waveform:'sine',     freqStart:1320, freqEnd:1320, duration:0.030, attack:0.001, decay:0.025, vol:0.07, offset:0 }
+      ],
+      filter: { type:'bandpass', freq:900, Q:1.8 }
+    },
+
+    /* Confirmar/selecionar — dois beeps ascendentes */
+    confirm: {
+      layers: [
+        { waveform:'square', freqStart:440,  freqEnd:660,  duration:0.080, attack:0.002, decay:0.070, vol:0.22, offset:0 },
+        { waveform:'square', freqStart:880,  freqEnd:1100, duration:0.120, attack:0.002, decay:0.100, vol:0.18, offset:0.06 },
+        { waveform:'sine',   freqStart:1760, freqEnd:1760, duration:0.060, attack:0.002, decay:0.055, vol:0.09, offset:0.12 }
+      ],
+      filter: { type:'highpass', freq:220, Q:0.8 }
+    },
+
+    /* Voltar/cancelar — tom descendente */
+    back: {
+      layers: [
+        { waveform:'triangle', freqStart:660, freqEnd:330, duration:0.120, attack:0.003, decay:0.110, vol:0.20, offset:0 },
+        { waveform:'square',   freqStart:440, freqEnd:220, duration:0.080, attack:0.002, decay:0.070, vol:0.10, offset:0, detune:-5 }
+      ],
+      filter: { type:'lowpass', freq:1200, Q:1.2 }
+    },
+
+    /* Click genérico — pop seco com textura noise */
+    click: {
+      layers: [
+        { waveform:'noise',  duration:0.025, attack:0.001, decay:0.020, vol:0.12 },
+        { waveform:'square', freqStart:1200, freqEnd:600,  duration:0.040, attack:0.001, decay:0.035, vol:0.16, offset:0 }
+      ],
+      filter: { type:'bandpass', freq:800, Q:2.0 },
+      distortionAmount: 8
+    },
+
+    /* ── Som especial: despedida emocional da pause_thanks ──────────────────
+       Progressão suave de 4 notas (Dó → Mi → Sol → Dó oitava acima)
+       com sine puro, um pad de fundo e shimmer final — sem distorção       */
+    pause_thanks_fanfare: {
+      layers: [
+        /* Pad de fundo — drone suave que sustenta tudo */
+        { waveform:'sine', freqStart:130.8, freqEnd:130.8, duration:2.60, attack:0.18, decay:2.50, vol:0.10, offset:0.00 },
+
+        /* Nota 1 — Dó3 (261 Hz) */
+        { waveform:'sine',     freqStart:261.6, freqEnd:261.6, duration:0.55, attack:0.025, decay:0.52, vol:0.28, offset:0.00 },
+        { waveform:'triangle', freqStart:523.2, freqEnd:523.2, duration:0.50, attack:0.030, decay:0.46, vol:0.08, offset:0.00 },
+
+        /* Nota 2 — Mi3 (329 Hz) */
+        { waveform:'sine',     freqStart:329.6, freqEnd:329.6, duration:0.55, attack:0.025, decay:0.52, vol:0.26, offset:0.38 },
+        { waveform:'triangle', freqStart:659.2, freqEnd:659.2, duration:0.50, attack:0.030, decay:0.46, vol:0.07, offset:0.38 },
+
+        /* Nota 3 — Sol3 (392 Hz) */
+        { waveform:'sine',     freqStart:392.0, freqEnd:392.0, duration:0.55, attack:0.025, decay:0.52, vol:0.24, offset:0.76 },
+        { waveform:'triangle', freqStart:784.0, freqEnd:784.0, duration:0.50, attack:0.030, decay:0.46, vol:0.07, offset:0.76 },
+
+        /* Nota 4 — Dó4 (523 Hz) — resolve, mais longa e com shimmer */
+        { waveform:'sine',     freqStart:523.2, freqEnd:523.2, duration:1.20, attack:0.030, decay:1.15, vol:0.30, offset:1.14 },
+        { waveform:'sine',     freqStart:523.2, freqEnd:523.2, duration:1.20, attack:0.030, decay:1.15, vol:0.10, offset:1.14, detune:5   },
+        { waveform:'sine',     freqStart:523.2, freqEnd:523.2, duration:1.20, attack:0.030, decay:1.15, vol:0.10, offset:1.14, detune:-5  },
+        { waveform:'triangle', freqStart:1046.4,freqEnd:1046.4,duration:0.90, attack:0.040, decay:0.85, vol:0.06, offset:1.14 },
+
+        /* Shimmer final — brilho suave que some lentamente */
+        { waveform:'sine', freqStart:1568.0, freqEnd:1200.0, duration:1.40, attack:0.08, decay:1.30, vol:0.04, offset:1.30 },
+        { waveform:'sine', freqStart:2093.0, freqEnd:1800.0, duration:1.20, attack:0.10, decay:1.10, vol:0.02, offset:1.45 }
+      ],
+      filter: { type:'lowpass', freq:4000, Q:0.5 }
+    }
+  };
+
+  /* ── 2. ENGINE DE SÍNTESE ───────────────────────────────────────────────── */
+  var _actx = null;
+
+  function _getCtx() {
+    if (!_actx) {
+      try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    }
+    if (_actx && _actx.state === 'suspended') { _actx.resume(); }
+    return _actx;
+  }
+
+  /* gera curva de distorção waveshaper */
+  function _makeDistortionCurve(amount) {
+    var n = 256, curve = new Float32Array(n);
+    var deg = Math.PI / 180;
+    for (var i = 0; i < n; i++) {
+      var x = (i * 2) / n - 1;
+      curve[i] = (3 + amount) * x * 20 * deg / (Math.PI + amount * Math.abs(x));
+    }
+    return curve;
+  }
+
+  /* buffer de ruído branco */
+  function _makeNoiseBuffer(ctx, duration) {
+    var sr = ctx.sampleRate;
+    var frames = Math.ceil(sr * duration);
+    var buf = ctx.createBuffer(1, frames, sr);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < frames; i++) { data[i] = Math.random() * 2 - 1; }
+    return buf;
+  }
+
+  function _playLayer(ctx, layer, masterGain, filterNode, now) {
+    var offset = layer.offset || 0;
+    var t0 = now + offset;
+    var duration = layer.duration || 0.05;
+    var tEnd = t0 + duration;
+
+    var gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0, t0);
+    gainNode.gain.linearRampToValueAtTime(layer.vol, t0 + (layer.attack || 0.002));
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, t0 + (layer.decay || duration));
+
+    gainNode.connect(filterNode);
+
+    if (layer.waveform === 'noise') {
+      var src = ctx.createBufferSource();
+      src.buffer = _makeNoiseBuffer(ctx, duration + 0.01);
+      src.connect(gainNode);
+      src.start(t0);
+      src.stop(tEnd + 0.01);
+    } else {
+      var osc = ctx.createOscillator();
+      osc.type = layer.waveform || 'square';
+      var fs = layer.freqStart || 440;
+      var fe = layer.freqEnd   || fs;
+      osc.frequency.setValueAtTime(fs, t0);
+      if (fs !== fe) {
+        osc.frequency.exponentialRampToValueAtTime(Math.max(fe, 1), tEnd);
+      }
+      if (layer.detune) { osc.detune.setValueAtTime(layer.detune, t0); }
+      osc.connect(gainNode);
+      osc.start(t0);
+      osc.stop(tEnd + 0.02);
+    }
+  }
+
+  function _playSynthSound(soundKey, volumeScale) {
+    var params = MENU_SFX_PARAMS[soundKey];
+    if (!params) return;
+    var ctx = _getCtx();
+    if (!ctx) return;
+
+    volumeScale = (volumeScale === undefined) ? 1 : volumeScale;
+
+    var now = ctx.currentTime;
+
+    /* master gain */
+    var master = ctx.createGain();
+    master.gain.setValueAtTime(volumeScale, now);
+
+    /* filtro */
+    var filt = ctx.createBiquadFilter();
+    if (params.filter) {
+      filt.type            = params.filter.type  || 'allpass';
+      filt.frequency.value = params.filter.freq  || 1000;
+      filt.Q.value         = params.filter.Q     || 1;
+    } else {
+      filt.type = 'allpass';
+    }
+    filt.connect(master);
+
+    /* distorção opcional */
+    if (params.distortionAmount) {
+      var ws = ctx.createWaveShaper();
+      ws.curve = _makeDistortionCurve(params.distortionAmount);
+      ws.oversample = '2x';
+      master.connect(ws);
+      ws.connect(ctx.destination);
+    } else {
+      master.connect(ctx.destination);
+    }
+
+    /* camadas */
+    params.layers.forEach(function(layer) {
+      _playLayer(ctx, layer, master, filt, now);
+    });
+  }
+
+  /* ── 3. PROXY — faz <span data-synth="X"> agir como <audio> ────────────── */
+  function _makeProxy(el) {
+    var soundKey = el.getAttribute('data-synth');
+    /* volume prop (lido pelo código existente do jogo) */
+    var _vol = 1.0;
+
+    Object.defineProperty(el, 'volume', {
+      get: function() { return _vol; },
+      set: function(v) { _vol = Math.max(0, Math.min(1, v)); }
+    });
+    Object.defineProperty(el, 'currentTime', {
+      get: function() { return 0; },
+      set: function() {}  /* no-op — síntese é sempre instantânea */
+    });
+    Object.defineProperty(el, 'paused', {
+      get: function() { return false; }
+    });
+
+    el.play = function() {
+      /* respeita volume global do jogo */
+      var gv = (typeof window._globalVolume !== 'undefined') ? window._globalVolume : 1;
+      var scale = _vol * gv;
+      if (scale < 0.001) return Promise.resolve();
+      try { _playSynthSound(soundKey, scale); } catch(e) {}
+      return Promise.resolve();
+    };
+    el.pause = function() {};
+    el.load  = function() {};
+  }
+
+  /* ── 4. INICIALIZAÇÃO ───────────────────────────────────────────────────── */
+  function _init() {
+    var ids = ['sfx-confirmation','sfx-click-menu','sfx-back','sfx-selection'];
+    ids.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.tagName !== 'AUDIO') {
+        _makeProxy(el);
+      }
+    });
+
+    /* acorda o AudioContext no primeiro gesto do usuário */
+    var _resumed = false;
+    function _resume() {
+      if (_resumed) return;
+      _resumed = true;
+      _getCtx();
+    }
+    document.addEventListener('click',    _resume, { once: true, passive: true });
+    document.addEventListener('keydown',  _resume, { once: true, passive: true });
+    document.addEventListener('touchstart',_resume, { once: true, passive: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _init);
+  } else {
+    _init();
+  }
+
+  /* expõe para debug no console */
+  window._himariSfxPlay = _playSynthSound;
+  window._himariSfxParams = MENU_SFX_PARAMS;
+
+})();
+</script>
+<!-- ══ fim MENU SFX SYNTH ENGINE ══════════════════════════════════════════════ -->
 
 </body>
 </html>

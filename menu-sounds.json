@@ -1,0 +1,163 @@
+{
+  "_comment": "Himari Games — Menu SFX sintetizados via Web Audio API. Vibe: cyberpunk/Persona, minimalista, roxo escuro.",
+  "_version": "1.0.0",
+  "_accent": "#cc00ff",
+
+  "sounds": {
+    "selection": {
+      "_desc": "Hover/navegar entre itens — tick seco de frequência alta, muito curto",
+      "layers": [
+        {
+          "type": "oscillator",
+          "waveform": "square",
+          "frequency": { "start": 880, "end": 660, "curve": "exponential" },
+          "duration": 0.055,
+          "attack":  0.001,
+          "decay":   0.045,
+          "volume":  0.18,
+          "detune":  0
+        },
+        {
+          "type": "oscillator",
+          "waveform": "sine",
+          "frequency": { "start": 1320, "end": 1320, "curve": "linear" },
+          "duration": 0.03,
+          "attack":  0.001,
+          "decay":   0.025,
+          "volume":  0.07,
+          "detune":  0
+        }
+      ],
+      "filter": {
+        "type": "bandpass",
+        "frequency": 900,
+        "Q": 1.8
+      },
+      "distortion": false,
+      "bitcrush": false,
+      "notes": "Tick seco tipo retro-UI, curto e não intrusivo"
+    },
+
+    "confirm": {
+      "_desc": "Selecionar/confirmar — dois tons ascendentes, click satisfatório",
+      "layers": [
+        {
+          "type": "oscillator",
+          "waveform": "square",
+          "frequency": { "start": 440, "end": 660, "curve": "exponential" },
+          "duration": 0.08,
+          "attack":  0.002,
+          "decay":   0.07,
+          "volume":  0.22,
+          "detune":  0
+        },
+        {
+          "type": "oscillator",
+          "waveform": "square",
+          "frequency": { "start": 880, "end": 1100, "curve": "exponential" },
+          "startOffset": 0.06,
+          "duration": 0.12,
+          "attack":  0.002,
+          "decay":   0.10,
+          "volume":  0.18,
+          "detune":  0
+        },
+        {
+          "type": "oscillator",
+          "waveform": "sine",
+          "frequency": { "start": 1760, "end": 1760, "curve": "linear" },
+          "startOffset": 0.12,
+          "duration": 0.06,
+          "attack":  0.002,
+          "decay":   0.055,
+          "volume":  0.09,
+          "detune":  0
+        }
+      ],
+      "filter": {
+        "type": "highpass",
+        "frequency": 220,
+        "Q": 0.8
+      },
+      "distortion": false,
+      "bitcrush": false,
+      "notes": "Dois beeps ascendentes — claro, decisivo, persona-like"
+    },
+
+    "back": {
+      "_desc": "Voltar/cancelar — tom descendente, suave mas perceptível",
+      "layers": [
+        {
+          "type": "oscillator",
+          "waveform": "triangle",
+          "frequency": { "start": 660, "end": 330, "curve": "exponential" },
+          "duration": 0.12,
+          "attack":  0.003,
+          "decay":   0.11,
+          "volume":  0.20,
+          "detune":  0
+        },
+        {
+          "type": "oscillator",
+          "waveform": "square",
+          "frequency": { "start": 440, "end": 220, "curve": "exponential" },
+          "duration": 0.08,
+          "attack":  0.002,
+          "decay":   0.07,
+          "volume":  0.10,
+          "detune":  -5
+        }
+      ],
+      "filter": {
+        "type": "lowpass",
+        "frequency": 1200,
+        "Q": 1.2
+      },
+      "distortion": false,
+      "bitcrush": false,
+      "notes": "Descida suave — direção oposta ao confirm"
+    },
+
+    "click": {
+      "_desc": "Click genérico de menu — impacto curto, seco, com leve glitch",
+      "layers": [
+        {
+          "type": "noise",
+          "noiseColor": "white",
+          "duration": 0.025,
+          "attack":  0.001,
+          "decay":   0.020,
+          "volume":  0.12
+        },
+        {
+          "type": "oscillator",
+          "waveform": "square",
+          "frequency": { "start": 1200, "end": 600, "curve": "exponential" },
+          "duration": 0.04,
+          "attack":  0.001,
+          "decay":   0.035,
+          "volume":  0.16,
+          "detune":  0
+        }
+      ],
+      "filter": {
+        "type": "bandpass",
+        "frequency": 800,
+        "Q": 2.0
+      },
+      "distortion": {
+        "amount": 8,
+        "oversample": "2x"
+      },
+      "bitcrush": false,
+      "notes": "Pop seco + distorção leve — clique físico com textura lo-fi"
+    }
+  },
+
+  "synthesis_engine": {
+    "sampleRate": 44100,
+    "contextType": "AudioContext",
+    "masterGain": 1.0,
+    "notes": "Todos os sons são gerados em runtime via Web Audio API usando estes parâmetros. Nenhum arquivo de áudio externo necessário."
+  }
+}
