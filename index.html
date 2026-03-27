@@ -2523,27 +2523,15 @@
   <!-- Conteúdo principal -->
   <div id="neroblock-page-1" style="max-width: 540px; transition: opacity 0.8s ease, transform 0.8s ease;">
     <p style="font-size: 10px; letter-spacing: 6px; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 32px;">Himari Games</p>
-    <h1 style="font-size: clamp(14px,1.6vw,18px); font-weight: 300; letter-spacing: 4px; color: rgba(255,255,255,0.9); text-transform: uppercase; margin-bottom: 40px; line-height: 1.4;">Aviso importante</h1>
+    <h1 id="neroblock-title" style="font-size: clamp(14px,1.6vw,18px); font-weight: 300; letter-spacing: 4px; color: rgba(255,255,255,0.9); text-transform: uppercase; margin-bottom: 40px; line-height: 1.4;">Aviso importante</h1>
     <div style="width: 40px; height: 1px; background: rgba(255,255,255,0.15); margin: 0 auto 40px;"></div>
-    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65); margin-bottom: 16px;">
-      O desenvolvimento deste projeto foi pausado por tempo indeterminado.
-    </p>
-    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65); margin-bottom: 16px;">
-      A ideia sempre foi criar algo nosso.<br>
-      Um jogo feito entre amigos, para amigos.
-    </p>
-    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65); margin-bottom: 16px;">
-      Mas, com o tempo, eu acabei meio que só criando tudo sozinha.<br>
-      E isso me fez perceber algo bem ruim:<br>
-      não era algo que estávamos construindo juntos.
-    </p>
-    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65); margin-bottom: 16px;">
-      Pensando dessa forma… o projeto todo perdeu o sentido.<br>
-      Não tem culpa, só a certeza de que pode existir algo melhor,<br>que realmente envolva todos.
-    </p>
-    <p style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65);">
-      Obrigada pelos testes lendários.
-    </p>
+    <div id="neroblock-body" style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65);">
+      <p style="margin-bottom: 16px;">O desenvolvimento deste projeto foi pausado por tempo indeterminado.</p>
+      <p style="margin-bottom: 16px;">A ideia sempre foi criar algo nosso.<br>Um jogo feito entre amigos, para amigos.</p>
+      <p style="margin-bottom: 16px;">Mas, com o tempo, eu acabei meio que só criando tudo sozinha.<br>E isso me fez perceber algo bem ruim:<br>não era algo que estávamos construindo juntos.</p>
+      <p style="margin-bottom: 16px;">Pensando dessa forma… o projeto todo perdeu o sentido.<br>Não tem culpa, só a certeza de que pode existir algo melhor,<br>que realmente envolva todos.</p>
+      <p>Obrigada pelos testes lendários.</p>
+    </div>
 
     <!-- Botão próximo -->
     <button id="neroblock-next-btn" onclick="neroblockNext()" style="
@@ -2606,6 +2594,130 @@
 (function() {
   /* ── Trava total: intercepta tudo antes do jogo carregar ── */
   var _pauseActive = true;
+
+  /* ════════════════════════════════════════════════════════════
+     SISTEMA DE VISITAS — conta quantas vezes o player voltou
+     e muda o conteúdo da tela a cada abertura.
+     Na 10ª tentativa desiste e deixa o jogo iniciar.
+  ════════════════════════════════════════════════════════════ */
+  var _NB_KEY = 'himari_nb_visits';
+  var _visits = parseInt(localStorage.getItem(_NB_KEY) || '0', 10) + 1;
+  localStorage.setItem(_NB_KEY, String(_visits));
+
+  /* Se já passou pela 10ª vez, nunca mais mostra — fecha imediatamente */
+  if (_visits > 10) {
+    _pauseActive = false;
+    window._pauseScreenActive = false;
+    var _nb = document.getElementById('neroblock');
+    if (_nb) { _nb.style.display = 'none'; }
+  }
+
+  /* Textos alternativos — índice 0 = primeira visita (original),
+     depois começam as negações progressivas de easter egg.
+     Array começa em visita 2 (índice _visits - 2 para visits >= 2). */
+  var _TITLES = [
+    'Aviso importante',               // visita 1 — padrão
+    'Aviso importante (de novo)',      // visita 2
+    'Ei. Ainda aqui.',                 // visita 3
+    'Ok. Vou ser direta.',             // visita 4
+    'Não tem nada aqui.',              // visita 5
+    'Sério. Para.',                    // visita 6
+    'Você não vai encontrar nada.',    // visita 7
+    '...',                             // visita 8
+    'Ok, talvez tenha algo.',          // visita 9
+    'Tá bom. Você ganhou.',            // visita 10
+  ];
+
+  var _BODIES = [
+    /* 1 — original */
+    '<p style="margin-bottom:16px">O desenvolvimento deste projeto foi pausado por tempo indeterminado.</p>' +
+    '<p style="margin-bottom:16px">A ideia sempre foi criar algo nosso.<br>Um jogo feito entre amigos, para amigos.</p>' +
+    '<p style="margin-bottom:16px">Mas, com o tempo, eu acabei meio que só criando tudo sozinha.<br>E isso me fez perceber algo bem ruim:<br>não era algo que estávamos construindo juntos.</p>' +
+    '<p style="margin-bottom:16px">Pensando dessa forma… o projeto todo perdeu o sentido.<br>Não tem culpa, só a certeza de que pode existir algo melhor,<br>que realmente envolva todos.</p>' +
+    '<p>Obrigada pelos testes lendários.</p>',
+
+    /* 2 */
+    '<p style="margin-bottom:16px">Você já viu isso antes.<br>Não tem nenhum easter egg escondido aqui.</p>' +
+    '<p style="margin-bottom:16px">Nenhuma mensagem secreta, nenhuma surpresa,<br>nenhum código oculto nas entrelinhas.</p>' +
+    '<p>Pode fechar e ir fazer outra coisa. De verdade.</p>',
+
+    /* 3 */
+    '<p style="margin-bottom:16px">Ok, você voltou.<br>Entendemos.</p>' +
+    '<p style="margin-bottom:16px">Mas olha — não tem easter egg.<br>Não existe mensagem escondida no pixel 347×892.<br>Não tem código digitável. Nada.</p>' +
+    '<p>Isso é literalmente só uma tela de aviso.</p>',
+
+    /* 4 */
+    '<p style="margin-bottom:16px">Não tem easter egg.</p>' +
+    '<p style="margin-bottom:16px">N-Ã-O T-E-M E-A-S-T-E-R E-G-G.</p>' +
+    '<p>Obrigada pela compreensão.</p>',
+
+    /* 5 */
+    '<p style="margin-bottom:16px">Olha. Eu poderia ter escondido algo aqui.<br>Seria divertido, admito.</p>' +
+    '<p style="margin-bottom:16px">Mas não fiz.<br>Esta é a quinta vez que você abre o jogo só pra ver isso.</p>' +
+    '<p>Vai jogar.</p>',
+
+    /* 6 */
+    '<p style="margin-bottom:16px">...</p>' +
+    '<p style="margin-bottom:16px">Sabe o que está acontecendo?<br>Você está procurando algo que não existe.</p>' +
+    '<p style="margin-bottom:16px">É a sexta vez.<br>Contei.</p>' +
+    '<p>Não tem nada.</p>',
+
+    /* 7 */
+    '<p style="margin-bottom:16px">Tudo bem.<br>Sétima visita. Respeito a dedicação.</p>' +
+    '<p style="margin-bottom:16px">Mas definitivamente, com absoluta certeza,<br>sem sombra de dúvida —</p>' +
+    '<p style="margin-bottom:16px">não tem easter egg.</p>' +
+    '<p style="font-size:10px;opacity:0.2">(não tem)</p>',
+
+    /* 8 */
+    '<p style="margin-bottom:16px">.</p>' +
+    '<p style="margin-bottom:16px">..</p>' +
+    '<p style="margin-bottom:16px">...</p>' +
+    '<p>Ok, oitava vez. Sem comentários.</p>',
+
+    /* 9 */
+    '<p style="margin-bottom:16px">Tá. Você chegou até aqui.<br>Vou te dar uma coisa.</p>' +
+    '<p style="margin-bottom:16px">Aqui está seu easter egg:</p>' +
+    '<p style="margin-bottom:16px;font-size:clamp(28px,4vw,48px);letter-spacing:8px">🥚</p>' +
+    '<p style="font-size:11px;opacity:0.4">feliz agora? uma última vez e você ganha algo de verdade.</p>',
+
+    /* 10 — desiste, auto-fecha */
+    '<p style="margin-bottom:16px">Você ganhou.<br>Dez vezes, dez aberturas, dez avisos ignorados.</p>' +
+    '<p style="margin-bottom:16px">Parabéns pela teimosia.<br>O jogo vai iniciar automaticamente agora.</p>' +
+    '<p style="font-size:11px;opacity:0.35">(não tinha easter egg, mas sua persistência conta como um)</p>',
+  ];
+
+  /* Aplica o conteúdo correspondente à visita atual */
+  function _applyVisitContent() {
+    var idx = Math.min(_visits, 10) - 1; // 0–9
+    var titleEl = document.getElementById('neroblock-title');
+    var bodyEl  = document.getElementById('neroblock-body');
+    if (titleEl) titleEl.textContent = _TITLES[idx] || _TITLES[0];
+    if (bodyEl)  bodyEl.innerHTML    = _BODIES[idx] || _BODIES[0];
+  }
+  _applyVisitContent();
+
+  /* Na 10ª visita: fecha automaticamente após um tempo */
+  if (_visits >= 10) {
+    setTimeout(function() {
+      _pauseActive = false;
+      var ps = document.getElementById('neroblock');
+      if (!ps) return;
+      /* Pulsa branco uma vez antes de fechar — pequena recompensa visual */
+      ps.style.transition = 'opacity 0.3s ease';
+      ps.style.opacity = '0.05';
+      setTimeout(function() {
+        ps.style.transition = 'opacity 1.8s ease';
+        ps.style.opacity = '0';
+        ps.style.pointerEvents = 'none';
+        setTimeout(function() {
+          ps.style.display = 'none';
+          window._pauseScreenActive = false;
+          /* Contador não é resetado — a tela nunca mais aparece */
+        }, 1800);
+      }, 300);
+    }, 5000); /* 5 segundos lendo a mensagem de vitória */
+  }
+  /* ════════════════════════════════════════════════════════════ */
 
   /* ── Vibração + som do botão fechar ────────────────────────────────────── */
   var _btnVibrateId = null;
@@ -2682,15 +2794,17 @@
   var _typedBuffer = '';
   var _unlockCode = 'nero';
 
-  /* Bloqueia qualquer init do jogo */
-  window._pauseScreenActive = true;
+  /* Bloqueia qualquer init do jogo — só se não foi liberado já pelo contador */
+  if (_pauseActive) window._pauseScreenActive = true;
 
   /* Escuta a senha digitada a qualquer momento */
   document.addEventListener('keydown', function(e) {
     if (!_pauseActive) return;
+    /* Engole o evento — nenhum listener de cheat (abbyl, aug, etc.) chega a receber */
+    e.stopImmediatePropagation();
     /* bloqueia F12 / debug */
     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
-      e.preventDefault(); e.stopImmediatePropagation(); return false;
+      e.preventDefault(); return false;
     }
     _typedBuffer += e.key.toLowerCase();
     if (_typedBuffer.length > _unlockCode.length) {
@@ -4696,7 +4810,14 @@
               <button class="db r" id="dbg-upd-reset">Resetar Versão Real</button>
             </div>
 
-            <div class="dbg-sub" style="margin-top:12px">Banner Aldrich (v1.0.40)</div>
+            <div class="dbg-sub" style="margin-top:12px">Dev Tour (após 10 visitas)</div>
+            <div class="dg2">
+              <button class="db g" id="dbg-dev-tour-trigger">Ativar Tour da Dev</button>
+              <button class="db r" id="dbg-dev-tour-reset">Resetar Contador</button>
+            </div>
+            <div id="dbg-dev-tour-status" style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-top:6px;margin-bottom:8px">—</div>
+
+            <div class="dbg-sub" style="margin-top:12px">Banner Aldrich (v1.0.50)</div>
             <div class="dg2">
               <button class="db g" id="dbg-aldrich-on">Ativar Banner</button>
               <button class="db r" id="dbg-aldrich-off">Desativar Banner</button>
@@ -11275,6 +11396,7 @@
                 return;
             }
             if (e.key && e.key.length === 1) {
+                if (window._pauseScreenActive) return; /* bloqueia cheats durante neroblock */
                 debugKeyBuffer += e.key.toLowerCase();
                 if (debugKeyBuffer.length > 10) debugKeyBuffer = debugKeyBuffer.slice(-10);
 
@@ -12228,6 +12350,7 @@
                 }
 
                 document.addEventListener('keydown', function(e) {
+                    if (window._pauseScreenActive) return;
                     if (isTextInputTarget(e)) return;
                     if (e.key.length === 1) {
                         cheatBuffer += e.key.toLowerCase();
@@ -13822,6 +13945,46 @@
                     }
                 })();
                 // ── fim Painel Update ─────────────────────────────────────────
+                // Botões do Dev Tour
+                var _tourTriggerBtn = document.getElementById('dbg-dev-tour-trigger');
+                var _tourResetBtn   = document.getElementById('dbg-dev-tour-reset');
+                var _tourSts        = document.getElementById('dbg-dev-tour-status');
+                function _updateTourStatus() {
+                    if (!_tourSts) return;
+                    var v = parseInt(localStorage.getItem('himari_nb_visits') || '0', 10);
+                    var done = localStorage.getItem('himari_dev_tour_done') === '1';
+                    _tourSts.textContent = 'Visitas: ' + v + ' | Tour concluído: ' + (done ? 'sim' : 'não');
+                }
+                _updateTourStatus();
+                if (_tourTriggerBtn) _tourTriggerBtn.addEventListener('click', function() {
+                    // Força as condições no localStorage
+                    localStorage.setItem('himari_nb_visits', '10');
+                    localStorage.setItem('himari_dev_tour_done', '0');
+                    window._devTourHooked = false; // permite re-ativar
+                    _updateTourStatus();
+                    // Fecha o debug e vai pro menu
+                    document.getElementById('debug-screen').style.display = 'none';
+                    var menuScreen = document.getElementById('menu-screen');
+                    if (menuScreen) menuScreen.style.display = 'flex';
+                    // Chama a função global exposta pelo script do tour
+                    setTimeout(function() {
+                        if (typeof window._devTourStart === 'function') {
+                            window._devTourStart();
+                            _dbgLog('Dev tour ativado.', 'ok');
+                            _updateTourStatus();
+                        } else {
+                            _dbgLog('Dev tour: função não encontrada. Recarregue a página.', 'warn');
+                        }
+                    }, 350);
+                });
+                if (_tourResetBtn) _tourResetBtn.addEventListener('click', function() {
+                    localStorage.setItem('himari_nb_visits',    '0');
+                    localStorage.setItem('himari_dev_tour_done','0');
+                    localStorage.setItem('himari_dev_logo_clicks', '0');
+                    _updateTourStatus();
+                    _dbgLog('Contador de visitas e tour resetados.', 'ok');
+                });
+
                 // Botões do banner Aldrich
                 var _aldBtn = document.getElementById('dbg-aldrich-on');
                 var _aldOff = document.getElementById('dbg-aldrich-off');
@@ -13848,7 +14011,7 @@
                                   var tag  = (r.tag_name||'').replace(/^v/,'');
                                   var note = (r.body||'').trim() || '—';
                                   var date = r.published_at ? new Date(r.published_at).toLocaleDateString('pt-BR') : '';
-                                  if(tag === '1.0.40' || window._dbgForceAldrichBanner){
+                                  if(tag === '1.0.50' || window._dbgForceAldrichBanner){
                                     entry.style.cssText = 'margin-bottom:4px';
                                     if(typeof window._buildAldrichBannerFn === 'function') entry.innerHTML = window._buildAldrichBannerFn(tag, note, date);
                                   } else {
@@ -17694,7 +17857,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
       .catch(function(){ sCheck.disabled=false; sCheckStatus.style.color='#f87171'; sCheckStatus.textContent='Sem conexão.'; setTimeout(function(){ sCheckStatus.textContent=''; },3000); });
   });
 
-  // ── Banner especial Aldrich — v1.0.40 ─────────────────────────────────────
+  // ── Banner especial Aldrich — v1.0.50 ─────────────────────────────────────
   window._dbgForceAldrichBanner = false;
 
   window._buildAldrichBannerFn = function _buildAldrichBanner(tag, note, date) {
@@ -17794,7 +17957,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
             var tag  = (r.version||'').replace(/^v/,'');
             var note = (r.notes||'').trim() || '—';
             var date = r.date || '';
-            if(tag === '1.0.40' || window._dbgForceAldrichBanner){
+            if(tag === '1.0.50' || window._dbgForceAldrichBanner){
               entry.style.cssText = 'margin-bottom:4px';
               entry.innerHTML = window._buildAldrichBannerFn(tag, note, date);
             } else {
@@ -18154,6 +18317,289 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 })();
 </script>
 <!-- ══ fim MENU SFX SYNTH ENGINE ══════════════════════════════════════════════ -->
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     DEV TOUR — comentários da dev após 10 visitas ao neroblock
+     Só roda 1 vez. Sprite: assets/images/characters/dev/devhappy.png
+════════════════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  var NB_KEY      = 'himari_nb_visits';
+  var TOUR_KEY    = 'himari_dev_tour_done';
+  var LOGO_KEY    = 'himari_dev_logo_clicks';
+
+  /* DOM e estilos são sempre injetados (independente de visitas)
+     para que o debug possa ativar o tour a qualquer momento. */
+
+  /* ── Estilos do sprite da dev ───────────────────────────────── */
+  var style = document.createElement('style');
+  style.textContent = [
+    '#dev-tour-wrap {',
+      'position:fixed; bottom:0; left:32px; z-index:89000;',
+      'display:none; align-items:flex-end; gap:16px;',
+      'pointer-events:none;',
+    '}',
+    '#dev-tour-sprite {',
+      'width:clamp(90px,10vw,140px); height:auto;',
+      'transform:translateY(100%); opacity:0;',
+      'transition:transform 0.55s cubic-bezier(0.22,0.61,0.36,1), opacity 0.4s ease;',
+      'image-rendering:auto;',
+    '}',
+    '#dev-tour-bubble {',
+      'position:relative; background:rgba(10,10,16,0.96);',
+      'border:1px solid rgba(204,0,255,0.35);',
+      'border-radius:8px 8px 8px 0;',
+      'padding:14px 18px; max-width:min(340px,55vw);',
+      'font-family:"VT323",monospace; font-size:clamp(14px,1.4vw,18px);',
+      'color:rgba(255,255,255,0.88); line-height:1.5;',
+      'box-shadow:0 0 18px rgba(204,0,255,0.15);',
+      'transform:translateY(8px); opacity:0;',
+      'transition:transform 0.4s ease 0.2s, opacity 0.35s ease 0.2s;',
+      'pointer-events:none;',
+    '}',
+    '#dev-tour-bubble::after {',
+      'content:""; position:absolute;',
+      'bottom:-8px; left:16px;',
+      'width:0; height:0;',
+      'border-left:8px solid transparent;',
+      'border-right:8px solid transparent;',
+      'border-top:8px solid rgba(10,10,16,0.96);',
+    '}',
+    /* ── Overlay bobão (5 clicks na logo) ── */
+    '#dev-bobao-overlay {',
+      'position:fixed; inset:0; background:#000; z-index:99000;',
+      'display:none; flex-direction:column;',
+      'align-items:center; justify-content:center; gap:32px;',
+    '}',
+    '#dev-bobao-img {',
+      'width:clamp(140px,18vw,220px); height:auto;',
+      'animation:devBobaoSpin 2s linear infinite;',
+    '}',
+    '@keyframes devBobaoSpin { to { transform:rotate(360deg); } }',
+    '#dev-bobao-marquee {',
+      'font-family:"VT323",monospace; font-size:clamp(22px,3vw,38px);',
+      'color:#cc00ff; letter-spacing:6px; white-space:nowrap;',
+      'overflow:hidden; width:100%;',
+    '}',
+    '#dev-bobao-inner {',
+      'display:inline-block;',
+      'animation:devBobaoScroll 8s linear infinite;',
+      'padding-left:100%;',
+    '}',
+    '@keyframes devBobaoScroll {',
+      'from { transform:translateX(0); }',
+      'to   { transform:translateX(-100%); }',
+    '}',
+  ].join('');
+  document.head.appendChild(style);
+
+  /* ── Monta o HTML do tour ────────────────────────────────────── */
+  var wrap = document.createElement('div');
+  wrap.id = 'dev-tour-wrap';
+  wrap.innerHTML = [
+    '<img id="dev-tour-sprite" src="assets/images/characters/dev/devhappy.png" alt="">',
+    '<div id="dev-tour-bubble"></div>',
+  ].join('');
+  document.body.appendChild(wrap);
+
+  var spriteEl = document.getElementById('dev-tour-sprite');
+  var bubbleEl = document.getElementById('dev-tour-bubble');
+
+  /* ── Typewriter simples ──────────────────────────────────────── */
+  var _twIv = null;
+  function typeWrite(text, onDone) {
+    if (_twIv) clearInterval(_twIv);
+    bubbleEl.textContent = '';
+    var i = 0;
+    _twIv = setInterval(function() {
+      if (i < text.length) { bubbleEl.textContent += text[i]; i++; }
+      else { clearInterval(_twIv); _twIv = null; if (onDone) onDone(); }
+    }, 28);
+  }
+
+  /* ── Mostra / esconde o sprite ───────────────────────────────── */
+  var _visible = false;
+  var _hideTimer = null;
+  function showDev(text, duration) {
+    if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
+    wrap.style.display = 'flex';
+    /* force reflow para a transição funcionar */
+    void spriteEl.offsetWidth;
+    spriteEl.style.transform   = 'translateY(0)';
+    spriteEl.style.opacity     = '1';
+    bubbleEl.style.transform   = 'translateY(0)';
+    bubbleEl.style.opacity     = '1';
+    _visible = true;
+    typeWrite(text, function() {
+      if (duration) {
+        _hideTimer = setTimeout(hideDev, duration);
+      }
+    });
+  }
+  function hideDev() {
+    spriteEl.style.transform = 'translateY(100%)';
+    spriteEl.style.opacity   = '0';
+    bubbleEl.style.transform = 'translateY(8px)';
+    bubbleEl.style.opacity   = '0';
+    _visible = false;
+    _hideTimer = setTimeout(function() {
+      wrap.style.display = 'none';
+    }, 600);
+  }
+
+  /* ── Mensagem de boas-vindas ao entrar no menu ───────────────── */
+  function _onMenuOpen() {
+    setTimeout(function() {
+      showDev('Ei! Já que você chegou até aqui... vou aproveitar pra comentar umas coisas do game. haha', 6000);
+    }, 1200);
+  }
+
+  /* ── Hooks nos botões do menu ────────────────────────────────── */
+  function _hookMenuButtons() {
+    /* Configurações */
+    var settingsBtn = document.getElementById('settings-menu-btn');
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', function() {
+        setTimeout(function() {
+          showDev('Ah, o menu de configurações. Sabia que eu não consegui achar um layout bom pra isso? haha', 7000);
+        }, 400);
+      });
+    }
+
+    /* Volume — qualquer slider de volume */
+    document.addEventListener('input', function(e) {
+      if (!e.target || !e.target.classList.contains('volume-slider')) return;
+      if (_visible) return; /* já mostrando algo */
+      showDev('Eu odiei isso. Não consegui arrumar o volume desse game de jeito nenhum.', 6000);
+    });
+
+    /* Atualizações */
+    var updateBtn = document.getElementById('update-menu-btn');
+    if (updateBtn) {
+      updateBtn.addEventListener('click', function() {
+        setTimeout(function() {
+          showDev('Ah... o painel de atualizações... você não faz ideia o quanto isso me deu dores de cabeça. Mas foi divertido ver como funcionava, haha', 8000);
+        }, 400);
+      });
+    }
+
+    /* Capítulos */
+    var chaptersBtn = document.getElementById('chapters-menu-btn');
+    if (chaptersBtn) {
+      chaptersBtn.addEventListener('click', function() {
+        setTimeout(function() {
+          showDev('Sabia que eu preferi nomear eles de 1.1, 1.2, 1.3... porque achava que eram pequenos demais pra serem chamados de 1, 2 e 3? hahaha', 8000);
+        }, 400);
+      });
+    }
+
+    /* ── 5 clicks na logo → overlay bobão ── */
+    var _logoClicks = parseInt(localStorage.getItem(LOGO_KEY) || '0', 10);
+    var logoEl = document.getElementById('menu-logo-img');
+    if (logoEl) {
+      logoEl.addEventListener('click', function() {
+        _logoClicks++;
+        localStorage.setItem(LOGO_KEY, String(_logoClicks));
+        if (_logoClicks >= 5) {
+          localStorage.setItem(LOGO_KEY, '0'); /* reseta para poder repetir se quiser */
+          _showBobao();
+        }
+      });
+    }
+  }
+
+  /* ── Overlay bobão ───────────────────────────────────────────── */
+  function _showBobao() {
+    hideDev();
+    var ov = document.createElement('div');
+    ov.id = 'dev-bobao-overlay';
+    ov.innerHTML = [
+      '<img id="dev-bobao-img" src="assets/images/characters/dev/xd.png" alt="">',
+      '<div id="dev-bobao-marquee">',
+        '<span id="dev-bobao-inner">',
+          'O que você pensa que está fazendo, bobão? &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+          'O que você pensa que está fazendo, bobão? &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+          'O que você pensa que está fazendo, bobão? &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',
+        '</span>',
+      '</div>',
+    ].join('');
+    document.body.appendChild(ov);
+
+    /* Música bobão */
+    var bobaoAudio = new Audio('assets/audio/bobao.mp3');
+    bobaoAudio.volume = 0.7;
+    bobaoAudio.play().catch(function(){});
+
+    /* Aparece com fade */
+    ov.style.display = 'flex';
+    ov.style.opacity = '0';
+    ov.style.transition = 'opacity 0.6s ease';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { ov.style.opacity = '1'; });
+    });
+
+    /* Fecha o game após 1 minuto */
+    setTimeout(function() {
+      ov.style.transition = 'opacity 1s ease';
+      ov.style.opacity = '0';
+      bobaoAudio.pause();
+      setTimeout(function() {
+        /* Tenta fechar via Electron, senão limpa a tela */
+        if (window.electronAPI && typeof window.electronAPI.quit === 'function') {
+          window.electronAPI.quit();
+        } else {
+          window.close();
+          document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:rgba(255,255,255,0.2);font-size:11px;letter-spacing:4px;text-transform:uppercase;">Pode fechar esta aba</div>';
+        }
+      }, 1000);
+    }, 60000);
+  }
+
+  /* ── Inicialização do tour (usada tanto pelo fluxo normal quanto pelo debug) ── */
+  function _startDevTour() {
+    if (window._devTourHooked) return; /* garante hooks uma vez só */
+    window._devTourHooked = true;
+    _hookMenuButtons();
+    _onMenuOpen();
+    localStorage.setItem(TOUR_KEY, '1');
+  }
+
+  /* Expõe globalmente para o debug poder chamar diretamente */
+  window._devTourStart = _startDevTour;
+  window._devTourShowBobao = _showBobao;
+
+  /* ── Auto-ativação: espera o menu abrir se as condições forem atendidas ── */
+  (function _autoActivate() {
+    var visits   = parseInt(localStorage.getItem(NB_KEY)   || '0', 10);
+    var tourDone = localStorage.getItem(TOUR_KEY) === '1';
+    if (visits < 10 || tourDone) return; /* condição não atendida — debug vai chamar manualmente */
+
+    var menuScreen = document.getElementById('menu-screen');
+    if (!menuScreen) { setTimeout(_autoActivate, 200); return; }
+
+    /* Se menu já está visível agora, ativa direto */
+    if (menuScreen.style.display !== 'none' && menuScreen.style.display !== '') {
+      _startDevTour(); return;
+    }
+
+    /* Senão observa até aparecer */
+    var obs = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        if (m.type === 'attributes' && m.attributeName === 'style') {
+          var el = m.target;
+          if (el.style.display !== 'none' && el.style.display !== '') {
+            obs.disconnect();
+            _startDevTour();
+          }
+        }
+      });
+    });
+    obs.observe(menuScreen, { attributes: true });
+  })();
+
+})();
+</script>
+<!-- ══ fim DEV TOUR ════════════════════════════════════════════════════════ -->
 
 </body>
 </html>
