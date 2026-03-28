@@ -42,4 +42,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onUpdateProgress:     (cb)  => ipcRenderer.on('update-progress',      (_e, pct, speed)        => cb(pct, speed)),
   onUpdateSequenceStep: (cb)  => ipcRenderer.on('update-sequence-step', (_e, step, total, ver)  => cb(step, total, ver)),
   onUpdateReady:        (cb)  => ipcRenderer.on('update-ready',         ()                      => cb()),
+
+  // ── Integrity Check ─────────────────────────────────────────────────────────
+  integrityRun:    ()   => ipcRenderer.invoke('integrity-run'),
+  integrityCancel: ()   => ipcRenderer.invoke('integrity-cancel'),
+  onIntegrityStart:    (cb) => ipcRenderer.on('integrity-start',    ()                                        => cb()),
+  onIntegrityProgress: (cb) => ipcRenderer.on('integrity-progress', (_e, pct, total, file, status)           => cb(pct, total, file, status)),
+  onIntegrityDone:     (cb) => ipcRenderer.on('integrity-done',     (_e, result)                             => cb(result)),
+  onIntegrityError:    (cb) => ipcRenderer.on('integrity-error',    (_e, msg)                                => cb(msg)),
 });

@@ -1,4 +1,6 @@
-<!-- ══ AUTO-UPDATE BANNER — cole antes do </body> no index.html ══════════════ -->
+<!-- ══ AUTO-UPDATE BANNER + INTEGRITY CHECK — cole antes do </body> no index.html ══ -->
+
+<!-- ── UPDATE BANNER ─────────────────────────────────────────────────────── -->
 <div id="update-banner" style="
   display:none; position:fixed; bottom:0; left:0; right:0; z-index:99999;
   background:rgba(10,10,20,0.97); border-top:2px solid #7c3aed;
@@ -14,7 +16,6 @@
     <div id="update-notes-label"   style="font-size:11px; color:rgba(255,255,255,0.55); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis"></div>
   </div>
 
-  <!-- barra de progresso (escondida até o download começar) -->
   <div id="update-progress-wrap" style="display:none; flex:1; max-width:200px">
     <div style="background:rgba(255,255,255,0.12); border-radius:4px; height:6px; overflow:hidden">
       <div id="update-progress-bar" style="height:100%; background:#7c3aed; width:0%; transition:width 0.2s"></div>
@@ -35,10 +36,104 @@
   ">DEPOIS</button>
 </div>
 
+<!-- ── INTEGRITY CHECK OVERLAY ───────────────────────────────────────────── -->
+<div id="integrity-overlay" style="
+  display:none; position:fixed; inset:0; z-index:100000;
+  background:rgba(6,6,15,0.96);
+  flex-direction:column; align-items:center; justify-content:center; gap:0;
+">
+  <!-- Painel central -->
+  <div style="
+    width:520px; max-width:92vw;
+    background:rgba(15,12,30,0.98);
+    border:1px solid rgba(124,58,237,0.35);
+    border-radius:12px;
+    padding:36px 40px 32px;
+    box-shadow:0 8px 48px rgba(124,58,237,0.2);
+    display:flex; flex-direction:column; gap:20px;
+  ">
+    <!-- Header -->
+    <div style="display:flex; align-items:center; gap:14px">
+      <!-- Ícone de escudo animado -->
+      <div id="integrity-icon" style="
+        width:40px; height:40px; flex-shrink:0;
+        background:rgba(124,58,237,0.15);
+        border-radius:50%;
+        display:flex; align-items:center; justify-content:center;
+        font-size:20px;
+        border:1.5px solid rgba(124,58,237,0.4);
+      ">🛡️</div>
+      <div>
+        <div style="font-size:11px; letter-spacing:4px; color:#a78bfa; font-weight:800; margin-bottom:3px">
+          VERIFICAÇÃO DE INTEGRIDADE
+        </div>
+        <div id="integrity-headline" style="font-size:13px; color:rgba(255,255,255,0.75); letter-spacing:1px">
+          Verificando arquivos do jogo...
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de progresso principal -->
+    <div>
+      <div style="background:rgba(255,255,255,0.08); border-radius:6px; height:8px; overflow:hidden">
+        <div id="integrity-bar" style="
+          height:100%; width:0%;
+          background: linear-gradient(90deg, #7c3aed, #a78bfa);
+          transition:width 0.15s ease;
+          border-radius:6px;
+        "></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:7px">
+        <div id="integrity-file-label" style="font-size:10px; color:rgba(255,255,255,0.35); letter-spacing:1px; max-width:360px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap"></div>
+        <div id="integrity-pct-label"  style="font-size:10px; color:rgba(255,255,255,0.4); letter-spacing:2px; flex-shrink:0; margin-left:12px">0%</div>
+      </div>
+    </div>
+
+    <!-- Contador de arquivos -->
+    <div style="display:flex; gap:24px">
+      <div style="text-align:center">
+        <div id="integrity-count-ok"    style="font-size:22px; font-weight:800; color:#4ade80; letter-spacing:1px">0</div>
+        <div style="font-size:9px; letter-spacing:3px; color:rgba(255,255,255,0.3); margin-top:2px">OK</div>
+      </div>
+      <div style="text-align:center">
+        <div id="integrity-count-fixed" style="font-size:22px; font-weight:800; color:#f59e0b; letter-spacing:1px">0</div>
+        <div style="font-size:9px; letter-spacing:3px; color:rgba(255,255,255,0.3); margin-top:2px">CORRIGIDO</div>
+      </div>
+      <div style="text-align:center">
+        <div id="integrity-count-err"   style="font-size:22px; font-weight:800; color:#f87171; letter-spacing:1px">0</div>
+        <div style="font-size:9px; letter-spacing:3px; color:rgba(255,255,255,0.3); margin-top:2px">ERRO</div>
+      </div>
+      <div style="flex:1"></div>
+      <div id="integrity-total-wrap" style="text-align:right">
+        <div id="integrity-count-total" style="font-size:22px; font-weight:800; color:rgba(255,255,255,0.4); letter-spacing:1px">0</div>
+        <div style="font-size:9px; letter-spacing:3px; color:rgba(255,255,255,0.2); margin-top:2px">TOTAL</div>
+      </div>
+    </div>
+
+    <!-- Log de arquivos recentes (últimos 4) -->
+    <div id="integrity-log" style="
+      background:rgba(0,0,0,0.3); border-radius:6px;
+      padding:10px 14px; min-height:72px;
+      font-size:10px; letter-spacing:1px; line-height:1.9;
+      color:rgba(255,255,255,0.35); font-family:monospace;
+      overflow:hidden;
+    "></div>
+
+    <!-- Botão fechar (só aparece ao terminar) -->
+    <button id="integrity-close-btn" style="
+      display:none;
+      padding:11px; background:#7c3aed; color:#fff; border:none;
+      font-size:11px; font-weight:800; letter-spacing:3px; cursor:pointer;
+      font-family:inherit; border-radius:6px; transition:background .2s;
+    ">FECHAR</button>
+  </div>
+</div>
+
 <script>
 (function(){
   if(!window.electronAPI) return;
 
+  // ── UPDATE BANNER ────────────────────────────────────────────────────────
   var banner   = document.getElementById('update-banner');
   var btnUp    = document.getElementById('update-btn');
   var btnDis   = document.getElementById('update-dismiss');
@@ -50,7 +145,6 @@
 
   var _downloadUrl = '';
 
-  // Update disponível → mostra banner
   electronAPI.onUpdateAvailable(function(info){
     verLabel.textContent = 'Versão ' + info.version;
     notLabel.textContent = info.notes || '';
@@ -58,27 +152,31 @@
     banner.style.display = 'flex';
   });
 
-  // Progresso do download
   electronAPI.onUpdateProgress(function(pct){
     progBar.style.width = pct + '%';
-    progPct.textContent  = pct + '%';
+    progPct.textContent = pct + '%';
   });
 
-  // Download concluído
   electronAPI.onUpdateReady(function(){
-    progPct.textContent     = 'Reiniciando...';
-    progBar.style.width     = '100%';
-    btnUp.textContent       = 'CONCLUÍDO!';
-    btnUp.style.background  = '#16a34a';
+    progPct.textContent    = 'Concluído!';
+    progBar.style.width    = '100%';
+    btnUp.textContent      = 'REINICIAR';
+    btnUp.disabled         = false;
+    btnUp.style.background = '#16a34a';
+    // Banner some, overlay de integridade vai aparecer automaticamente via evento
+    setTimeout(function(){ banner.style.display = 'none'; }, 800);
   });
 
-  // Botão Atualizar
   btnUp.addEventListener('click', function(){
+    if(btnUp.textContent === 'REINICIAR'){
+      electronAPI.updateRestart();
+      return;
+    }
     if(!_downloadUrl) return;
-    btnUp.disabled          = true;
-    btnUp.textContent       = 'BAIXANDO...';
-    btnDis.style.display    = 'none';
-    progWrap.style.display  = 'block';
+    btnUp.disabled         = true;
+    btnUp.textContent      = 'BAIXANDO...';
+    btnDis.style.display   = 'none';
+    progWrap.style.display = 'block';
     electronAPI.updateDownload(_downloadUrl).then(function(res){
       if(res && !res.ok){
         progPct.textContent = 'Erro: ' + (res.error || 'falha no download');
@@ -88,16 +186,142 @@
     });
   });
 
-  // Botão Depois → esconde banner
   btnDis.addEventListener('click', function(){
     banner.style.display = 'none';
   });
 
-  // Hover nos botões
   btnUp.addEventListener('mouseenter',  function(){ if(!btnUp.disabled) btnUp.style.background='#6d28d9'; });
   btnUp.addEventListener('mouseleave',  function(){ if(!btnUp.disabled) btnUp.style.background='#7c3aed'; });
   btnDis.addEventListener('mouseenter', function(){ btnDis.style.borderColor='rgba(255,255,255,0.4)'; btnDis.style.color='rgba(255,255,255,0.7)'; });
   btnDis.addEventListener('mouseleave', function(){ btnDis.style.borderColor='rgba(255,255,255,0.15)'; btnDis.style.color='rgba(255,255,255,0.4)'; });
+
+  // ── INTEGRITY CHECK OVERLAY ──────────────────────────────────────────────
+  var overlay      = document.getElementById('integrity-overlay');
+  var intBar       = document.getElementById('integrity-bar');
+  var intPct       = document.getElementById('integrity-pct-label');
+  var intFile      = document.getElementById('integrity-file-label');
+  var intHeadline  = document.getElementById('integrity-headline');
+  var intIcon      = document.getElementById('integrity-icon');
+  var intLog       = document.getElementById('integrity-log');
+  var intCloseBtn  = document.getElementById('integrity-close-btn');
+  var cntOk        = document.getElementById('integrity-count-ok');
+  var cntFixed     = document.getElementById('integrity-count-fixed');
+  var cntErr       = document.getElementById('integrity-count-err');
+  var cntTotal     = document.getElementById('integrity-count-total');
+
+  var _logLines = [];
+  var _okCount  = 0, _fixedCount = 0, _errCount = 0;
+
+  function pushLog(text, color) {
+    color = color || 'rgba(255,255,255,0.3)';
+    _logLines.push('<span style="color:' + color + '">' + text + '</span>');
+    if(_logLines.length > 4) _logLines.shift();
+    intLog.innerHTML = _logLines.join('<br>');
+  }
+
+  function resetIntegrity() {
+    _logLines   = [];
+    _okCount    = 0; _fixedCount = 0; _errCount = 0;
+    intBar.style.width    = '0%';
+    intPct.textContent    = '0%';
+    intFile.textContent   = '';
+    cntOk.textContent     = '0';
+    cntFixed.textContent  = '0';
+    cntErr.textContent    = '0';
+    cntTotal.textContent  = '0';
+    intLog.innerHTML      = '';
+    intCloseBtn.style.display = 'none';
+    intHeadline.textContent   = 'Verificando arquivos do jogo...';
+    intIcon.textContent       = '🛡️';
+    intIcon.style.background  = 'rgba(124,58,237,0.15)';
+    intIcon.style.borderColor = 'rgba(124,58,237,0.4)';
+  }
+
+  electronAPI.onIntegrityStart(function(){
+    resetIntegrity();
+    overlay.style.display = 'flex';
+  });
+
+  electronAPI.onIntegrityProgress(function(pct, total, file, status){
+    intBar.style.width  = pct + '%';
+    intPct.textContent  = pct + '%';
+    intFile.textContent = file;
+    cntTotal.textContent = total;
+
+    if(status === 'ok'){
+      _okCount++;
+      cntOk.textContent = _okCount;
+    } else if(status === 'fixed'){
+      _fixedCount++;
+      cntFixed.textContent = _fixedCount;
+      pushLog('✔ Corrigido: ' + file, '#f59e0b');
+    } else if(status === 'missing'){
+      pushLog('⬇ Baixando: ' + file + ' (ausente)', '#a78bfa');
+    } else if(status === 'mismatch'){
+      pushLog('⬇ Baixando: ' + file + ' (modificado)', '#a78bfa');
+    }
+  });
+
+  electronAPI.onIntegrityDone(function(result){
+    intBar.style.width = '100%';
+    intPct.textContent = '100%';
+    intFile.textContent = '';
+
+    var allGood = result.fixed === 0 && result.errors.length === 0;
+
+    if(allGood){
+      intHeadline.textContent  = 'Todos os arquivos estão íntegros!';
+      intIcon.textContent      = '✅';
+      intIcon.style.background = 'rgba(74,222,128,0.1)';
+      intIcon.style.borderColor = 'rgba(74,222,128,0.4)';
+      pushLog('✅ Verificação concluída. ' + result.checked + ' arquivo(s) OK.', '#4ade80');
+    } else {
+      intHeadline.textContent  = result.fixed + ' arquivo(s) corrigido(s).';
+      intIcon.textContent      = '🔧';
+      intIcon.style.background = 'rgba(245,158,11,0.1)';
+      intIcon.style.borderColor = 'rgba(245,158,11,0.4)';
+      pushLog('🔧 ' + result.fixed + ' corrigido(s), ' + result.skipped + ' ignorado(s).', '#f59e0b');
+    }
+
+    if(result.errors && result.errors.length > 0){
+      _errCount = result.errors.length;
+      cntErr.textContent = _errCount;
+      result.errors.forEach(function(e){
+        pushLog('✖ Erro em ' + e.file + ': ' + e.reason, '#f87171');
+      });
+    }
+
+    // Se tudo OK, fecha sozinho em 3s; se houve correções, espera o jogador fechar
+    if(allGood){
+      var countdown = 3;
+      intCloseBtn.style.display = 'block';
+      intCloseBtn.textContent   = 'FECHAR (' + countdown + ')';
+      var iv = setInterval(function(){
+        countdown--;
+        if(countdown <= 0){
+          clearInterval(iv);
+          overlay.style.display = 'none';
+        } else {
+          intCloseBtn.textContent = 'FECHAR (' + countdown + ')';
+        }
+      }, 1000);
+    } else {
+      intCloseBtn.style.display = 'block';
+      intCloseBtn.textContent   = 'FECHAR';
+    }
+  });
+
+  electronAPI.onIntegrityError(function(msg){
+    intHeadline.textContent  = 'Falha na verificação.';
+    intIcon.textContent      = '⚠️';
+    pushLog('⚠️ ' + msg, '#f87171');
+    intCloseBtn.style.display = 'block';
+    intCloseBtn.textContent   = 'FECHAR';
+  });
+
+  intCloseBtn.addEventListener('click', function(){
+    overlay.style.display = 'none';
+  });
 })();
 </script>
-<!-- ══ fim AUTO-UPDATE BANNER ════════════════════════════════════════════════ -->
+<!-- ══ fim AUTO-UPDATE BANNER + INTEGRITY CHECK ══════════════════════════════ -->

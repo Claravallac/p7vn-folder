@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════════════════════
-// updater.js — update sequencial via GitHub
+// updater.js — update sequencial + integrity check via GitHub
 // ══════════════════════════════════════════════════════════════════════════════
 
 const { app, ipcMain } = require('electron');
@@ -8,6 +8,7 @@ const http   = require('http');
 const fs     = require('fs');
 const path   = require('path');
 const os     = require('os');
+const crypto = require('crypto');
 const { spawn } = require('child_process');
 
 const REPO_OWNER         = 'Claravallac';
@@ -15,7 +16,11 @@ const REPO_NAME          = 'p7vn-folder';
 const BRANCH             = 'main';
 const VERSION_JSON_URL   = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/version.json`;
 const CHANGELOG_JSON_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/changelog.json`;
+const INTEGRITY_JSON_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/integrity.json`;
 const ZIP_URL            = `https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${BRANCH}.zip`;
+
+// URL base para baixar arquivos individuais do GitHub
+const RAW_BASE_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}`;
 
 const APPDATA_DIR = app.isPackaged
   ? path.join(path.dirname(process.execPath), 'resources', 'app')
@@ -76,6 +81,41 @@ function fetchText(url) {
       res.on('end', () => resolve(data));
     }).on('error', reject);
   });
+}
+
+function fetchBuffer(url) {
+  return new Promise((resolve, reject) => {
+    function doGet(currentUrl, hops) {
+      if (hops > 10) return reject(new Error('Too many redirects'));
+      const proto = currentUrl.startsWith('https') ? https : http;
+      proto.get(currentUrl, { headers: { 'User-Agent': 'HimariGames-Updater' } }, res => {
+        if ([301,302,303,307,308].includes(res.statusCode)) {
+          res.resume();
+          const loc = res.headers.location;
+          if (!loc) return reject(new Error('Redirect sem location'));
+          return doGet(loc.startsWith('http') ? loc : new URL(loc, currentUrl).href, hops + 1);
+        }
+        if (res.statusCode !== 200) return reject(new Error('HTTP ' + res.statusCode));
+        const chunks = [];
+        res.on('data', c => chunks.push(c));
+        res.on('end', () => resolve(Buffer.concat(chunks)));
+        res.on('error', reject);
+      }).on('error', reject);
+    }
+    doGet(url, 0);
+  });
+}
+
+function sha256(buf) {
+  return crypto.createHash('sha256').update(buf).digest('hex');
+}
+
+function sha256File(filePath) {
+  try {
+    return sha256(fs.readFileSync(filePath));
+  } catch(e) {
+    return null;
+  }
 }
 
 function downloadFile(url, destPath, onProgress) {
@@ -196,7 +236,6 @@ async function checkForUpdates() {
 
     if (!isNewer(remote.version, local)) return;
 
-    // Versões que o player ainda não tem, com URL, em ordem crescente
     const pending = changelog
       .filter(e => e.url && isNewer(e.version, local))
       .sort((a, b) => compareVersions(a.version, b.version));
@@ -215,6 +254,116 @@ async function checkForUpdates() {
     console.log('[updater] Não foi possível checar atualizações:', e.message);
   }
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// INTEGRITY CHECK — compara SHA256 de cada arquivo local com o do GitHub
+// ══════════════════════════════════════════════════════════════════════════════
+
+let _integrityActive = false;
+
+/**
+ * integrity.json esperado no repo:
+ * {
+ *   "files": {
+ *     "index.html": "sha256hex...",
+ *     "main.js":    "sha256hex...",
+ *     "js/game.js": "sha256hex...",
+ *     ...
+ *   }
+ * }
+ */
+async function runIntegrityCheck(gameDir) {
+  if (_integrityActive) return;
+  _integrityActive = true;
+
+  function emit(event, ...args) {
+    if (_mainWindow && !_mainWindow.isDestroyed())
+      _mainWindow.webContents.send(event, ...args);
+  }
+
+  emit('integrity-start');
+
+  try {
+    // Busca o manifesto de hashes do GitHub
+    const rawIntegrity = await fetchText(INTEGRITY_JSON_URL);
+    const manifest = JSON.parse(rawIntegrity);
+    const files = Object.entries(manifest.files || {});
+
+    if (files.length === 0) {
+      emit('integrity-done', { fixed: 0, total: 0, skipped: 0, errors: [] });
+      _integrityActive = false;
+      return;
+    }
+
+    let checked = 0, fixed = 0, skipped = 0;
+    const errors = [];
+
+    emit('integrity-progress', 0, files.length, '', 'Verificando arquivos...');
+
+    for (const [relPath, expectedHash] of files) {
+      const localPath = path.join(gameDir, ...relPath.split('/'));
+      const localHash = sha256File(localPath);
+
+      checked++;
+      const pct = Math.round((checked / files.length) * 100);
+
+      if (localHash === expectedHash) {
+        // Arquivo OK
+        emit('integrity-progress', pct, files.length, relPath, 'ok');
+      } else {
+        // Arquivo ausente ou corrompido — baixar do GitHub
+        const status = localHash === null ? 'missing' : 'mismatch';
+        emit('integrity-progress', pct, files.length, relPath, status);
+
+        try {
+          const rawUrl = `${RAW_BASE_URL}/${relPath}`;
+          const buf = await fetchBuffer(rawUrl);
+
+          // Valida o hash do arquivo baixado
+          const downloadedHash = sha256(buf);
+          if (downloadedHash !== expectedHash) {
+            errors.push({ file: relPath, reason: 'hash mismatch após download' });
+            skipped++;
+          } else {
+            // Garante que a pasta existe e escreve o arquivo
+            fs.mkdirSync(path.dirname(localPath), { recursive: true });
+            fs.writeFileSync(localPath, buf);
+            fixed++;
+            emit('integrity-progress', pct, files.length, relPath, 'fixed');
+          }
+        } catch(e) {
+          errors.push({ file: relPath, reason: e.message });
+          skipped++;
+        }
+      }
+
+      // Pequena pausa para não travar o event loop em listas grandes
+      await new Promise(r => setTimeout(r, 10));
+    }
+
+    emit('integrity-done', { fixed, total: files.length, checked, skipped, errors });
+
+  } catch(e) {
+    console.log('[integrity] Erro:', e.message);
+    emit('integrity-error', e.message);
+  }
+
+  _integrityActive = false;
+}
+
+// ── IPC Handlers para Integrity ───────────────────────────────────────────────
+
+ipcMain.handle('integrity-run', async () => {
+  const gameDir = app.isPackaged ? findGameDir() : APPDATA_DIR;
+  runIntegrityCheck(gameDir); // fire-and-forget, progresso via events
+  return { ok: true };
+});
+
+ipcMain.handle('integrity-cancel', () => {
+  _integrityActive = false;
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
 
 ipcMain.handle('update-check-partial',   () => 0);
 ipcMain.handle('update-discard-partial', () => {
@@ -277,6 +426,10 @@ ipcMain.handle('update-download', async (_event, url) => {
     if (_mainWindow && !_mainWindow.isDestroyed())
       _mainWindow.webContents.send('update-ready');
 
+    // ── Inicia integrity check automaticamente após o update ──────────────────
+    const integrityGameDir = app.isPackaged ? findGameDir() : APPDATA_DIR;
+    setTimeout(() => runIntegrityCheck(integrityGameDir), 1500);
+
     return { ok: true };
   } catch(e) {
     _sequenceActive = false;
@@ -295,7 +448,6 @@ ipcMain.handle('update-restart', () => {
   restartApp();
 });
 
-// Downgrade — instala versão mais velha explicitamente
 ipcMain.handle('update-downgrade', async (_event, targetVersion) => {
   if (!app.isPackaged) return { ok: false, error: 'Só funciona no jogo instalado.' };
   _sequenceActive = true;
@@ -315,6 +467,9 @@ ipcMain.handle('update-downgrade', async (_event, targetVersion) => {
 
     if (_mainWindow && !_mainWindow.isDestroyed())
       _mainWindow.webContents.send('update-ready');
+
+    // Integrity check após downgrade também
+    setTimeout(() => runIntegrityCheck(gameDir), 1500);
 
     return { ok: true };
   } catch(e) {
