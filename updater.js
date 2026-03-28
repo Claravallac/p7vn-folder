@@ -16,7 +16,8 @@ const REPO_NAME          = 'p7vn-folder';
 const BRANCH             = 'main';
 const VERSION_JSON_URL   = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/version.json`;
 const CHANGELOG_JSON_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/changelog.json`;
-const INTEGRITY_JSON_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/integrity.json`;
+const INTEGRITY_JSON_URL      = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/integrity.json`;
+const INTEGRITY_FULL_JSON_URL = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/integrity-full.json`;
 const ZIP_URL            = `https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${BRANCH}.zip`;
 
 // URL base para baixar arquivos individuais do GitHub
@@ -239,7 +240,7 @@ function setMainWindow(win) {
   if (checkIntegrityPending()) {
     const gameDir = app.isPackaged ? findGameDir() : APPDATA_DIR;
     win.webContents.once('did-finish-load', () => {
-      setTimeout(() => runIntegrityCheck(gameDir), 3000);
+      setTimeout(() => runIntegrityCheck(gameDir, false), 3000);
     });
   }
 }
@@ -294,7 +295,7 @@ let _integrityActive = false;
  *   }
  * }
  */
-async function runIntegrityCheck(gameDir) {
+async function runIntegrityCheck(gameDir, fullCheck) {
   if (_integrityActive) return;
   _integrityActive = true;
 
@@ -307,7 +308,8 @@ async function runIntegrityCheck(gameDir) {
 
   try {
     // Busca o manifesto de hashes do GitHub
-    const rawIntegrity = await fetchText(INTEGRITY_JSON_URL);
+    const manifestUrl  = fullCheck ? INTEGRITY_FULL_JSON_URL : INTEGRITY_JSON_URL;
+    const rawIntegrity = await fetchText(manifestUrl);
     const manifest = JSON.parse(rawIntegrity);
     const files = Object.entries(manifest.files || {});
 
@@ -375,9 +377,9 @@ async function runIntegrityCheck(gameDir) {
 
 // ── IPC Handlers para Integrity ───────────────────────────────────────────────
 
-ipcMain.handle('integrity-run', async () => {
+ipcMain.handle('integrity-run', async (_event, mode) => {
   const gameDir = app.isPackaged ? findGameDir() : APPDATA_DIR;
-  runIntegrityCheck(gameDir); // fire-and-forget, progresso via events
+  runIntegrityCheck(gameDir, mode === 'full'); // fire-and-forget, progresso via events
   return { ok: true };
 });
 
@@ -450,7 +452,7 @@ ipcMain.handle('update-download', async (_event, url) => {
 
     // ── Inicia integrity check automaticamente após o update ──────────────────
     const integrityGameDir = app.isPackaged ? findGameDir() : APPDATA_DIR;
-    setTimeout(() => runIntegrityCheck(integrityGameDir), 1500);
+    setTimeout(() => runIntegrityCheck(integrityGameDir, false), 1500);
 
     return { ok: true };
   } catch(e) {
@@ -491,7 +493,7 @@ ipcMain.handle('update-downgrade', async (_event, targetVersion) => {
       _mainWindow.webContents.send('update-ready');
 
     // Integrity check após downgrade também
-    setTimeout(() => runIntegrityCheck(gameDir), 1500);
+    setTimeout(() => runIntegrityCheck(gameDir, false), 1500);
 
     return { ok: true };
   } catch(e) {

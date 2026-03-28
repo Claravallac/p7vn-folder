@@ -4032,6 +4032,11 @@
                             border:1px solid rgba(124,58,237,0.25);font-size:9px;letter-spacing:3px;
                             cursor:pointer;font-family:inherit;transition:all .2s;
                         ">🛡 VERIFICAR INTEGRIDADE</button>
+                        <button id="upd-screen-integrity-full" style="
+                            padding:11px 22px;background:transparent;color:rgba(167,139,250,0.35);
+                            border:1px solid rgba(124,58,237,0.15);font-size:9px;letter-spacing:3px;
+                            cursor:pointer;font-family:inherit;transition:all .2s;
+                        ">🛡 VERIFICAÇÃO COMPLETA</button>
                     </div>
                     <div id="upd-integrity-status" style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-top:10px;min-height:16px;display:none">
                         <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-left:3px solid #7c3aed;padding:12px 14px">
@@ -17923,6 +17928,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     electronAPI.onIntegrityError(function(msg){
       if(sIntegrityFile) sIntegrityFile.textContent = '⚠️ Erro: ' + msg;
       if(sIntegrityBtn){ sIntegrityBtn.disabled = false; sIntegrityBtn.textContent = '🛡 VERIFICAR INTEGRIDADE'; }
+      if(sIntegrityFullBtn){ sIntegrityFullBtn.disabled = false; sIntegrityFullBtn.textContent = '🛡 VERIFICAÇÃO COMPLETA'; }
     });
   }
 
@@ -17936,6 +17942,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
         : '🔧 ' + result.fixed + ' corrigido(s). ' + (_integrityErr > 0 ? _integrityErr + ' erro(s).' : '');
       if(sIntegrityFile) sIntegrityFile.textContent = msg;
       if(sIntegrityBtn){ sIntegrityBtn.disabled = false; sIntegrityBtn.textContent = '🛡 VERIFICAR INTEGRIDADE'; }
+      if(sIntegrityFullBtn){ sIntegrityFullBtn.disabled = false; sIntegrityFullBtn.textContent = '🛡 VERIFICAÇÃO COMPLETA'; }
       // Popula lista de erros
       if(_integrityErr > 0 && result.errors && sIntegrityErrWrap && sIntegrityErrList){
         sIntegrityErrWrap.style.display = 'block';
@@ -17954,6 +17961,37 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     sIntegrityBtn.addEventListener('mouseenter', function(){ if(!sIntegrityBtn.disabled) sIntegrityBtn.style.borderColor='rgba(124,58,237,0.5)'; sIntegrityBtn.style.color='rgba(167,139,250,0.9)'; });
     sIntegrityBtn.addEventListener('mouseleave', function(){ sIntegrityBtn.style.borderColor='rgba(124,58,237,0.25)'; sIntegrityBtn.style.color='rgba(167,139,250,0.5)'; });
   }
+
+  // ── Botão Verificação Completa (código + assets) ──────────────────────────
+  var sIntegrityFullBtn = document.getElementById('upd-screen-integrity-full');
+
+  function _runIntegrityFull() {
+    if(!window.electronAPI || !electronAPI.integrityRun) return;
+    sIntegrityFullBtn.disabled = true;
+    sIntegrityBtn.disabled     = true;
+    sIntegrityFullBtn.textContent = '🛡 VERIFICANDO...';
+    _integrityOk = 0; _integrityFixed = 0; _integrityErr = 0;
+    if(sIntegrityOk)    sIntegrityOk.textContent    = '0';
+    if(sIntegrityFixed) sIntegrityFixed.textContent  = '0';
+    if(sIntegrityErr)   sIntegrityErr.textContent    = '0';
+    if(sIntegrityBar)   sIntegrityBar.style.width    = '0%';
+    if(sIntegrityFile)  sIntegrityFile.textContent   = '';
+    if(sIntegrityErrWrap)  sIntegrityErrWrap.style.display  = 'none';
+    if(sIntegrityErrList)  { sIntegrityErrList.innerHTML = ''; sIntegrityErrList.style.display = 'none'; }
+    if(sIntegrityErrToggle) sIntegrityErrToggle.textContent = '▶ VER ARQUIVOS COM ERRO';
+    if(sIntegrityStatus) sIntegrityStatus.style.display = 'block';
+    electronAPI.integrityRun('full');
+  }
+
+  if(sIntegrityFullBtn) sIntegrityFullBtn.addEventListener('click', _runIntegrityFull);
+
+  if(sIntegrityFullBtn){
+    sIntegrityFullBtn.addEventListener('mouseenter', function(){ if(!sIntegrityFullBtn.disabled){ sIntegrityFullBtn.style.borderColor='rgba(124,58,237,0.4)'; sIntegrityFullBtn.style.color='rgba(167,139,250,0.7)'; } });
+    sIntegrityFullBtn.addEventListener('mouseleave', function(){ sIntegrityFullBtn.style.borderColor='rgba(124,58,237,0.15)'; sIntegrityFullBtn.style.color='rgba(167,139,250,0.35)'; });
+  }
+
+  // Ao terminar qualquer check, reabilita ambos os botões
+  var _origIntegrityDoneHandler = null;
 
   if(sCheck) sCheck.addEventListener('click', function(){
     sCheck.disabled=true; sCheckStatus.textContent='Verificando...';

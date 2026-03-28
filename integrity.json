@@ -1,6 +1,6 @@
 {
   "files": {
-    "changelog.json": "1c8143e738333300085cfe6825e4829216bfd3a8155069248d6bd044e4e05f1f",
+    "changelog.json": "75acf9f181be4b7b6b4eae0456a84670b9817f5f8be8597515081607f0b0fadb",
     "chapters.json": "3976cdb5199f0c4634e4c4185d84def6351196f992348d55aa31add072e3eafc",
     "css/animations.css": "993cb46f04676103cfa09cb05f7daae62fe19a67eefc6251f4868d688ed9e85a",
     "css/base.css": "d45c3c9eb728c7be297d8c4f8d9a28493250c8f513697377585bc16c9d9e24fd",
@@ -15,7 +15,8 @@
     "dialogues.json": "609a3ac39bbe27f552681fc159c856d501cff66377fa57cb7e80e82a244ff88c",
     "discord-presence.js": "d3b8d7c19a1057c7c972ad23623897ce7b8bbfd0f022d8bf4316227f1745256b",
     "himari-editor.html": "507cec9fd1340faae4da77dc2957b598d9123d10c579a4d149530eb994c4b050",
-    "index.html": "7bae424f2fd229e3a5f2e5550d1abd7c2ed2b50cf9e7961108d3ace3d27d37c2",
+    "index.html": "01ce97f2702dc25d90bdaf54c16320cb51d410d46ba9f4c5509d444ca8fced34",
+    "integrity-full.json": "31ad0734e03a7a254e5d9166337d2442e6cf7c487f32f03e52bae9b23598ee95",
     "js/abbyl-cheat.js": "0a4b021f294926f149631d914dc26162861c844fac0aceda1fdca542deb04cc1",
     "js/battle-arabel-intro.js": "ea14dadb804449c114e3d9d99c28957fa61c1165e5c334d87923728ee2433fa2",
     "js/battle-arabel.js": "8deec85bd2f04be5b8395f1db2f291459e4e9510e476071b45596d589ffbeab6",
@@ -46,12 +47,13 @@
     "js/replay-dialogues.js": "c3d09faff1e06024da3531eff5ef1546ab5a0978c1fa7d020f58ddc96c7494d6",
     "js/transition-arabel-nero.js": "394eac0bcecc12195444c4fd94df0aa7f6fe7e064dd9e727987af5b0f1ded119",
     "main.js": "adc78df0c623c716989d65bc2d7134cc2d16533f01fc3e82b5240bba926d22f4",
+    "make-integrity-full.js": "2c2f0374deec5dac076a280831fd57e1a0aa4d26d9eff0dcd50343a06abd8504",
     "menu-sounds.json": "71d2deffa445d633c24e9e0da55539c837cb25457491fb083cff8a0720e9351b",
-    "preload.js": "152873680cda5eec202ba233f2afe593710b45321e18258dcf6841f8cd3bce1c",
+    "preload.js": "7ef18c18b2203e94ec4010543cb29fd1562d0575fcd7e037c629fbdc3eead10c",
     "removed.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
     "seven-reels.html": "830b5768a2d3dcade8d3e8a173de78d202be31165fbfab5b81b960a3665804a3",
     "update-banner.html": "b5352403b55fbd68e8cb83b8823daadc6517651738bb089c20ae8b5d218f458f",
-    "updater.js": "1985769d86ce61036c7e5ffe52efb2f63e7fab15fcb50c0309ab241b3933b0e1",
-    "version.json": "cf880ce43d908114f25cf8e9f92d0d2794e8ee0e1d6442954a7acf3676c1cd9a"
+    "updater.js": "d7f0dbf869eb9e290db52f60a64d83d8da700e401c563347fe84f2a865253bd1",
+    "version.json": "5f72605085c5eab5295f34268bd6ecdc7062f4b07ceb1fcd5a3b33ae7e12471e"
   }
 }

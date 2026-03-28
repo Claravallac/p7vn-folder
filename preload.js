@@ -44,7 +44,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onUpdateReady:        (cb)  => ipcRenderer.on('update-ready',         ()                      => cb()),
 
   // ── Integrity Check ─────────────────────────────────────────────────────────
-  integrityRun:    ()   => ipcRenderer.invoke('integrity-run'),
+  integrityRun:    (mode) => ipcRenderer.invoke('integrity-run', mode || 'code'),
   integrityCancel: ()   => ipcRenderer.invoke('integrity-cancel'),
   onIntegrityStart:    (cb) => ipcRenderer.on('integrity-start',    ()                                        => cb()),
   onIntegrityProgress: (cb) => ipcRenderer.on('integrity-progress', (_e, pct, total, file, status)           => cb(pct, total, file, status)),
