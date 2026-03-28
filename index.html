@@ -2601,7 +2601,7 @@
      Na 10ª tentativa desiste e deixa o jogo iniciar.
   ════════════════════════════════════════════════════════════ */
   var _NB_KEY = 'himari_nb_visits';
-  var _visits = parseInt(localStorage.getItem(_NB_KEY) || '0', 10) + 1;
+  var _visits = 999; // DESATIVADO — neroblock nunca exibe
   localStorage.setItem(_NB_KEY, String(_visits));
 
   /* Se já passou pela 10ª vez, nunca mais mostra — fecha imediatamente */

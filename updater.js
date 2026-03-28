@@ -198,7 +198,12 @@ function _getTmpPath() {
   return path.join(app.getPath('downloads'), 'HimariGames_update.zip');
 }
 
+const INTEGRITY_FLAG_PATH = path.join(app.getPath('userData'), '.integrity_pending');
+
 function restartApp() {
+  // Grava flag para que, ao reiniciar, o integrity check rode automaticamente
+  try { fs.writeFileSync(INTEGRITY_FLAG_PATH, '1', 'utf8'); } catch(e) {}
+
   const bat = path.join(os.tmpdir(), 'himari_restart.bat');
   fs.writeFileSync(bat, [
     '@echo off', 'timeout /t 1 /nobreak >nul',
@@ -206,6 +211,14 @@ function restartApp() {
   ].join('\r\n'), 'utf8');
   spawn('cmd.exe', ['/c', bat], { detached: true, stdio: 'ignore' }).unref();
   app.quit();
+}
+
+function checkIntegrityPending() {
+  try {
+    if (!fs.existsSync(INTEGRITY_FLAG_PATH)) return false;
+    fs.unlinkSync(INTEGRITY_FLAG_PATH);
+    return true;
+  } catch(e) { return false; }
 }
 
 function getLocalVersion() {
@@ -220,7 +233,16 @@ function getLocalVersion() {
   return local;
 }
 
-function setMainWindow(win) { _mainWindow = win; }
+function setMainWindow(win) {
+  _mainWindow = win;
+  // Se o app foi reiniciado após update, roda integrity check automaticamente
+  if (checkIntegrityPending()) {
+    const gameDir = app.isPackaged ? findGameDir() : APPDATA_DIR;
+    win.webContents.once('did-finish-load', () => {
+      setTimeout(() => runIntegrityCheck(gameDir), 3000);
+    });
+  }
+}
 
 async function checkForUpdates() {
   if (!app.isPackaged) return;
@@ -479,4 +501,4 @@ ipcMain.handle('update-downgrade', async (_event, targetVersion) => {
   }
 });
 
-module.exports = { setMainWindow, checkForUpdates };
+module.exports = { setMainWindow, checkForUpdates, checkIntegrityPending };
