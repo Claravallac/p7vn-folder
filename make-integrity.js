@@ -20,6 +20,7 @@ const IGNORE_FILES = new Set([
   'r2-upload.js', 'build.bat', 'secrets.json',
   'integrity.json',       // não inclui a si mesmo
   '_tmp.json',
+  'package.json',
   'package-lock.json',
   'test-chapter-1-3.html',
 ]);

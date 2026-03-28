@@ -128,8 +128,12 @@ echo Atualizando changelog...
 node update-changelog.js
 node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%'},null,2),'utf8');"
 
+echo Gerando manifesto de integridade...
+node make-integrity.js
+
 echo Subindo arquivos para o GitHub...
 git add --all -- . ":(exclude)assets/*"
+git add integrity.json
 git commit -m "update leve: versao %VERSION%"
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
@@ -181,12 +185,16 @@ echo Atualizando changelog...
 node update-changelog.js
 node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%'},null,2),'utf8');"
 
+echo Gerando manifesto de integridade...
+node make-integrity.js
+
 echo Subindo arquivos para o GitHub (incluindo assets)...
 git add --all .
 git add -f assets/audio/
 git add -f assets/fonts/
 git add -f assets/images/
 git add -f assets/videos/
+git add integrity.json
 git commit -m "update completo: versao %VERSION%"
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
@@ -230,8 +238,12 @@ echo Atualizando changelog...
 node update-changelog.js
 node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({version:'%VERSION%',notes:'%NOTES%'},null,2),'utf8');"
 
+echo Gerando manifesto de integridade...
+node make-integrity.js
+
 echo Subindo codigo para o GitHub...
 git add --all -- . ":(exclude)assets/*"
+git add integrity.json
 git commit -m "checkpoint leve: versao %VERSION%"
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
@@ -272,7 +284,8 @@ echo if(e){e.url=url;fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2)
 node _cp_write.js
 del _cp_write.js _cp_notes.txt 2>nul
 
-git add version.json changelog.json
+node make-integrity.js
+git add version.json changelog.json integrity.json
 git commit -m "checkpoint leve: url v%VERSION%"
 git push --force origin main
 
@@ -334,11 +347,15 @@ echo if(e){e.url=zip;fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2)
 node _cp_write.js
 del _cp_write.js _cp_notes.txt 2>nul
 
+echo Gerando manifesto de integridade...
+node make-integrity.js
+
 git add --all .
 git add -f assets/audio/
 git add -f assets/fonts/
 git add -f assets/images/
 git add -f assets/videos/
+git add integrity.json
 git commit -m "checkpoint completo: versao %VERSION%"
 git push --force origin main
 if errorlevel 1 ( echo [ERRO] Push falhou. & pause & exit /b 1 )
@@ -384,7 +401,8 @@ node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({
 :: Atualiza changelog.json com URL do delta desta versao
 node -e "const fs=require('fs');const cl=JSON.parse(fs.readFileSync('changelog.json','utf8'));const e=cl.find(function(x){return x.version==='%VERSION%';});if(e){e.url='%DELTA_URL%';fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');console.log('changelog.json atualizado com URL');}"
 
-git add version.json changelog.json
+node make-integrity.js
+git add version.json changelog.json integrity.json
 git commit -m "update: url delta v%VERSION%"
 git push --force origin main
 

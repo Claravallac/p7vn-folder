@@ -4021,12 +4021,48 @@
                     <div id="upd-screen-ok-version" style="font-size:clamp(40px,6vw,64px);letter-spacing:2px;color:#fff;font-weight:900;line-height:1;margin-bottom:8px"></div>
                     <div style="font-size:11px;color:rgba(74,222,128,0.5);letter-spacing:3px;margin-bottom:28px">você está em dia</div>
                     <div style="font-size:12px;color:rgba(255,255,255,0.3);line-height:1.75;border-left:2px solid rgba(74,222,128,0.2);padding-left:14px;margin-bottom:28px">Nenhuma atualização disponível no momento. O jogo verificará automaticamente ao abrir.</div>
-                    <div id="upd-repair-idle" style="display:flex;gap:10px;align-items:center">
+                    <div id="upd-repair-idle" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
                         <button id="upd-screen-repair" style="
                             padding:11px 22px;background:transparent;color:rgba(255,255,255,0.25);
                             border:1px solid rgba(255,255,255,0.1);font-size:9px;letter-spacing:3px;
                             cursor:pointer;font-family:inherit;transition:all .2s;
                         ">↺ REPARAR INSTALAÇÃO</button>
+                        <button id="upd-screen-integrity" style="
+                            padding:11px 22px;background:transparent;color:rgba(167,139,250,0.5);
+                            border:1px solid rgba(124,58,237,0.25);font-size:9px;letter-spacing:3px;
+                            cursor:pointer;font-family:inherit;transition:all .2s;
+                        ">🛡 VERIFICAR INTEGRIDADE</button>
+                    </div>
+                    <div id="upd-integrity-status" style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-top:10px;min-height:16px;display:none">
+                        <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-left:3px solid #7c3aed;padding:12px 14px">
+                            <div style="font-size:8px;letter-spacing:4px;color:#a78bfa;font-weight:700;margin-bottom:8px">VERIFICANDO INTEGRIDADE</div>
+                            <div style="background:rgba(255,255,255,0.07);border-radius:4px;height:5px;overflow:hidden;margin-bottom:7px">
+                                <div id="upd-integrity-bar" style="height:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa);width:0%;transition:width 0.15s ease;border-radius:4px"></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center">
+                                <div id="upd-integrity-file" style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px"></div>
+                                <div style="display:flex;gap:12px;flex-shrink:0;margin-left:12px">
+                                    <span style="font-size:9px;color:rgba(74,222,128,0.7);letter-spacing:1px">OK: <b id="upd-integrity-ok">0</b></span>
+                                    <span style="font-size:9px;color:rgba(245,158,11,0.8);letter-spacing:1px">CORRIGIDO: <b id="upd-integrity-fixed">0</b></span>
+                                    <span style="font-size:9px;color:rgba(248,113,113,0.8);letter-spacing:1px">ERRO: <b id="upd-integrity-err">0</b></span>
+                                </div>
+                            </div>
+                            <!-- log de erros — só aparece quando há erros -->
+                            <div id="upd-integrity-err-wrap" style="display:none;margin-top:10px">
+                                <button id="upd-integrity-err-toggle" style="
+                                    background:transparent;border:none;padding:0;
+                                    font-size:9px;letter-spacing:2px;color:rgba(248,113,113,0.6);
+                                    cursor:pointer;font-family:inherit;transition:color .2s;
+                                ">▶ VER ARQUIVOS COM ERRO</button>
+                                <div id="upd-integrity-err-list" style="
+                                    display:none;margin-top:8px;
+                                    background:rgba(0,0,0,0.25);border-radius:4px;
+                                    padding:8px 10px;max-height:120px;overflow-y:auto;
+                                    font-family:monospace;font-size:9px;line-height:1.9;
+                                    color:rgba(248,113,113,0.7);letter-spacing:0.5px;
+                                "></div>
+                            </div>
+                        </div>
                     </div>
                     <!-- estado: modo de reparo ativo -->
                     <div id="upd-repair-active" style="display:none;background:rgba(255,165,0,0.06);border:1px solid rgba(255,165,0,0.2);border-left:3px solid rgba(255,165,0,0.5);padding:14px">
@@ -17836,6 +17872,88 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     }
     exitRepairWrap.style.display = '';
   });
+
+  // ── Botão Verificar Integridade ───────────────────────────────────────────
+  var sIntegrityBtn    = document.getElementById('upd-screen-integrity');
+  var sIntegrityStatus = document.getElementById('upd-integrity-status');
+  var sIntegrityBar    = document.getElementById('upd-integrity-bar');
+  var sIntegrityFile   = document.getElementById('upd-integrity-file');
+  var sIntegrityOk     = document.getElementById('upd-integrity-ok');
+  var sIntegrityFixed  = document.getElementById('upd-integrity-fixed');
+  var sIntegrityErr    = document.getElementById('upd-integrity-err');
+  var sIntegrityErrWrap   = document.getElementById('upd-integrity-err-wrap');
+  var sIntegrityErrToggle = document.getElementById('upd-integrity-err-toggle');
+  var sIntegrityErrList   = document.getElementById('upd-integrity-err-list');
+  var _integrityOk = 0, _integrityFixed = 0, _integrityErr = 0;
+
+  // Toggle do log de erros
+  if(sIntegrityErrToggle) sIntegrityErrToggle.addEventListener('click', function(){
+    var open = sIntegrityErrList.style.display !== 'none';
+    sIntegrityErrList.style.display = open ? 'none' : 'block';
+    sIntegrityErrToggle.textContent = (open ? '▶' : '▼') + ' VER ARQUIVOS COM ERRO';
+  });
+
+  if(sIntegrityBtn) sIntegrityBtn.addEventListener('click', function(){
+    if(!window.electronAPI || !electronAPI.integrityRun) return;
+    sIntegrityBtn.disabled = true;
+    sIntegrityBtn.textContent = '🛡 VERIFICANDO...';
+    _integrityOk = 0; _integrityFixed = 0; _integrityErr = 0;
+    if(sIntegrityOk)    sIntegrityOk.textContent    = '0';
+    if(sIntegrityFixed) sIntegrityFixed.textContent  = '0';
+    if(sIntegrityErr)   sIntegrityErr.textContent    = '0';
+    if(sIntegrityBar)   sIntegrityBar.style.width    = '0%';
+    if(sIntegrityFile)  sIntegrityFile.textContent   = '';
+    if(sIntegrityErrWrap)  sIntegrityErrWrap.style.display  = 'none';
+    if(sIntegrityErrList)  { sIntegrityErrList.innerHTML = ''; sIntegrityErrList.style.display = 'none'; }
+    if(sIntegrityErrToggle) sIntegrityErrToggle.textContent = '▶ VER ARQUIVOS COM ERRO';
+    if(sIntegrityStatus) sIntegrityStatus.style.display = 'block';
+    electronAPI.integrityRun();
+  });
+
+  if(window.electronAPI && electronAPI.onIntegrityProgress){
+    electronAPI.onIntegrityProgress(function(pct, total, file, status){
+      if(sIntegrityBar)  sIntegrityBar.style.width = pct + '%';
+      if(sIntegrityFile) sIntegrityFile.textContent = file;
+      if(status === 'ok')    { _integrityOk++;    if(sIntegrityOk)    sIntegrityOk.textContent    = _integrityOk; }
+      if(status === 'fixed') { _integrityFixed++;  if(sIntegrityFixed) sIntegrityFixed.textContent  = _integrityFixed; }
+    });
+  }
+
+  if(window.electronAPI && electronAPI.onIntegrityError){
+    electronAPI.onIntegrityError(function(msg){
+      if(sIntegrityFile) sIntegrityFile.textContent = '⚠️ Erro: ' + msg;
+      if(sIntegrityBtn){ sIntegrityBtn.disabled = false; sIntegrityBtn.textContent = '🛡 VERIFICAR INTEGRIDADE'; }
+    });
+  }
+
+  if(window.electronAPI && electronAPI.onIntegrityDone){
+    electronAPI.onIntegrityDone(function(result){
+      if(sIntegrityBar)  sIntegrityBar.style.width = '100%';
+      _integrityErr = (result.errors && result.errors.length) || 0;
+      if(sIntegrityErr) sIntegrityErr.textContent = _integrityErr;
+      var msg = result.fixed === 0 && _integrityErr === 0
+        ? '✅ Todos os ' + result.checked + ' arquivo(s) íntegros.'
+        : '🔧 ' + result.fixed + ' corrigido(s). ' + (_integrityErr > 0 ? _integrityErr + ' erro(s).' : '');
+      if(sIntegrityFile) sIntegrityFile.textContent = msg;
+      if(sIntegrityBtn){ sIntegrityBtn.disabled = false; sIntegrityBtn.textContent = '🛡 VERIFICAR INTEGRIDADE'; }
+      // Popula lista de erros
+      if(_integrityErr > 0 && result.errors && sIntegrityErrWrap && sIntegrityErrList){
+        sIntegrityErrWrap.style.display = 'block';
+        sIntegrityErrList.innerHTML = result.errors.map(function(e){
+          return '✖ <b>' + e.file + '</b> — ' + e.reason;
+        }).join('<br>');
+      }
+      // Some o painel após 5s se tudo OK
+      if(result.fixed === 0 && _integrityErr === 0){
+        setTimeout(function(){ if(sIntegrityStatus) sIntegrityStatus.style.display = 'none'; }, 5000);
+      }
+    });
+  }
+
+  if(sIntegrityBtn){
+    sIntegrityBtn.addEventListener('mouseenter', function(){ if(!sIntegrityBtn.disabled) sIntegrityBtn.style.borderColor='rgba(124,58,237,0.5)'; sIntegrityBtn.style.color='rgba(167,139,250,0.9)'; });
+    sIntegrityBtn.addEventListener('mouseleave', function(){ sIntegrityBtn.style.borderColor='rgba(124,58,237,0.25)'; sIntegrityBtn.style.color='rgba(167,139,250,0.5)'; });
+  }
 
   if(sCheck) sCheck.addEventListener('click', function(){
     sCheck.disabled=true; sCheckStatus.textContent='Verificando...';
