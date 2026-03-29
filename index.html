@@ -130,12 +130,16 @@
             background: #07000c; clip-path: inset(0 100% 0 0);
         }
         #press-start-screen.ps-leaving #ps-transition-overlay {
-            animation: psSlashOut 0.65s cubic-bezier(0.7,0,0.3,1) forwards;
+            animation: psSlashOut 0.42s cubic-bezier(0.7,0,0.3,1) forwards;
         }
         @keyframes psSlashOut {
             0%   { clip-path: inset(0 100% 0 0); }
-            40%  { clip-path: inset(0 0% 0 0);   }
-            100% { clip-path: inset(0 0% 0 0);   }
+            45%  { clip-path: inset(0 0%   0 0); }
+            100% { clip-path: inset(0 0%   0 0); }
+        }
+        /* Reveal do menu — overlay que varre de dentro pra fora */
+        #menu-reveal-overlay {
+            will-change: clip-path, opacity;
         }
         /* glitch na logo ao apertar */
         #press-start-screen.ps-leaving #ps-logo {
@@ -6084,12 +6088,101 @@
                 // Tick suave de navegação
                 _playMenuTone(380, 'triangle', 0.08, 0.05);
             } else if (type === 'hover') {
-                _playMenuTone(500, 'sine', 0.05, 0.03);
+                // Shimmer suave — dois harmônicos com fade in/out muito rápido
+                var ctx = _getMenuAudioCtx();
+                if (!ctx) return;
+                var vol = Math.min(0.055, 0.055 * Math.min(1, _sfxVolume * _globalVolume));
+                if (vol < 0.002) return;
+                var baseFreq = (type._hoverFreq || 520);
+                var t = ctx.currentTime;
+
+                // Harmônico 1 — fundamental suave
+                var osc1 = ctx.createOscillator(), g1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(baseFreq, t);
+                osc1.frequency.linearRampToValueAtTime(baseFreq * 1.008, t + 0.06);
+                g1.gain.setValueAtTime(0, t);
+                g1.gain.linearRampToValueAtTime(vol, t + 0.018);
+                g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+                osc1.connect(g1); g1.connect(ctx.destination);
+                osc1.start(t); osc1.stop(t + 0.14);
+
+                // Harmônico 2 — oitava levemente desafinada (shimmer)
+                var osc2 = ctx.createOscillator(), g2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(baseFreq * 2.003, t);
+                osc2.frequency.linearRampToValueAtTime(baseFreq * 1.997, t + 0.08);
+                g2.gain.setValueAtTime(0, t);
+                g2.gain.linearRampToValueAtTime(vol * 0.28, t + 0.022);
+                g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.10);
+                osc2.connect(g2); g2.connect(ctx.destination);
+                osc2.start(t); osc2.stop(t + 0.11);
             }
         }
         window._playMenuClickSfx = _playMenuClickSfx;
 
-        // ── Settings transition helpers ───────────────────────────────────────
+        // ── Hover suave nos botões do menu principal ──────────────────────────
+        // Escala pentatônica menor — cada botão tem sua própria nota
+        var _hoverNotes = [440, 494, 523, 587, 659, 698, 784];
+        function _playMenuHover(noteIndex) {
+            var ctx = _getMenuAudioCtx();
+            if (!ctx) return;
+            var vol = Math.min(0.052, 0.052 * Math.min(1, _sfxVolume * _globalVolume));
+            if (vol < 0.002) return;
+            var freq = _hoverNotes[noteIndex % _hoverNotes.length];
+            var t = ctx.currentTime;
+
+            // Harmônico 1 — fundamental com ataque suave
+            var osc1 = ctx.createOscillator(), g1 = ctx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(freq, t);
+            osc1.frequency.linearRampToValueAtTime(freq * 1.006, t + 0.07);
+            g1.gain.setValueAtTime(0, t);
+            g1.gain.linearRampToValueAtTime(vol, t + 0.016);
+            g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+            osc1.connect(g1); g1.connect(ctx.destination);
+            osc1.start(t); osc1.stop(t + 0.15);
+
+            // Harmônico 2 — oitava com shimmer leve
+            var osc2 = ctx.createOscillator(), g2 = ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(freq * 2.004, t);
+            osc2.frequency.linearRampToValueAtTime(freq * 1.996, t + 0.09);
+            g2.gain.setValueAtTime(0, t);
+            g2.gain.linearRampToValueAtTime(vol * 0.22, t + 0.020);
+            g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+            osc2.connect(g2); g2.connect(ctx.destination);
+            osc2.start(t); osc2.stop(t + 0.12);
+
+            // Harmônico 3 — quinta acima, muito suave, dá profundidade
+            var osc3 = ctx.createOscillator(), g3 = ctx.createGain();
+            osc3.type = 'sine';
+            osc3.frequency.setValueAtTime(freq * 1.5, t + 0.012);
+            g3.gain.setValueAtTime(0, t + 0.012);
+            g3.gain.linearRampToValueAtTime(vol * 0.12, t + 0.030);
+            g3.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+            osc3.connect(g3); g3.connect(ctx.destination);
+            osc3.start(t + 0.012); osc3.stop(t + 0.13);
+        }
+        window._playMenuHover = _playMenuHover;
+
+        // Conecta o hover nos botões do menu principal
+        (function _hookMenuBtnHover() {
+            var _mainMenu = document.getElementById('main-menu-buttons');
+            if (!_mainMenu) { setTimeout(_hookMenuBtnHover, 300); return; }
+            var _lastHover = -1;
+            _mainMenu.querySelectorAll('.menu-btn').forEach(function(btn, i) {
+                btn.addEventListener('mouseenter', function() {
+                    if (btn.classList.contains('locked')) return;
+                    if (_lastHover === i) return; // não repete se já está no mesmo
+                    _lastHover = i;
+                    _playMenuHover(i);
+                });
+                btn.addEventListener('mouseleave', function() {
+                    if (_lastHover === i) _lastHover = -1;
+                });
+            });
+        })();
         function _showSettingsWithTransition() {
             var el = document.getElementById('settings-submenu');
             if (!el) { showMenuView('settings-submenu'); return; }
@@ -13186,7 +13279,99 @@
                                 window._showPressStart(function() {
                                     // Para a música do press-start ao avançar
                                     try { var _psMus2 = document.getElementById('update-screen-music'); if(_psMus2){ _psMus2.pause(); _psMus2.currentTime = 0; } } catch(e) {}
-                                    menuScreen.style.display = 'flex';
+
+                                    // ── Transição press-start → menu ─────────────────────────────────────
+                                    var _psEl = document.getElementById('press-start-screen');
+
+                                    // 1. Prepara o menu já por trás, invisível
+                                    menuScreen.style.display  = 'flex';
+                                    menuScreen.style.opacity  = '0';
+                                    menuScreen.style.clipPath = 'inset(0 100% 0 0)';
+                                    menuScreen.style.transition = 'none';
+
+                                    // 2. Dispara animação de saída do press-start (ps-leaving já tem CSS)
+                                    if (_psEl) _psEl.classList.add('ps-leaving');
+
+                                    // 3. Durante a saída do ps (0–400ms): fade out do áudio do ps
+                                    //    e fade in da música do menu
+                                    var _menuMusicEl = document.getElementById('menu-music') || document.querySelector('audio[src*="menu"]');
+                                    if (typeof window.playMenuMusic === 'function') {
+                                        setTimeout(function() { window.playMenuMusic(); }, 200);
+                                    }
+
+                                    // 4. Em 420ms: revela o menu com slash diagonal (clip-path da direita pra esquerda)
+                                    setTimeout(function() {
+                                        // Oculta press-start
+                                        if (_psEl) { _psEl.style.display = 'none'; _psEl.classList.remove('ps-leaving'); }
+
+                                        // Overlay preto sobre o menu que some
+                                        var _menuRevealOv = document.createElement('div');
+                                        _menuRevealOv.id = 'menu-reveal-overlay';
+                                        _menuRevealOv.style.cssText = [
+                                            'position:fixed;inset:0;z-index:9999;pointer-events:none;',
+                                            'background:#07000c;',
+                                            'clip-path:inset(0 0% 0 0);',
+                                            'transition:clip-path 0.55s cubic-bezier(0.7,0,0.3,1), opacity 0.3s ease;',
+                                        ].join('');
+                                        document.body.appendChild(_menuRevealOv);
+
+                                        // Menu aparece de repente (atrás do overlay)
+                                        menuScreen.style.opacity  = '1';
+                                        menuScreen.style.clipPath = '';
+                                        menuScreen.style.transition = '';
+
+                                        // Elementos do menu entram com delay escalonado
+                                        var _menuEls = [
+                                            '#menu-logo-container',
+                                            '#menu-panel-left',
+                                            '.menu-btn:nth-child(1)',
+                                            '.menu-btn:nth-child(2)',
+                                            '.menu-btn:nth-child(3)',
+                                            '.menu-btn:nth-child(4)',
+                                            '.menu-btn:nth-child(5)',
+                                            '#menu-studio-tag',
+                                        ];
+                                        _menuEls.forEach(function(sel, i) {
+                                            var els = menuScreen.querySelectorAll(sel);
+                                            els.forEach(function(el) {
+                                                el.style.opacity   = '0';
+                                                el.style.transform = 'translateY(12px)';
+                                                el.style.transition = 'none';
+                                            });
+                                        });
+
+                                        // Varre o overlay (slash que abre da esquerda pra direita)
+                                        requestAnimationFrame(function() { requestAnimationFrame(function() {
+                                            _menuRevealOv.style.clipPath = 'inset(0 100% 0 0)';
+
+                                            // Após o reveal (550ms), entra cada elemento do menu
+                                            setTimeout(function() {
+                                                _menuRevealOv.style.opacity = '0';
+                                                setTimeout(function() {
+                                                    if (_menuRevealOv.parentNode) _menuRevealOv.parentNode.removeChild(_menuRevealOv);
+                                                }, 320);
+
+                                                // Stagger dos elementos do menu
+                                                _menuEls.forEach(function(sel, i) {
+                                                    var els = menuScreen.querySelectorAll(sel);
+                                                    els.forEach(function(el) {
+                                                        setTimeout(function() {
+                                                            el.style.transition = 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.2,0,0,1)';
+                                                            el.style.opacity    = '';
+                                                            el.style.transform  = '';
+                                                            setTimeout(function() {
+                                                                el.style.transition = '';
+                                                                el.style.opacity    = '';
+                                                                el.style.transform  = '';
+                                                            }, 500);
+                                                        }, i * 60);
+                                                    });
+                                                });
+                                            }, 560);
+                                        }); });
+                                    }, 420);
+                                    // ─────────────────────────────────────────────────────────────────────
+
                                     if (typeof DiscordPresence !== 'undefined') DiscordPresence.menu();
                                 });
                             } else {
