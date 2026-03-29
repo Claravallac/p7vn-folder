@@ -12194,21 +12194,9 @@
                 logoImg.style.cursor = 'pointer';
                 logoImg.addEventListener('click', () => {
                     titleClicks++;
-                    if (titleClicks >= 5 && !debugMode && !window.electronAPI?.isPackaged) {
-                        debugMode = true;
-                        unlockAchievement(ACHIEVEMENT_IDS.DEBUG_MATRIX);
-                        document.querySelectorAll('.menu-btn[data-chapter]').forEach(btn => {
-                            const id = btn.dataset.chapter;
-                            const label = btn.querySelector('.mb-label');
-                            btn.classList.remove('locked');
-                            if (label && btn.dataset.label) label.textContent = btn.dataset.label;
-                            saveUnlockChapter(id);
-                        });
-                        refreshDebugMenuAccess();
-                        document.getElementById('debug-js-indicator').style.display = 'block';
-                        logoImg.classList.add('glitching');
-                        if (typeof window._playLogoGlitchSfx === 'function' && !window._abbylCheatGlitchBlocked) window._playLogoGlitchSfx();
-                        setTimeout(() => logoImg.classList.remove('glitching'), 400);
+                    if (titleClicks >= 5) {
+                        titleClicks = 0;
+                        if (typeof window._devTourShowBobao === 'function') window._devTourShowBobao();
                     }
                 });
             }
@@ -17836,6 +17824,19 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   /* ── Overlay bobão ───────────────────────────────────────────── */
   function _showBobao() {
     hideDev();
+
+    /* Silencia TODAS as músicas de fundo do jogo */
+    if (typeof applyMusicMute === 'function') {
+      applyMusicMute(true);
+    } else {
+      /* fallback: muta diretamente todos os <audio> conhecidos */
+      ['menuMusic','prologueMusic','ostP','sevenLab','battleMusic','neroStoreMusic',
+       'abbyl-store-music','nero-store-music-other','update-screen-music'].forEach(function(id) {
+        var el = (typeof window[id] !== 'undefined') ? window[id] : document.getElementById(id);
+        if (el && el.muted !== undefined) el.muted = true;
+      });
+    }
+
     var ov = document.createElement('div');
     ov.id = 'dev-bobao-overlay';
     ov.innerHTML = [
@@ -17863,21 +17864,22 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
       requestAnimationFrame(function() { ov.style.opacity = '1'; });
     });
 
-    /* Fecha o game após 1 minuto */
-    setTimeout(function() {
+    /* Fecha ao terminar a música — fade out + encerra o game */
+    function _doClose() {
       ov.style.transition = 'opacity 1s ease';
       ov.style.opacity = '0';
       bobaoAudio.pause();
       setTimeout(function() {
-        /* Tenta fechar via Electron, senão limpa a tela */
-        if (window.electronAPI && typeof window.electronAPI.quit === 'function') {
-          window.electronAPI.quit();
+        if (window.electronAPI && typeof window.electronAPI.closeWindow === 'function') {
+          window.electronAPI.closeWindow();
         } else {
           window.close();
           document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:rgba(255,255,255,0.2);font-size:11px;letter-spacing:4px;text-transform:uppercase;">Pode fechar esta aba</div>';
         }
       }, 1000);
-    }, 60000);
+    }
+
+    bobaoAudio.addEventListener('ended', _doClose);
   }
 
   /* ── Inicialização do tour (usada tanto pelo fluxo normal quanto pelo debug) ── */
