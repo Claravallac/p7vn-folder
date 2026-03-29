@@ -2998,18 +2998,7 @@
                     <div id="upd-screen-ok-version" style="font-size:clamp(40px,6vw,64px);letter-spacing:2px;color:#fff;font-weight:900;line-height:1;margin-bottom:8px"></div>
                     <div style="font-size:11px;color:rgba(74,222,128,0.5);letter-spacing:3px;margin-bottom:28px">você está em dia</div>
                     <div style="font-size:12px;color:rgba(255,255,255,0.3);line-height:1.75;border-left:2px solid rgba(74,222,128,0.2);padding-left:14px;margin-bottom:28px">Nenhuma atualização disponível no momento. O jogo verificará automaticamente ao abrir.</div>
-                    <div id="upd-repair-idle" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-                        <button id="upd-screen-repair" style="
-                            padding:11px 22px;background:transparent;color:rgba(255,255,255,0.25);
-                            border:1px solid rgba(255,255,255,0.1);font-size:9px;letter-spacing:3px;
-                            cursor:pointer;font-family:inherit;transition:all .2s;
-                        ">↺ REPARAR INSTALAÇÃO</button>
-                        <button id="upd-screen-integrity" style="
-                            padding:11px 22px;background:transparent;color:rgba(167,139,250,0.5);
-                            border:1px solid rgba(124,58,237,0.25);font-size:9px;letter-spacing:3px;
-                            cursor:pointer;font-family:inherit;transition:all .2s;
-                        ">🛡 VERIFICAR INTEGRIDADE</button>
-                    </div>
+                    <div id="upd-repair-idle"></div>
                     <div id="upd-integrity-status" style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-top:10px;min-height:16px;display:none">
                         <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-left:3px solid #7c3aed;padding:12px 14px">
                             <div style="font-size:8px;letter-spacing:4px;color:#a78bfa;font-weight:700;margin-bottom:8px">VERIFICANDO INTEGRIDADE</div>
@@ -3099,6 +3088,48 @@
                             clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px));
                         ">VERIFICAR UPDATE</button>
                         <div id="upd-screen-check-status" style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-top:8px;min-height:16px"></div>
+                        <!-- botão opções -->
+                        <button id="upd-options-toggle" style="
+                            width:100%;margin-top:8px;padding:10px 13px;
+                            background:transparent;color:rgba(255,255,255,0.2);
+                            border:1px solid rgba(255,255,255,0.07);font-size:9px;letter-spacing:3px;
+                            cursor:pointer;font-family:inherit;transition:all .2s;
+                            display:flex;align-items:center;justify-content:space-between;
+                        ">
+                            <span>OPÇÕES DE ATUALIZAÇÃO</span>
+                            <span id="upd-options-arrow" style="font-size:8px;transition:transform .2s">▶</span>
+                        </button>
+                        <!-- drawer com os 3 botões -->
+                        <div id="upd-options-drawer" style="
+                            display:grid;grid-template-rows:0fr;
+                            transition:grid-template-rows 0.32s cubic-bezier(0.4,0,0.2,1),
+                                       opacity 0.28s ease,
+                                       margin-top 0.28s ease;
+                            opacity:0;margin-top:0;overflow:hidden;
+                        "><div style="
+                            min-height:0;
+                            border:1px solid rgba(255,255,255,0.07);
+                            padding:0 14px;
+                            background:rgba(0,0,0,0.2);
+                            display:flex;flex-direction:column;gap:8px;
+                            transition:padding 0.28s ease;
+                        " id="upd-options-drawer-inner">
+                            <button id="upd-screen-repair" style="
+                                padding:11px 22px;background:transparent;color:rgba(255,255,255,0.25);
+                                border:1px solid rgba(255,255,255,0.1);font-size:9px;letter-spacing:3px;
+                                cursor:pointer;font-family:inherit;transition:all .2s;width:100%;text-align:left;
+                            ">↺ REPARAR INSTALAÇÃO</button>
+                            <button id="upd-screen-integrity" style="
+                                padding:11px 22px;background:transparent;color:rgba(167,139,250,0.5);
+                                border:1px solid rgba(124,58,237,0.25);font-size:9px;letter-spacing:3px;
+                                cursor:pointer;font-family:inherit;transition:all .2s;width:100%;text-align:left;
+                            ">🛡 VERIFICAR INTEGRIDADE</button>
+                            <button id="upd-screen-integrity-full" style="
+                                padding:11px 22px;background:transparent;color:rgba(167,139,250,0.35);
+                                border:1px solid rgba(124,58,237,0.15);font-size:9px;letter-spacing:3px;
+                                cursor:pointer;font-family:inherit;transition:all .2s;width:100%;text-align:left;
+                            ">🛡 VERIFICAR TUDO</button>
+                        </div></div>
                     </div>
                 </div>
 
@@ -16781,6 +16812,62 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   var sRepairCancel  = document.getElementById('upd-repair-cancel');
   var _repairUrl     = null;
 
+  // Drawer "Opções de Atualização"
+  var sOptionsToggle = document.getElementById('upd-options-toggle');
+  var sOptionsDrawer = document.getElementById('upd-options-drawer');
+  var sOptionsArrow  = document.getElementById('upd-options-arrow');
+  var _optionsOpen   = false;
+  if(sOptionsToggle) sOptionsToggle.addEventListener('click', function(){
+    _optionsOpen = !_optionsOpen;
+    // ── Animação do drawer ───────────────────────────────────────────────────
+    var inner = document.getElementById('upd-options-drawer-inner');
+    if(_optionsOpen){
+      sOptionsDrawer.style.gridTemplateRows = '1fr';
+      sOptionsDrawer.style.opacity          = '1';
+      sOptionsDrawer.style.marginTop        = '6px';
+      if(inner){ inner.style.padding = '12px 14px'; }
+    } else {
+      sOptionsDrawer.style.gridTemplateRows = '0fr';
+      sOptionsDrawer.style.opacity          = '0';
+      sOptionsDrawer.style.marginTop        = '0';
+      if(inner){ inner.style.padding = '0 14px'; }
+    }
+    sOptionsArrow.style.transform = _optionsOpen ? 'rotate(90deg)' : 'rotate(0deg)';
+    // ── Som suave via Web Audio ──────────────────────────────────────────────
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      var filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 1800;
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      var t = ctx.currentTime;
+      if(_optionsOpen){
+        // Abrir: sweep suave de 180Hz → 320Hz, fade out rápido
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(180, t);
+        osc.frequency.exponentialRampToValueAtTime(320, t + 0.18);
+        gain.gain.setValueAtTime(0.07, t);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+        osc.start(t);
+        osc.stop(t + 0.22);
+      } else {
+        // Fechar: sweep suave de 300Hz → 160Hz, fade out
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, t);
+        osc.frequency.exponentialRampToValueAtTime(160, t + 0.18);
+        gain.gain.setValueAtTime(0.06, t);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+        osc.start(t);
+        osc.stop(t + 0.2);
+      }
+      osc.onended = function(){ ctx.close(); };
+    } catch(e){}
+  });
+
   // Entra no modo de reparo
   if(sRepair) sRepair.addEventListener('click', function(){
     sRepair.disabled = true;
@@ -16847,7 +16934,8 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   });
 
   // ── Botão Verificar Integridade ───────────────────────────────────────────
-  var sIntegrityBtn    = document.getElementById('upd-screen-integrity');
+  var sIntegrityBtn     = document.getElementById('upd-screen-integrity');
+  var sIntegrityFullBtn = document.getElementById('upd-screen-integrity-full');
   var sIntegrityStatus = document.getElementById('upd-integrity-status');
   var sIntegrityBar    = document.getElementById('upd-integrity-bar');
   var sIntegrityFile   = document.getElementById('upd-integrity-file');
@@ -16885,6 +16973,24 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     electronAPI.integrityRun();
   });
 
+  if(sIntegrityFullBtn) sIntegrityFullBtn.addEventListener('click', function(){
+    if(!window.electronAPI || !electronAPI.integrityRun) return;
+    sIntegrityFullBtn.disabled = true;
+    sIntegrityFullBtn.textContent = '🛡 VERIFICANDO TUDO...';
+    _integrityOk = 0; _integrityFixed = 0; _integrityErr = 0; _integrityDeleted = 0;
+    if(sIntegrityOk)    sIntegrityOk.textContent    = '0';
+    if(sIntegrityFixed) sIntegrityFixed.textContent  = '0';
+    if(sIntegrityErr)      sIntegrityErr.textContent      = '0';
+    if(sIntegrityDeleted) sIntegrityDeleted.textContent = '0';
+    if(sIntegrityBar)   sIntegrityBar.style.width    = '0%';
+    if(sIntegrityFile)  sIntegrityFile.textContent   = '';
+    if(sIntegrityErrWrap)  sIntegrityErrWrap.style.display  = 'none';
+    if(sIntegrityErrList)  { sIntegrityErrList.innerHTML = ''; sIntegrityErrList.style.display = 'none'; }
+    if(sIntegrityErrToggle) sIntegrityErrToggle.textContent = '▶ VER ARQUIVOS COM ERRO';
+    if(sIntegrityStatus) sIntegrityStatus.style.display = 'block';
+    electronAPI.integrityRun('full');
+  });
+
   if(window.electronAPI && electronAPI.onIntegrityProgress){
     electronAPI.onIntegrityProgress(function(pct, total, file, status){
       if(sIntegrityBar)  sIntegrityBar.style.width = pct + '%';
@@ -16899,6 +17005,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     electronAPI.onIntegrityError(function(msg){
       if(sIntegrityFile) sIntegrityFile.textContent = '⚠️ Erro: ' + msg;
       if(sIntegrityBtn){ sIntegrityBtn.disabled = false; sIntegrityBtn.textContent = '🛡 VERIFICAR INTEGRIDADE'; }
+      if(sIntegrityFullBtn){ sIntegrityFullBtn.disabled = false; sIntegrityFullBtn.textContent = '🛡 VERIFICAR TUDO'; }
     });
   }
 
@@ -16914,6 +17021,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
         : '🔧 ' + result.fixed + ' corrigido(s)' + (_deleted > 0 ? ', ' + _deleted + ' deletado(s)' : '') + '. ' + (_integrityErr > 0 ? _integrityErr + ' erro(s).' : '');
       if(sIntegrityFile) sIntegrityFile.textContent = msg;
       if(sIntegrityBtn){ sIntegrityBtn.disabled = false; sIntegrityBtn.textContent = '🛡 VERIFICAR INTEGRIDADE'; }
+      if(sIntegrityFullBtn){ sIntegrityFullBtn.disabled = false; sIntegrityFullBtn.textContent = '🛡 VERIFICAR TUDO'; }
       // Popula lista de erros
       if(_integrityErr > 0 && result.errors && sIntegrityErrWrap && sIntegrityErrList){
         sIntegrityErrWrap.style.display = 'block';
@@ -16931,6 +17039,10 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   if(sIntegrityBtn){
     sIntegrityBtn.addEventListener('mouseenter', function(){ if(!sIntegrityBtn.disabled) sIntegrityBtn.style.borderColor='rgba(124,58,237,0.5)'; sIntegrityBtn.style.color='rgba(167,139,250,0.9)'; });
     sIntegrityBtn.addEventListener('mouseleave', function(){ sIntegrityBtn.style.borderColor='rgba(124,58,237,0.25)'; sIntegrityBtn.style.color='rgba(167,139,250,0.5)'; });
+  }
+  if(sIntegrityFullBtn){
+    sIntegrityFullBtn.addEventListener('mouseenter', function(){ if(!sIntegrityFullBtn.disabled) sIntegrityFullBtn.style.borderColor='rgba(124,58,237,0.4)'; sIntegrityFullBtn.style.color='rgba(167,139,250,0.7)'; });
+    sIntegrityFullBtn.addEventListener('mouseleave', function(){ sIntegrityFullBtn.style.borderColor='rgba(124,58,237,0.15)'; sIntegrityFullBtn.style.color='rgba(167,139,250,0.35)'; });
   }
 
   if(sCheck) sCheck.addEventListener('click', function(){
