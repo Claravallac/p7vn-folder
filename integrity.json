@@ -1,6 +1,6 @@
 {
   "files": {
-    "changelog.json": "a95ee443f86e6c62df953aa66d36ce20cd19f3c0608802f14f996eed5c9aa865",
+    "changelog.json": "8fe189d0268dd9fd3d3069ac1ef3a35876bf787e9ec8fb8300bf298573de20c1",
     "chapters.json": "3976cdb5199f0c4634e4c4185d84def6351196f992348d55aa31add072e3eafc",
     "css/animations.css": "993cb46f04676103cfa09cb05f7daae62fe19a67eefc6251f4868d688ed9e85a",
     "css/base.css": "d45c3c9eb728c7be297d8c4f8d9a28493250c8f513697377585bc16c9d9e24fd",
@@ -54,6 +54,6 @@
     "seven-reels.html": "830b5768a2d3dcade8d3e8a173de78d202be31165fbfab5b81b960a3665804a3",
     "update-banner.html": "b5352403b55fbd68e8cb83b8823daadc6517651738bb089c20ae8b5d218f458f",
     "updater.js": "b3339ef6474884d7847515f2717b3fb638f80329d0ea4dc980dd6ba8f37ddaab",
-    "version.json": "28b046d915c6b68369d42abde8329a8e1f8d966e6a1a62205a53f3b579981337"
+    "version.json": "7593555cfe20898329831a811d89e50bb690ba6d805fc1fe18456f868ebf561c"
   }
 }
