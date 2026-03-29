@@ -3001,7 +3001,14 @@
                     <div id="upd-repair-idle"></div>
                     <div id="upd-integrity-status" style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-top:10px;min-height:16px;display:none">
                         <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-left:3px solid #7c3aed;padding:12px 14px">
-                            <div style="font-size:8px;letter-spacing:4px;color:#a78bfa;font-weight:700;margin-bottom:8px">VERIFICANDO INTEGRIDADE</div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                                <div style="font-size:8px;letter-spacing:4px;color:#a78bfa;font-weight:700">VERIFICANDO INTEGRIDADE</div>
+                                <button id="upd-integrity-close" style="
+                                    background:transparent;border:none;padding:0 2px;
+                                    font-size:13px;color:rgba(255,255,255,0.2);
+                                    cursor:pointer;font-family:inherit;transition:color .2s;line-height:1;
+                                " title="Fechar">✕</button>
+                            </div>
                             <div style="background:rgba(255,255,255,0.07);border-radius:4px;height:5px;overflow:hidden;margin-bottom:7px">
                                 <div id="upd-integrity-bar" style="height:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa);width:0%;transition:width 0.15s ease;border-radius:4px"></div>
                             </div>
@@ -16946,7 +16953,78 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   var sIntegrityErrWrap   = document.getElementById('upd-integrity-err-wrap');
   var sIntegrityErrToggle = document.getElementById('upd-integrity-err-toggle');
   var sIntegrityErrList   = document.getElementById('upd-integrity-err-list');
+  var sIntegrityClose     = document.getElementById('upd-integrity-close');
   var _integrityOk = 0, _integrityFixed = 0, _integrityErr = 0, _integrityDeleted = 0;
+
+  function _integrityPanelClose() {
+    if (!sIntegrityStatus) return;
+    sIntegrityStatus.style.transition = 'opacity 0.4s ease, max-height 0.4s ease';
+    sIntegrityStatus.style.opacity    = '0';
+    sIntegrityStatus.style.maxHeight  = '0';
+    sIntegrityStatus.style.overflow   = 'hidden';
+    setTimeout(function(){
+      sIntegrityStatus.style.display = 'none';
+      sIntegrityStatus.style.opacity = '';
+      sIntegrityStatus.style.maxHeight = '';
+      sIntegrityStatus.style.overflow = '';
+      sIntegrityStatus.style.transition = '';
+    }, 420);
+  }
+
+  function _playSoundIntegrityOk() {
+    try {
+      var ctx  = new (window.AudioContext || window.webkitAudioContext)();
+      var gain = ctx.createGain();
+      var filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass'; filter.frequency.value = 2200;
+      gain.connect(filter); filter.connect(ctx.destination);
+      // Acorde suave: três notas em sequência (Dó → Mi → Sol)
+      var notes = [523.25, 659.25, 783.99];
+      notes.forEach(function(freq, i) {
+        var osc = ctx.createOscillator();
+        var g   = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        osc.connect(g); g.connect(filter);
+        var t = ctx.currentTime + i * 0.13;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.07, t + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+        osc.start(t); osc.stop(t + 0.32);
+      });
+      setTimeout(function(){ ctx.close(); }, 900);
+    } catch(e){}
+  }
+
+  function _playSoundIntegrityErr() {
+    try {
+      var ctx  = new (window.AudioContext || window.webkitAudioContext)();
+      var filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass'; filter.frequency.value = 900;
+      filter.connect(ctx.destination);
+      // Dois pulsos graves
+      [0, 0.22].forEach(function(offset) {
+        var osc  = ctx.createOscillator();
+        var g    = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, ctx.currentTime + offset);
+        osc.frequency.exponentialRampToValueAtTime(90, ctx.currentTime + offset + 0.18);
+        osc.connect(g); g.connect(filter);
+        g.gain.setValueAtTime(0.12, ctx.currentTime + offset);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + offset + 0.2);
+        osc.start(ctx.currentTime + offset);
+        osc.stop(ctx.currentTime + offset + 0.22);
+      });
+      setTimeout(function(){ ctx.close(); }, 700);
+    } catch(e){}
+  }
+
+  // Botão X — fecha o painel manualmente
+  if(sIntegrityClose) sIntegrityClose.addEventListener('click', _integrityPanelClose);
+  if(sIntegrityClose) {
+    sIntegrityClose.addEventListener('mouseenter', function(){ sIntegrityClose.style.color='rgba(255,255,255,0.6)'; });
+    sIntegrityClose.addEventListener('mouseleave', function(){ sIntegrityClose.style.color='rgba(255,255,255,0.2)'; });
+  }
 
   // Toggle do log de erros
   if(sIntegrityErrToggle) sIntegrityErrToggle.addEventListener('click', function(){
@@ -17006,6 +17084,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
       if(sIntegrityFile) sIntegrityFile.textContent = '⚠️ Erro: ' + msg;
       if(sIntegrityBtn){ sIntegrityBtn.disabled = false; sIntegrityBtn.textContent = '🛡 VERIFICAR INTEGRIDADE'; }
       if(sIntegrityFullBtn){ sIntegrityFullBtn.disabled = false; sIntegrityFullBtn.textContent = '🛡 VERIFICAR TUDO'; }
+      _playSoundIntegrityErr();
     });
   }
 
@@ -17029,9 +17108,12 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
           return '✖ <b>' + e.file + '</b> — ' + e.reason;
         }).join('<br>');
       }
-      // Some o painel após 5s se tudo OK
+      // Som e fechar
       if(result.fixed === 0 && _integrityErr === 0){
-        setTimeout(function(){ if(sIntegrityStatus) sIntegrityStatus.style.display = 'none'; }, 5000);
+        _playSoundIntegrityOk();
+        setTimeout(function(){ _integrityPanelClose(); }, 3500);
+      } else {
+        _playSoundIntegrityErr();
       }
     });
   }

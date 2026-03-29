@@ -388,6 +388,51 @@ async function runIntegrityCheck(gameDir, fullCheck) {
       }
     }
 
+    // ── Apaga arquivos locais que não constam no manifesto ───────────────────
+    // Mesmas exclusões usadas pelo make-integrity-full.js
+    const SCAN_IGNORE_DIRS  = new Set(['node_modules', '.git', 'dist', 'backup', 'dlc']);
+    const SCAN_IGNORE_FILES = new Set([
+      'make-delta.js', 'make-checkpoint.js', 'detect-removed.js',
+      'update-changelog.js', 'get-release-url.js', 'make-integrity.js',
+      'make-integrity-full.js', 'r2-upload.js', 'build.bat', 'secrets.json',
+      'integrity.json', 'integrity-full.json',
+      '_tmp.json', 'package.json', 'package-lock.json',
+      'test-chapter-1-3.html', 'changelog.json', 'version.json',
+      'MAPA_MENTAL.md', 'nulnpm', 'removed.json',
+    ]);
+    const SCAN_IGNORE_EXTS  = new Set(['.bat', '.md', '.log', '.bak', '.tmp']);
+
+    const manifestSet = new Set(files.map(([relPath]) => relPath));
+
+    function scanForStray(dir, base) {
+      let entries;
+      try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch(e) { return; }
+      for (const entry of entries) {
+        if (entry.name.startsWith('.')) continue;
+        if (SCAN_IGNORE_FILES.has(entry.name)) continue;
+        const fullPath = path.join(dir, entry.name);
+        const relPath  = base ? base + '/' + entry.name : entry.name;
+        if (entry.isDirectory()) {
+          if (SCAN_IGNORE_DIRS.has(entry.name)) continue;
+          scanForStray(fullPath, relPath);
+        } else {
+          const ext = path.extname(entry.name).toLowerCase();
+          if (SCAN_IGNORE_EXTS.has(ext)) continue;
+          if (!manifestSet.has(relPath)) {
+            // Arquivo existe localmente mas não está no manifesto — deletar
+            try {
+              fs.unlinkSync(fullPath);
+              deleted++;
+              emit('integrity-progress', 100, files.length, relPath, 'deleted');
+            } catch(e) {
+              errors.push({ file: relPath, reason: 'não pôde ser deletado: ' + e.message });
+            }
+          }
+        }
+      }
+    }
+    scanForStray(gameDir, '');
+
     emit('integrity-done', { fixed, total: files.length, checked, skipped, deleted, errors });
 
   } catch(e) {
