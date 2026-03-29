@@ -2509,1030 +2509,7 @@
 <body>
     <div id="debug-js-indicator" style="display:none">JS: index.html</div>
 
-<!-- ══ TELA DE PAUSA DO PROJETO ══════════════════════════════════════════════ -->
-<div id="neroblock" style="
-  position: fixed; inset: 0; background: #000; z-index: 99999;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #fff; text-align: center; padding: 40px;
-  opacity: 1; transition: opacity 1.2s ease;
-">
-  <!-- Partícula decorativa superior -->
-  <div style="width: 1px; height: 60px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.15)); margin-bottom: 48px;"></div>
-
-  <!-- Conteúdo principal -->
-  <div id="neroblock-page-1" style="max-width: 540px; transition: opacity 0.8s ease, transform 0.8s ease;">
-    <p style="font-size: 10px; letter-spacing: 6px; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 32px;">Himari Games</p>
-    <h1 id="neroblock-title" style="font-size: clamp(14px,1.6vw,18px); font-weight: 300; letter-spacing: 4px; color: rgba(255,255,255,0.9); text-transform: uppercase; margin-bottom: 40px; line-height: 1.4;">Aviso importante</h1>
-    <div style="width: 40px; height: 1px; background: rgba(255,255,255,0.15); margin: 0 auto 40px;"></div>
-    <div id="neroblock-body" style="font-size: clamp(13px,1.2vw,15px); font-weight: 300; line-height: 2; color: rgba(255,255,255,0.65);">
-      <p style="margin-bottom: 16px;">O desenvolvimento deste projeto foi pausado por tempo indeterminado.</p>
-      <p style="margin-bottom: 16px;">A ideia sempre foi criar algo nosso.<br>Um jogo feito entre amigos, para amigos.</p>
-      <p style="margin-bottom: 16px;">Mas, com o tempo, eu acabei meio que só criando tudo sozinha.<br>E isso me fez perceber algo bem ruim:<br>não era algo que estávamos construindo juntos.</p>
-      <p style="margin-bottom: 16px;">Pensando dessa forma… o projeto todo perdeu o sentido.<br>Não tem culpa, só a certeza de que pode existir algo melhor,<br>que realmente envolva todos.</p>
-      <p>Obrigada pelos testes lendários.</p>
-    </div>
-
-    <!-- Botão próximo -->
-    <button id="neroblock-next-btn" onclick="neroblockNext()" style="
-      position: fixed; bottom: 36px; right: 40px;
-      background: none; border: none; cursor: pointer;
-      font-family: inherit; font-size: 11px; letter-spacing: 5px;
-      color: rgba(255,255,255,0.3); text-transform: uppercase;
-      display: flex; align-items: center; gap: 10px;
-      transition: color 0.3s;
-      padding: 8px 0;
-    "
-    onmouseover="this.style.color='rgba(255,255,255,0.7)'"
-    onmouseout="this.style.color='rgba(255,255,255,0.3)'"
-    >
-      próximo
-      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M1 5H15M15 5L11 1M15 5L11 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Página 2 (oculta inicialmente) -->
-  <div id="neroblock-page-2" style="
-    max-width: 540px; display: none; opacity: 0;
-    transform: translateY(16px); transition: opacity 2.2s ease, transform 2.2s ease;
-  ">
-    <p style="font-size: clamp(15px,1.4vw,18px); font-weight: 300; line-height: 2.2; color: rgba(255,255,255,0.7);">
-      Mal posso esperar pra saber<br>o que vamos fazer juntos da próxima vez. ❤️
-    </p>
-  </div>
-
-  <!-- Botão fechar (oculto) -->
-  <button id="neroblock-close-btn" onclick="neroblockClose()" style="
-    display: none; margin-top: 48px;
-    background: none; border: 1px solid rgba(255,255,255,0.12); cursor: pointer;
-    font-family: inherit; font-size: 11px; letter-spacing: 5px;
-    color: rgba(255,255,255,0.35); text-transform: uppercase;
-    padding: 14px 36px; transition: color 0.3s, border-color 0.3s;
-    opacity: 0; animation: none;
-  "
-  onmouseover="
-    this.style.color='rgba(255,255,255,0.8)';
-    this.style.borderColor='rgba(255,255,255,0.35)';
-    window._neroblockBtnVibrate(this);
-  "
-  onmouseout="
-    this.style.color='rgba(255,255,255,0.35)';
-    this.style.borderColor='rgba(255,255,255,0.12)';
-    window._neroblockBtnStop(this);
-  "
-  >
-    fechar jogo
-  </button>
-
-  <!-- Partícula decorativa inferior -->
-  <div style="width: 1px; height: 60px; background: linear-gradient(to top, transparent, rgba(255,255,255,0.15)); margin-top: 48px;"></div>
-</div>
-
-<script>
-(function() {
-  /* ── Trava total: intercepta tudo antes do jogo carregar ── */
-  var _pauseActive = true;
-
-  /* ════════════════════════════════════════════════════════════
-     SISTEMA DE VISITAS — conta quantas vezes o player voltou
-     e muda o conteúdo da tela a cada abertura.
-     Na 10ª tentativa desiste e deixa o jogo iniciar.
-  ════════════════════════════════════════════════════════════ */
-  var _NB_KEY = 'himari_nb_visits';
-  var _visits = 999; // DESATIVADO — neroblock nunca exibe
-  localStorage.setItem(_NB_KEY, String(_visits));
-
-  /* Se já passou pela 10ª vez, nunca mais mostra — fecha imediatamente */
-  if (_visits > 10) {
-    _pauseActive = false;
-    window._pauseScreenActive = false;
-    var _nb = document.getElementById('neroblock');
-    if (_nb) { _nb.style.display = 'none'; }
-  }
-
-  /* Textos alternativos — índice 0 = primeira visita (original),
-     depois começam as negações progressivas de easter egg.
-     Array começa em visita 2 (índice _visits - 2 para visits >= 2). */
-  var _TITLES = [
-    'Aviso importante',               // visita 1 — padrão
-    'Aviso importante (de novo)',      // visita 2
-    'Ei. Ainda aqui.',                 // visita 3
-    'Ok. Vou ser direta.',             // visita 4
-    'Não tem nada aqui.',              // visita 5
-    'Sério. Para.',                    // visita 6
-    'Você não vai encontrar nada.',    // visita 7
-    '...',                             // visita 8
-    'Ok, talvez tenha algo.',          // visita 9
-    'Tá bom. Você ganhou.',            // visita 10
-  ];
-
-  var _BODIES = [
-    /* 1 — original */
-    '<p style="margin-bottom:16px">O desenvolvimento deste projeto foi pausado por tempo indeterminado.</p>' +
-    '<p style="margin-bottom:16px">A ideia sempre foi criar algo nosso.<br>Um jogo feito entre amigos, para amigos.</p>' +
-    '<p style="margin-bottom:16px">Mas, com o tempo, eu acabei meio que só criando tudo sozinha.<br>E isso me fez perceber algo bem ruim:<br>não era algo que estávamos construindo juntos.</p>' +
-    '<p style="margin-bottom:16px">Pensando dessa forma… o projeto todo perdeu o sentido.<br>Não tem culpa, só a certeza de que pode existir algo melhor,<br>que realmente envolva todos.</p>' +
-    '<p>Obrigada pelos testes lendários.</p>',
-
-    /* 2 */
-    '<p style="margin-bottom:16px">Você já viu isso antes.<br>Não tem nenhum easter egg escondido aqui.</p>' +
-    '<p style="margin-bottom:16px">Nenhuma mensagem secreta, nenhuma surpresa,<br>nenhum código oculto nas entrelinhas.</p>' +
-    '<p>Pode fechar e ir fazer outra coisa. De verdade.</p>',
-
-    /* 3 */
-    '<p style="margin-bottom:16px">Ok, você voltou.<br>Entendemos.</p>' +
-    '<p style="margin-bottom:16px">Mas olha — não tem easter egg.<br>Não existe mensagem escondida no pixel 347×892.<br>Não tem código digitável. Nada.</p>' +
-    '<p>Isso é literalmente só uma tela de aviso.</p>',
-
-    /* 4 */
-    '<p style="margin-bottom:16px">Não tem easter egg.</p>' +
-    '<p style="margin-bottom:16px">N-Ã-O T-E-M E-A-S-T-E-R E-G-G.</p>' +
-    '<p>Obrigada pela compreensão.</p>',
-
-    /* 5 */
-    '<p style="margin-bottom:16px">Olha. Eu poderia ter escondido algo aqui.<br>Seria divertido, admito.</p>' +
-    '<p style="margin-bottom:16px">Mas não fiz.<br>Esta é a quinta vez que você abre o jogo só pra ver isso.</p>' +
-    '<p>Vai jogar.</p>',
-
-    /* 6 */
-    '<p style="margin-bottom:16px">...</p>' +
-    '<p style="margin-bottom:16px">Sabe o que está acontecendo?<br>Você está procurando algo que não existe.</p>' +
-    '<p style="margin-bottom:16px">É a sexta vez.<br>Contei.</p>' +
-    '<p>Não tem nada.</p>',
-
-    /* 7 */
-    '<p style="margin-bottom:16px">Tudo bem.<br>Sétima visita. Respeito a dedicação.</p>' +
-    '<p style="margin-bottom:16px">Mas definitivamente, com absoluta certeza,<br>sem sombra de dúvida —</p>' +
-    '<p style="margin-bottom:16px">não tem easter egg.</p>' +
-    '<p style="font-size:10px;opacity:0.2">(não tem)</p>',
-
-    /* 8 */
-    '<p style="margin-bottom:16px">.</p>' +
-    '<p style="margin-bottom:16px">..</p>' +
-    '<p style="margin-bottom:16px">...</p>' +
-    '<p>Ok, oitava vez. Sem comentários.</p>',
-
-    /* 9 */
-    '<p style="margin-bottom:16px">Tá. Você chegou até aqui.<br>Vou te dar uma coisa.</p>' +
-    '<p style="margin-bottom:16px">Aqui está seu easter egg:</p>' +
-    '<p style="margin-bottom:16px;font-size:clamp(28px,4vw,48px);letter-spacing:8px">🥚</p>' +
-    '<p style="font-size:11px;opacity:0.4">feliz agora? uma última vez e você ganha algo de verdade.</p>',
-
-    /* 10 — desiste, auto-fecha */
-    '<p style="margin-bottom:16px">Você ganhou.<br>Dez vezes, dez aberturas, dez avisos ignorados.</p>' +
-    '<p style="margin-bottom:16px">Parabéns pela teimosia.<br>O jogo vai iniciar automaticamente agora.</p>' +
-    '<p style="font-size:11px;opacity:0.35">(não tinha easter egg, mas sua persistência conta como um)</p>',
-  ];
-
-  /* Aplica o conteúdo correspondente à visita atual */
-  function _applyVisitContent() {
-    var idx = Math.min(_visits, 10) - 1; // 0–9
-    var titleEl = document.getElementById('neroblock-title');
-    var bodyEl  = document.getElementById('neroblock-body');
-    if (titleEl) titleEl.textContent = _TITLES[idx] || _TITLES[0];
-    if (bodyEl)  bodyEl.innerHTML    = _BODIES[idx] || _BODIES[0];
-  }
-  _applyVisitContent();
-
-  /* Na 10ª visita: fecha automaticamente após um tempo */
-  if (_visits >= 10) {
-    setTimeout(function() {
-      _pauseActive = false;
-      var ps = document.getElementById('neroblock');
-      if (!ps) return;
-      /* Pulsa branco uma vez antes de fechar — pequena recompensa visual */
-      ps.style.transition = 'opacity 0.3s ease';
-      ps.style.opacity = '0.05';
-      setTimeout(function() {
-        ps.style.transition = 'opacity 1.8s ease';
-        ps.style.opacity = '0';
-        ps.style.pointerEvents = 'none';
-        setTimeout(function() {
-          ps.style.display = 'none';
-          window._pauseScreenActive = false;
-          /* Contador não é resetado — a tela nunca mais aparece */
-        }, 1800);
-      }, 300);
-    }, 5000); /* 5 segundos lendo a mensagem de vitória */
-  }
-  /* ════════════════════════════════════════════════════════════ */
-
-  /* ── Vibração + som do botão fechar ────────────────────────────────────── */
-  var _btnVibrateId = null;
-  var _btnVibrateFrame = 0;
-
-  window._neroblockBtnVibrate = function(btn) {
-    if (_btnVibrateId) return;
-    _btnVibrateFrame = 0;
-
-    /* Som de vibração — pulso rápido grave/médio que fica repetindo */
-    (function _playVibrateSound() {
-      try {
-        var AC = window.AudioContext || window.webkitAudioContext;
-        var ac = window._actx && window._actx.state !== 'closed' ? window._actx : new AC();
-        if (ac.state === 'suspended') ac.resume();
-        var now = ac.currentTime;
-        var master = ac.createGain();
-        master.gain.setValueAtTime(0.0, now);
-        master.gain.linearRampToValueAtTime(0.18, now + 0.01);
-        master.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
-        master.connect(ac.destination);
-
-        /* Rumble grave */
-        var osc1 = ac.createOscillator();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(55, now);
-        osc1.frequency.linearRampToValueAtTime(38, now + 0.18);
-        osc1.connect(master);
-        osc1.start(now); osc1.stop(now + 0.20);
-
-        /* Clique médio */
-        var osc2 = ac.createOscillator();
-        osc2.type = 'square';
-        osc2.frequency.setValueAtTime(120, now);
-        osc2.frequency.exponentialRampToValueAtTime(60, now + 0.08);
-        var g2 = ac.createGain();
-        g2.gain.setValueAtTime(0.10, now);
-        g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
-        osc2.connect(g2); g2.connect(ac.destination);
-        osc2.start(now); osc2.stop(now + 0.10);
-
-        /* Noise curto de textura */
-        var frames = Math.ceil(ac.sampleRate * 0.06);
-        var buf = ac.createBuffer(1, frames, ac.sampleRate);
-        var d = buf.getChannelData(0);
-        for (var i = 0; i < frames; i++) d[i] = (Math.random() * 2 - 1) * 0.4;
-        var ns = ac.createBufferSource();
-        var ng = ac.createGain();
-        ng.gain.setValueAtTime(0.08, now);
-        ng.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
-        ns.buffer = buf; ns.connect(ng); ng.connect(ac.destination);
-        ns.start(now); ns.stop(now + 0.07);
-
-      } catch(e) {}
-    })();
-
-    /* Animação de vibração: translates pequenos e rápidos */
-    var _offsets = [
-      [-2, 1], [2, -1], [-1, 2], [3, -1], [-2, 0],
-      [1, 2],  [-3, 1], [2, -2], [-1, 1], [0, 0]
-    ];
-
-    _btnVibrateId = setInterval(function() {
-      _btnVibrateFrame++;
-      var o = _offsets[_btnVibrateFrame % _offsets.length];
-      btn.style.transform = 'translate(' + o[0] + 'px, ' + o[1] + 'px)';
-    }, 40);
-  };
-
-  window._neroblockBtnStop = function(btn) {
-    if (_btnVibrateId) { clearInterval(_btnVibrateId); _btnVibrateId = null; }
-    btn.style.transform = 'translate(0,0)';
-  };
-  var _typedBuffer = '';
-  var _unlockCode = 'nero';
-
-  /* Bloqueia qualquer init do jogo — só se não foi liberado já pelo contador */
-  if (_pauseActive) window._pauseScreenActive = true;
-
-  /* Escuta a senha digitada a qualquer momento */
-  document.addEventListener('keydown', function(e) {
-    if (!_pauseActive) return;
-    /* Engole o evento — nenhum listener de cheat (abbyl, aug, etc.) chega a receber */
-    e.stopImmediatePropagation();
-    /* bloqueia F12 / debug */
-    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
-      e.preventDefault(); return false;
-    }
-    _typedBuffer += e.key.toLowerCase();
-    if (_typedBuffer.length > _unlockCode.length) {
-      _typedBuffer = _typedBuffer.slice(-_unlockCode.length);
-    }
-    if (_typedBuffer === _unlockCode) {
-      _pauseActive = false;
-      var ps = document.getElementById('neroblock');
-      ps.style.opacity = '0';
-      ps.style.pointerEvents = 'none';
-      setTimeout(function() { ps.style.display = 'none'; window._pauseScreenActive = false; }, 1200);
-    }
-  }, true);
-
-  /* Bloqueia cliques fora da pause screen enquanto ativa */
-  document.addEventListener('click', function(e) {
-    if (!_pauseActive) return;
-    var ps = document.getElementById('neroblock');
-    if (!ps.contains(e.target)) { e.stopImmediatePropagation(); e.preventDefault(); }
-  }, true);
-
-  /* ── Funções de fluxo da tela ── */
-  window.neroblockNext = function() {
-    var page1 = document.getElementById('neroblock-page-1');
-    var page2 = document.getElementById('neroblock-page-2');
-    var nextBtn = document.getElementById('neroblock-next-btn');
-
-    /* Fade out página 1 — lento e suave */
-    page1.style.transition = 'opacity 1.4s ease, transform 1.4s ease';
-    page1.style.opacity = '0';
-    page1.style.transform = 'translateY(-12px)';
-    nextBtn.style.transition = 'opacity 1.0s ease';
-    nextBtn.style.opacity = '0';
-    nextBtn.style.pointerEvents = 'none';
-
-    setTimeout(function() {
-      page1.style.display = 'none';
-
-      /* Mostrar página 2 com fade bem lento */
-      page2.style.transition = 'opacity 2.2s ease, transform 2.2s ease';
-      page2.style.display = 'block';
-      requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
-          page2.style.opacity = '1';
-          page2.style.transform = 'translateY(0)';
-        });
-      });
-
-      /* Fica visível por 7s antes de começar o fade out */
-      setTimeout(function() {
-        /* fade out lento e dramático */
-        page2.style.transition = 'opacity 3.0s ease, transform 3.0s ease';
-        page2.style.opacity = '0';
-        page2.style.transform = 'translateY(-8px)';
-
-        setTimeout(function() {
-          page2.style.display = 'none';
-
-          /* botão fechar aparece devagar */
-          var closeBtn = document.getElementById('neroblock-close-btn');
-          closeBtn.style.transition = 'opacity 1.8s ease';
-          closeBtn.style.display = 'inline-block';
-          requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-              closeBtn.style.opacity = '1';
-            });
-          });
-
-          /* Dispara conquista real do jogo — tenta agora e repete até conseguir */
-          (function _tryGrantPauseThanks() {
-            function _grant() {
-              if (typeof achievementsState === 'undefined' || !achievementsState) return false;
-
-              /* Substitui o som da conquista pelo fanfare emocional só desta vez */
-              var _origSfx = window.playAchievementUnlockSfx;
-              if (typeof playAchievementUnlockSfx !== 'undefined') {
-                window._pauseThanksOverrideSfx = true;
-                window._pauseThanksAmizade = true;
-              }
-
-              if (typeof hasAchievement === 'function' && hasAchievement('pause_thanks')) {
-                if (typeof queueAchievementPopup === 'function') {
-                  queueAchievementPopup({
-                    title: 'Obrigada por testar e acreditar na minha ideia',
-                    description: 'Você esteve aqui quando o projeto pausou. ❤️',
-                    image: 'assets/images/logo/icon.png',
-                    rewardCoins: 0
-                  });
-                }
-                return true;
-              }
-              if (typeof unlockAchievement === 'function') {
-                unlockAchievement('pause_thanks');
-                return true;
-              }
-              return false;
-            }
-            if (!_grant()) {
-              var _t = setInterval(function() { if (_grant()) clearInterval(_t); }, 300);
-            }
-            /* Estende a duração do popup para 8s nessa conquista específica */
-            (function _extendPopupDuration() {
-              function _tryExtend() {
-                if (typeof _achievementHideTimer === 'undefined') return false;
-                /* Espera o popup estar visível */
-                var popup = document.getElementById('achievement-popup');
-                if (!popup || popup.style.display === 'none') return false;
-                /* Cancela o timer original e redefine para 8s */
-                if (_achievementHideTimer) {
-                  clearTimeout(_achievementHideTimer);
-                  _achievementHideTimer = null;
-                }
-                var barEl = document.getElementById('achievement-popup-bar');
-                var coinsEl = document.getElementById('achievement-popup-coins');
-                if (barEl) {
-                  barEl.classList.remove('running');
-                  void barEl.offsetWidth;
-                  barEl.style.setProperty('--bar-duration', '8s');
-                  requestAnimationFrame(function(){ requestAnimationFrame(function(){ barEl.classList.add('running'); }); });
-                }
-                _achievementHideTimer = setTimeout(function() {
-                  _achievementHideTimer = null;
-                  popup.classList.remove('show');
-                  popup.classList.add('hide');
-                  setTimeout(function() {
-                    popup.classList.remove('hide');
-                    popup.style.display = 'none';
-                    if (coinsEl) coinsEl.classList.remove('visible');
-                    if (barEl) barEl.classList.remove('running');
-                    _achievementShowing = false;
-                    if (typeof showNextAchievementPopup === 'function') showNextAchievementPopup();
-                  }, 340);
-                }, 8000);
-                return true;
-              }
-              /* Tenta logo após o disparo, dá tempo do popup aparecer */
-              setTimeout(function() {
-                if (!_tryExtend()) {
-                  var _r = setInterval(function() { if (_tryExtend()) clearInterval(_r); }, 100);
-                }
-                /* 5s de silêncio após conquista → música + partículas */
-                setTimeout(function() {
-                  if (typeof window._neroblockStartMusic === 'function') {
-                    window._neroblockStartMusic();
-                  }
-                }, 60000);
-              }, 200);
-            })();
-          })();
-
-        }, 3200);
-      }, 7000);
-
-    }, 1500);
-  };
-
-  window.neroblockClose = function() {
-    var ps = document.getElementById('neroblock');
-    ps.style.opacity = '0';
-    setTimeout(function() {
-      window.close();
-      document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:rgba(255,255,255,0.2);font-size:11px;letter-spacing:4px;text-transform:uppercase;">Pode fechar esta aba</div>';
-    }, 900);
-  };
-
-  /* ── Música + partículas do neroblock ───────────────────────────────────── */
-  window._neroblockStartMusic = function() {
-    var music = document.getElementById('neroblock-music');
-    if (!music) return;
-
-    /* Canvas de partículas */
-    var canvas = document.createElement('canvas');
-    canvas.id = 'neroblock-particles';
-    canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:99999998;';
-    document.getElementById('neroblock').appendChild(canvas);
-    var ctx = canvas.getContext('2d');
-
-    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    resize();
-    window.addEventListener('resize', resize);
-
-    /* Partículas */
-    var particles = [];
-    var PARTICLE_COUNT = 80;
-
-    function createParticle() {
-      return {
-        x: Math.random() * canvas.width,
-        y: -10 - Math.random() * 60,
-        size: 0.6 + Math.random() * 1.4,
-        speed: 0.15 + Math.random() * 0.45,
-        baseOpacity: 0.15 + Math.random() * 0.45,
-        flicker: Math.random() * Math.PI * 2,
-        flickerSpeed: 0.008 + Math.random() * 0.018,
-        drift: (Math.random() - 0.5) * 0.15
-      };
-    }
-
-    for (var i = 0; i < PARTICLE_COUNT; i++) {
-      particles.push(createParticle());
-      /* Distribui ao longo do tempo, não spawna tudo junto */
-      particles[i]._delay = i * (canvas.height / PARTICLE_COUNT / (0.15 + Math.random() * 0.45));
-    }
-
-    /* Web Audio — analyser focado em graves para detectar beat */
-    var analyser = null;
-    var dataArray = null;
-    var audioCtx = null;
-    var beatEnergy = 0;   /* energia suavizada atual */
-    var peakEnergy = 0;   /* pico recente para normalizar */
-    var hissEnergy = 0;   /* energia dos agudos — detecta o chiado */
-    var hissPeak = 0;
-    var glitchActive = false;
-    var glitchTimer = 0;
-
-    function setupAnalyser() {
-      try {
-        var AC = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AC();
-        var source = audioCtx.createMediaElementSource(music);
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 512;
-        analyser.smoothingTimeConstant = 0.55; /* menos amortecimento = mais responsivo */
-        dataArray = new Uint8Array(analyser.frequencyBinCount);
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination);
-      } catch(e) { analyser = null; }
-    }
-
-    /* Pega energia dos graves (bins 1–12 ≈ 80–400Hz) — onde o beat mora */
-    function getBeatEnergy() {
-      if (!analyser) return 0;
-      analyser.getByteFrequencyData(dataArray);
-
-      /* Graves — beat */
-      var bassSum = 0, bassBins = 12;
-      for (var i = 1; i <= bassBins; i++) bassSum += dataArray[i];
-      var rawBass = bassSum / (bassBins * 255);
-      if (rawBass > peakEnergy) peakEnergy = rawBass;
-      else peakEnergy *= 0.9995;
-
-      /* Agudos — chiado (bins 180–255 ≈ 7kHz+) */
-      var hissSum = 0, hissBins = 0;
-      for (var j = 180; j < dataArray.length; j++) { hissSum += dataArray[j]; hissBins++; }
-      var rawHiss = hissBins > 0 ? hissSum / (hissBins * 255) : 0;
-      if (rawHiss > hissPeak) hissPeak = rawHiss;
-      else hissPeak *= 0.998;
-      hissEnergy = hissPeak > 0.005 ? rawHiss / hissPeak : 0;
-
-      return peakEnergy > 0.01 ? rawBass / peakEnergy : 0;
-    }
-
-    var animId;
-    var glitchLines = [];
-
-    function spawnGlitchLines() {
-      glitchLines = [];
-      var count = 4 + Math.floor(Math.random() * 6);
-      for (var i = 0; i < count; i++) {
-        glitchLines.push({
-          y:      Math.random() * canvas.height,
-          height: 1 + Math.random() * 4,
-          width:  60 + Math.random() * 300,
-          x:      Math.random() * canvas.width,
-          opacity: 0.15 + Math.random() * 0.45,
-          shift:  (Math.random() - 0.5) * 30
-        });
-      }
-    }
-
-    function drawGlitch(intensity) {
-      /* Faixas horizontais deslocadas */
-      for (var i = 0; i < glitchLines.length; i++) {
-        var g = glitchLines[i];
-        ctx.save();
-        ctx.globalAlpha = g.opacity * intensity;
-        /* Recorta uma fatia da tela e move lateralmente */
-        var sliceY = g.y;
-        var sliceH = g.height;
-        ctx.drawImage(canvas, 0, sliceY, canvas.width, sliceH,
-                              g.shift * intensity, sliceY, canvas.width, sliceH);
-        /* Faixa branca fina */
-        ctx.fillStyle = 'rgba(255,255,255,' + (g.opacity * intensity * 0.6) + ')';
-        ctx.fillRect(g.x, g.y, g.width, g.height);
-        ctx.restore();
-      }
-
-      /* Overlay de ruído RGB suave */
-      if (intensity > 0.4) {
-        ctx.save();
-        ctx.globalAlpha = (intensity - 0.4) * 0.18;
-        ctx.fillStyle = 'rgba(180,220,255,1)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.restore();
-      }
-    }
-
-    function animate() {
-      animId = requestAnimationFrame(animate);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      var rawEnergy = getBeatEnergy();
-      /* Ataque rápido, decay lento */
-      if (rawEnergy > beatEnergy) beatEnergy += (rawEnergy - beatEnergy) * 0.55;
-      else                        beatEnergy += (rawEnergy - beatEnergy) * 0.06;
-      beatEnergy = Math.max(0, Math.min(1, beatEnergy));
-
-      /* ── Partículas ── */
-      for (var i = 0; i < particles.length; i++) {
-        var p = particles[i];
-
-        /* Delay inicial: partícula espera sua vez antes de aparecer */
-        if (p._delay > 0) { p._delay--; continue; }
-
-        p.y += p.speed;
-        p.x += p.drift;
-        p.flicker += p.flickerSpeed;
-
-        var individualGlow = 0.5 + 0.5 * Math.sin(p.flicker);
-        var finalOpacity = p.baseOpacity * individualGlow + beatEnergy * 0.7;
-        finalOpacity = Math.min(0.95, finalOpacity);
-        var finalSize = p.size * (1 + beatEnergy * 0.5);
-
-        if (beatEnergy > 0.35) {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, finalSize * 2.5, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,' + (beatEnergy * 0.08) + ')';
-          ctx.fill();
-        }
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, finalSize, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,' + finalOpacity + ')';
-        ctx.fill();
-
-        if (p.y > canvas.height + 10 || p.x < -10 || p.x > canvas.width + 10) {
-          particles[i] = createParticle();
-        }
-      }
-
-      /* ── Glitch por chiado ── */
-      if (hissEnergy > 0.55 && !glitchActive) {
-        glitchActive = true;
-        glitchTimer = 6 + Math.floor(Math.random() * 10); /* dura N frames */
-        spawnGlitchLines();
-      }
-
-      if (glitchActive) {
-        var intensity = Math.min(1, hissEnergy * 1.4);
-        drawGlitch(intensity);
-        glitchTimer--;
-        if (glitchTimer <= 0) {
-          glitchActive = false;
-          glitchLines = [];
-        }
-      }
-    }
-
-    /* Inicia tudo */
-    setupAnalyser();
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    music.volume = 0;
-    music.play().catch(function(){});
-
-    /* Fade in da música */
-    var fadeInSteps = 40;
-    var fadeInStep = 0;
-    var fadeInTimer = setInterval(function() {
-      fadeInStep++;
-      music.volume = Math.min(1, fadeInStep / fadeInSteps);
-      if (fadeInStep >= fadeInSteps) clearInterval(fadeInTimer);
-    }, 50);
-
-    animate();
-
-    /* ── VHS overlay permanente leve ────────────────────────────────────────── */
-    var vhsCanvas = document.createElement('canvas');
-    vhsCanvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:999999997;opacity:0;transition:opacity 1.2s ease;';
-    document.getElementById('neroblock').appendChild(vhsCanvas);
-    var vhsCtx = vhsCanvas.getContext('2d');
-    var vhsAnimId;
-    var vhsActive = false;
-    var vhsScanOffset = 0;
-
-    function resizeVhs() { vhsCanvas.width = window.innerWidth; vhsCanvas.height = window.innerHeight; }
-    resizeVhs();
-    window.addEventListener('resize', resizeVhs);
-
-    function animateVhs() {
-      vhsAnimId = requestAnimationFrame(animateVhs);
-      vhsCtx.clearRect(0, 0, vhsCanvas.width, vhsCanvas.height);
-
-      /* Scanlines */
-      for (var y = 0; y < vhsCanvas.height; y += 4) {
-        vhsCtx.fillStyle = 'rgba(0,0,0,0.08)';
-        vhsCtx.fillRect(0, y, vhsCanvas.width, 1);
-      }
-
-      /* Linha de scan rolando */
-      vhsScanOffset = (vhsScanOffset + 0.8) % vhsCanvas.height;
-      var grad = vhsCtx.createLinearGradient(0, vhsScanOffset - 20, 0, vhsScanOffset + 20);
-      grad.addColorStop(0, 'rgba(255,255,255,0)');
-      grad.addColorStop(0.5, 'rgba(255,255,255,0.03)');
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
-      vhsCtx.fillStyle = grad;
-      vhsCtx.fillRect(0, vhsScanOffset - 20, vhsCanvas.width, 40);
-
-      /* Ruído leve nas bordas */
-      if (Math.random() > 0.92) {
-        var noiseY = Math.random() * vhsCanvas.height;
-        var noiseH = 1 + Math.random() * 2;
-        var shift = (Math.random() - 0.5) * 6;
-        vhsCtx.drawImage(vhsCanvas, 0, noiseY, vhsCanvas.width, noiseH, shift, noiseY, vhsCanvas.width, noiseH);
-      }
-
-      /* Vinheta */
-      var vig = vhsCtx.createRadialGradient(
-        vhsCanvas.width/2, vhsCanvas.height/2, vhsCanvas.height * 0.3,
-        vhsCanvas.width/2, vhsCanvas.height/2, vhsCanvas.height * 0.85
-      );
-      vig.addColorStop(0, 'rgba(0,0,0,0)');
-      vig.addColorStop(1, 'rgba(0,0,0,0.35)');
-      vhsCtx.fillStyle = vig;
-      vhsCtx.fillRect(0, 0, vhsCanvas.width, vhsCanvas.height);
-    }
-
-    function activateVhs() {
-      if (vhsActive) return;
-      vhsActive = true;
-      animateVhs();
-      requestAnimationFrame(function(){ vhsCanvas.style.opacity = '1'; });
-    }
-
-    /* ── Sistema de legendas ─────────────────────────────────────────────────
-       Timings em segundos. text: string | {type:'glitch1'|'glitch2'|'glitch3'} | {type:'redacted'}
-    ─────────────────────────────────────────────────────────────────────── */
-    var SUBTITLES = [
-      { start:  0.00, end:  3.51, text: 'Oi, espero que esteja bem' },
-      { start: 12.10, end: 13.46, text: 'Muito obrigada pela ajuda' },
-      { start: 14.08, end: 15.29, text: 'Você é incrível' },
-      { start: 36.40, end: 41.17, text: { type: 'glitch1' } }, /* ← substitua pelo texto ou mantenha glitch */
-      { start: 67.10, end: 68.37, text: { type: 'glitch2' } }, /* ← substitua pelo texto ou mantenha glitch */
-      { start: 72.45, end: 73.55, text: { type: 'glitch3' } }, /* ← substitua pelo texto ou mantenha glitch */
-      { start: 91.02, end: 94.23, text: { type: 'glitch1' } },
-      { start: 99.36, end: 103.23, text: { type: 'redacted' } }
-    ];
-
-    /* Elemento de legenda */
-    var subEl = document.createElement('div');
-    subEl.id = 'neroblock-sub';
-    subEl.style.cssText = [
-      'position:fixed',
-      'bottom:80px',
-      'left:50%',
-      'transform:translateX(-50%)',
-      'z-index:999999999',
-      'pointer-events:none',
-      'text-align:center',
-      'font-family:"Segoe UI",sans-serif',
-      'font-size:clamp(14px,1.6vw,20px)',
-      'font-weight:300',
-      'letter-spacing:2px',
-      'color:rgba(255,255,255,0.9)',
-      'text-shadow:0 0 18px rgba(255,255,255,0.4)',
-      'max-width:70vw',
-      'line-height:1.6',
-      'opacity:0',
-      'transition:opacity 0.6s ease'
-    ].join(';');
-    document.getElementById('neroblock').appendChild(subEl);
-
-    var _subCurrent = -1;
-    var _glitchChars  = '!@#$%^&*<>?/\\|[]{}~ÃÂÊÔãâêô░▒▓';
-    var _glitchChars2 = '01010110100101001101010110';
-    var _glitchChars3 = '─━│┃┄┅┆┇┈┉┊┋┌┍┎┏┐┑┒┓└┕┖┗';
-    var _effectInterval = null;
-
-    function _stopSubEffects() {
-      if (_effectInterval) { clearInterval(_effectInterval); _effectInterval = null; }
-    }
-
-    /* Glitch 1: caos puro — caracteres aleatórios coloridos, spacing errático */
-    function _glitch1(el) {
-      var len = 6 + Math.floor(Math.random() * 10);
-      _effectInterval = setInterval(function() {
-        var out = '';
-        for (var i = 0; i < len; i++) out += _glitchChars[Math.floor(Math.random() * _glitchChars.length)];
-        el.style.color = ['rgba(180,220,255,0.95)','rgba(255,100,180,0.9)','rgba(255,255,255,0.95)'][Math.floor(Math.random()*3)];
-        el.style.letterSpacing = (Math.random() * 12) + 'px';
-        el.style.textShadow = '0 0 ' + (Math.random()*20) + 'px rgba(180,220,255,0.8)';
-        el.style.transform = 'translateX(calc(-50% + ' + ((Math.random()-0.5)*8) + 'px))';
-        el.textContent = out;
-      }, 70);
-    }
-
-    /* Glitch 2: binário frio — parece dado corrompido */
-    function _glitch2(el) {
-      el.style.color = 'rgba(100,220,180,0.85)';
-      el.style.fontFamily = '"Courier New",monospace';
-      el.style.letterSpacing = '4px';
-      var _f = 0;
-      _effectInterval = setInterval(function() {
-        _f++;
-        var len = 10 + Math.floor(Math.random() * 8);
-        var out = '';
-        for (var i = 0; i < len; i++) out += _glitchChars2[Math.floor(Math.random() * _glitchChars2.length)];
-        /* A cada ~6 frames, insere um separador */
-        if (_f % 6 === 0) out = out.slice(0,5) + ' ERR ' + out.slice(5);
-        el.style.opacity = Math.random() > 0.15 ? '1' : '0.3';
-        el.textContent = out;
-      }, 90);
-    }
-
-    /* Glitch 3: linhas de box drawing — parece terminal quebrado */
-    function _glitch3(el) {
-      el.style.color = 'rgba(255,220,100,0.8)';
-      el.style.fontFamily = '"Courier New",monospace';
-      el.style.letterSpacing = '3px';
-      var rows = ['', '', ''];
-      _effectInterval = setInterval(function() {
-        for (var r = 0; r < 3; r++) {
-          var len = 8 + Math.floor(Math.random() * 6);
-          var out = '';
-          for (var i = 0; i < len; i++) out += _glitchChars3[Math.floor(Math.random() * _glitchChars3.length)];
-          rows[r] = out;
-        }
-        el.innerHTML = rows[0] + '<br>' + rows[1];
-        el.style.fontSize = 'clamp(10px,1.1vw,14px)';
-        el.style.transform = 'translateX(calc(-50% + ' + ((Math.random()-0.5)*4) + 'px)) skewX(' + ((Math.random()-0.5)*3) + 'deg)';
-      }, 100);
-    }
-
-    /* Redacted: aparece de cabeça pra baixo, fragmenta violentamente e se rompe */
-    function _showRedactedText(el) {
-      el.style.transition = 'none';
-      el.style.transform = 'translateX(-50%) rotate(180deg)';
-      el.style.fontWeight = '900';
-      el.style.letterSpacing = '8px';
-      el.style.fontSize = 'clamp(16px,2vw,24px)';
-      el.style.color = 'rgba(255,255,255,0.9)';
-      el.style.textShadow = '0 0 12px rgba(255,80,80,0.6)';
-      el.textContent = 'REDACTED';
-
-      var word = ['R','E','D','A','C','T','E','D'];
-      var _frame = 0;
-      var _breakStarted = false;
-
-      _effectInterval = setInterval(function() {
-        _frame++;
-
-        /* Fase 1 (frames 0-18): fica estável, apenas pisca levemente */
-        if (_frame < 18) {
-          el.style.opacity = Math.random() > 0.92 ? '0.5' : '1';
-          return;
-        }
-
-        /* Fase 2 (frames 18+): começa a fragmentar — letras individuais corrompem */
-        var progress = (_frame - 18) / 30; /* 0→1 ao longo de 30 frames */
-
-        var out = '';
-        for (var i = 0; i < word.length; i++) {
-          /* Quanto mais avança, mais letras corrompem */
-          var corruptChance = progress * (1 + i * 0.08);
-          if (Math.random() < corruptChance) {
-            out += _glitchChars[Math.floor(Math.random() * _glitchChars.length)];
-          } else {
-            out += word[i];
-          }
-        }
-
-        /* Fragmentação espacial: letra spacing explode */
-        var explodeSpacing = 8 + progress * 40;
-        el.style.letterSpacing = explodeSpacing + 'px';
-
-        /* Cor vai virando vermelho/branco alternando */
-        var r = Math.floor(200 + Math.random() * 55);
-        var g = Math.floor((1-progress) * 200);
-        el.style.color = 'rgba(' + r + ',' + g + ',80,' + Math.max(0.1, 1 - progress * 0.6) + ')';
-
-        /* Tremor no eixo Y cresce */
-        var shakeY = (Math.random() - 0.5) * progress * 14;
-        var shakeX = (Math.random() - 0.5) * progress * 10;
-        el.style.transform = 'translateX(calc(-50% + ' + shakeX + 'px)) rotate(180deg) translateY(' + shakeY + 'px)';
-
-        el.textContent = out;
-
-        /* Fase 3 (frame 48): colapso final — som e desaparecimento */
-        if (_frame >= 48 && !_breakStarted) {
-          _breakStarted = true;
-          _playBreakSound();
-
-          /* Última faísca visual antes de sumir */
-          el.textContent = '░▒▓█▓▒░';
-          el.style.color = 'rgba(255,255,255,1)';
-          el.style.letterSpacing = '2px';
-          el.style.transform = 'translateX(-50%) rotate(180deg) scaleX(2) scaleY(0.1)';
-          el.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
-
-          setTimeout(function() {
-            el.style.opacity = '0';
-            el.style.transform = 'translateX(-50%) rotate(180deg) scaleX(3) scaleY(0)';
-            clearInterval(_effectInterval);
-            _effectInterval = null;
-          }, 80);
-        }
-      }, 75);
-    }
-
-    function _playBreakSound() {
-      try {
-        var AC = window.AudioContext || window.webkitAudioContext;
-        var ac = (audioCtx && audioCtx.state !== 'closed') ? audioCtx : new AC();
-        if (ac.state === 'suspended') ac.resume();
-        var now = ac.currentTime;
-        var master = ac.createGain();
-        master.gain.setValueAtTime(0.55, now);
-        master.connect(ac.destination);
-        var layers = [
-          { type:'osc',   wave:'sine',   fs:90,   fe:18,   dur:0.40, attack:0.002, decay:0.38, vol:0.8,  offset:0.00 },
-          { type:'osc',   wave:'square', fs:200,  fe:50,   dur:0.28, attack:0.001, decay:0.26, vol:0.35, offset:0.00 },
-          { type:'noise', dur:0.35, attack:0.001, decay:0.33, vol:0.65, offset:0.00 },
-          { type:'noise', dur:0.10, attack:0.001, decay:0.09, vol:0.40, offset:0.03 },
-          { type:'osc',   wave:'sawtooth',fs:800, fe:200,  dur:0.15, attack:0.001, decay:0.14, vol:0.20, offset:0.01 },
-          { type:'osc',   wave:'sine',   fs:1400, fe:300,  dur:0.22, attack:0.004, decay:0.20, vol:0.14, offset:0.06 }
-        ];
-        layers.forEach(function(l) {
-          var t0 = now + (l.offset || 0);
-          var g = ac.createGain();
-          g.gain.setValueAtTime(0, t0);
-          g.gain.linearRampToValueAtTime(l.vol, t0 + l.attack);
-          g.gain.exponentialRampToValueAtTime(0.0001, t0 + l.decay);
-          g.connect(master);
-          if (l.type === 'noise') {
-            var frames = Math.ceil(ac.sampleRate * (l.dur + 0.01));
-            var buf = ac.createBuffer(1, frames, ac.sampleRate);
-            var d = buf.getChannelData(0);
-            for (var i = 0; i < frames; i++) d[i] = Math.random() * 2 - 1;
-            var src = ac.createBufferSource();
-            src.buffer = buf; src.connect(g);
-            src.start(t0); src.stop(t0 + l.dur + 0.01);
-          } else {
-            var osc = ac.createOscillator();
-            osc.type = l.wave;
-            osc.frequency.setValueAtTime(l.fs, t0);
-            osc.frequency.exponentialRampToValueAtTime(Math.max(l.fe, 1), t0 + l.dur);
-            osc.connect(g); osc.start(t0); osc.stop(t0 + l.dur + 0.02);
-          }
-        });
-      } catch(e) {}
-    }
-
-    /* Loop de verificação de legendas via timeupdate */
-    music.addEventListener('timeupdate', function() {
-      var t = music.currentTime;
-      var found = -1;
-      for (var i = 0; i < SUBTITLES.length; i++) {
-        if (t >= SUBTITLES[i].start && t < SUBTITLES[i].end) { found = i; break; }
-      }
-
-      if (found === _subCurrent) return;
-
-      /* Esconde legenda atual */
-      if (_subCurrent !== -1) {
-        _stopSubEffects();
-        subEl.style.opacity = '0';
-        /* Reseta estilos para o próximo */
-        setTimeout(function() {
-          subEl.style.transform = 'translateX(-50%)';
-          subEl.style.letterSpacing = '2px';
-          subEl.style.fontWeight = '300';
-          subEl.style.fontFamily = '"Segoe UI",sans-serif';
-          subEl.style.fontSize = 'clamp(14px,1.6vw,20px)';
-          subEl.style.color = 'rgba(255,255,255,0.9)';
-          subEl.style.textShadow = '0 0 18px rgba(255,255,255,0.4)';
-          subEl.style.transition = 'opacity 0.6s ease';
-          subEl.innerHTML = '';
-        }, 300);
-      }
-
-      _subCurrent = found;
-      if (found === -1) return;
-
-      var sub = SUBTITLES[found];
-
-      /* Ativa VHS na primeira legenda */
-      activateVhs();
-
-      setTimeout(function() {
-        var txt = sub.text;
-        subEl.style.opacity = '1';
-
-        if (typeof txt === 'string') {
-          subEl.textContent = txt;
-          subEl.style.transform = 'translateX(-50%)';
-        } else if (txt.type === 'glitch1') {
-          _glitch1(subEl);
-        } else if (txt.type === 'glitch2') {
-          _glitch2(subEl);
-        } else if (txt.type === 'glitch3') {
-          _glitch3(subEl);
-        } else if (txt.type === 'redacted') {
-          _showRedactedText(subEl);
-        }
-      }, 250);
-    });
-
-
-    /* Ao terminar a música → fade out tudo e fecha */
-    music.addEventListener('ended', function() {
-      /* Para animação */
-      cancelAnimationFrame(animId);
-
-      /* Fade out do neroblock inteiro */
-      var nb = document.getElementById('neroblock');
-      if (nb) {
-        nb.style.transition = 'opacity 2s ease';
-        nb.style.opacity = '0';
-      }
-
-      setTimeout(function() {
-        window.close();
-        document.body.innerHTML = '<div style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:rgba(255,255,255,0.15);font-size:11px;letter-spacing:4px;text-transform:uppercase;">Pode fechar esta aba</div>';
-      }, 2100);
-    });
-  };
-})();
-</script>
-<!-- ══ fim TELA DE PAUSA ══════════════════════════════════════════════════════ -->
+<!-- neroblock removido — acessível apenas via debug (_dbgFireSurprise) -->
 
     <div id="fade-overlay"></div>
     <div id="white-flash"></div>
@@ -4848,7 +3825,7 @@
               <button class="db r" id="dbg-upd-reset">Resetar Versão Real</button>
             </div>
 
-            <div class="dbg-sub" style="margin-top:12px">Dev Tour (após 10 visitas)</div>
+            <div class="dbg-sub" style="margin-top:12px">Dev Tour (NeroSurprise 18–19)</div>
             <div class="dg2">
               <button class="db g" id="dbg-dev-tour-trigger">Ativar Tour da Dev</button>
               <button class="db r" id="dbg-dev-tour-reset">Resetar Contador</button>
@@ -4961,7 +3938,7 @@
     </div>
 
     <audio id="splash-music" preload="auto"><source src="./assets/audio/himarigames.mp3" type="audio/mpeg"></audio>
-    <audio id="neroblock-music" preload="auto"><source src="./assets/audio/mensagem_para_voce.mp3" type="audio/mpeg"></audio>
+<!-- neroblock-music removido -->
     <audio id="menu-music" loop preload="auto"><source src="./assets/audio/menu.mp3" type="audio/mpeg"></audio>
     <audio id="prologue-music" loop preload="auto"><source src="./assets/audio/soundbgprologue.mp3" type="audio/mpeg"></audio>
     <audio id="ost-p" loop preload="auto"><source src="./assets/audio/ost-p.mp3" type="audio/mpeg"></audio>
@@ -13993,22 +12970,19 @@
                 var _tourSts        = document.getElementById('dbg-dev-tour-status');
                 function _updateTourStatus() {
                     if (!_tourSts) return;
-                    var v = parseInt(localStorage.getItem('himari_nb_visits') || '0', 10);
                     var done = localStorage.getItem('himari_dev_tour_done') === '1';
-                    _tourSts.textContent = 'Visitas: ' + v + ' | Tour concluído: ' + (done ? 'sim' : 'não');
+                    _tourSts.textContent = 'Tour concluído: ' + (done ? 'sim' : 'não');
                 }
                 _updateTourStatus();
                 if (_tourTriggerBtn) _tourTriggerBtn.addEventListener('click', function() {
-                    // Força as condições no localStorage
-                    localStorage.setItem('himari_nb_visits', '10');
                     localStorage.setItem('himari_dev_tour_done', '0');
-                    window._devTourHooked = false; // permite re-ativar
+                    window._devTourHooked = false;
+                    window._neroSurpriseDevTour = true;
                     _updateTourStatus();
                     // Fecha o debug e vai pro menu
                     document.getElementById('debug-screen').style.display = 'none';
                     var menuScreen = document.getElementById('menu-screen');
                     if (menuScreen) menuScreen.style.display = 'flex';
-                    // Chama a função global exposta pelo script do tour
                     setTimeout(function() {
                         if (typeof window._devTourStart === 'function') {
                             window._devTourStart();
@@ -14020,11 +12994,11 @@
                     }, 350);
                 });
                 if (_tourResetBtn) _tourResetBtn.addEventListener('click', function() {
-                    localStorage.setItem('himari_nb_visits',    '0');
-                    localStorage.setItem('himari_dev_tour_done','0');
+                    localStorage.setItem('himari_dev_tour_done', '0');
                     localStorage.setItem('himari_dev_logo_clicks', '0');
+                    window._neroSurpriseDevTour = false;
                     _updateTourStatus();
-                    _dbgLog('Contador de visitas e tour resetados.', 'ok');
+                    _dbgLog('Tour da dev resetado.', 'ok');
                 });
 
                 // Botões do banner Aldrich
@@ -14135,13 +13109,6 @@
 
 
                         // ── Boot sequence: Autosave → Vídeo Splash → Menu ────────────────
-            /* Aguarda a pause screen ser dispensada antes de iniciar o jogo */
-            (function waitForPauseScreen(cb) {
-                if (!window._pauseScreenActive) { cb(); return; }
-                var _t = setInterval(function() {
-                    if (!window._pauseScreenActive) { clearInterval(_t); cb(); }
-                }, 300);
-            })(function() {
             (function bootSequence() {
 
                 // Esconde o splash screen logo imediatamente
@@ -14320,21 +13287,21 @@
                             audios.forEach(function(src) { var a = new Audio(); a.preload = 'auto'; a.src = src; });
                         })();
 
-                        // Após 5500ms visível → fade out → vídeo splash
+                        // Fade out rápido → vídeo splash
                         setTimeout(() => {
                             _bootOv.classList.remove('visible');
                             setTimeout(() => {
                                 _bootOv.classList.remove('show');
                                 _playSplashVideo();
-                            }, 700);
-                        }, 2800);
+                            }, 400);
+                        }, 800);
                     }));
                 } else {
                     // Sem overlay de autosave → vai direto pro vídeo
                     _playSplashVideo();
                 }
             })();
-            }); /* fim waitForPauseScreen */
+
 
 
             const splashLogo = document.getElementById('splash-logo-wrap');
@@ -18448,12 +17415,11 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 <!-- ══ fim MENU SFX SYNTH ENGINE ══════════════════════════════════════════════ -->
 
 <!-- ══════════════════════════════════════════════════════════════════════════
-     DEV TOUR — comentários da dev após 10 visitas ao neroblock
+     DEV TOUR — comentários da dev (ativado por NeroSurprise 18-19 ou via debug)
      Só roda 1 vez. Sprite: assets/images/characters/dev/devhappy.png
 ════════════════════════════════════════════════════════════════════════════ -->
 <script>
 (function() {
-  var NB_KEY      = 'himari_nb_visits';
   var TOUR_KEY    = 'himari_dev_tour_done';
   var LOGO_KEY    = 'himari_dev_logo_clicks';
 
@@ -18723,6 +17689,7 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   /* ── Inicialização do tour (usada tanto pelo fluxo normal quanto pelo debug) ── */
   function _startDevTour() {
     if (window._devTourHooked) return; /* garante hooks uma vez só */
+    if (localStorage.getItem(TOUR_KEY) === '1') return; /* já rodou em sessão anterior */
     window._devTourHooked = true;
     _hookMenuButtons();
     _onMenuOpen();
@@ -18735,12 +17702,12 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 
   /* ── Auto-ativação: espera o menu abrir se as condições forem atendidas ── */
   (function _autoActivate() {
-    var visits      = parseInt(localStorage.getItem(NB_KEY) || '0', 10);
-    var tourDone    = localStorage.getItem(TOUR_KEY) === '1';
+    var tourDone     = localStorage.getItem(TOUR_KEY) === '1';
     var surpriseTour = !!window._neroSurpriseDevTour;
-    /* Ativa se: 10+ visitas ao neroblock OU NeroSurprise 18-19 */
+    /* tourDone bloqueia SEMPRE */
     if (tourDone) return;
-    if (visits < 10 && !surpriseTour) return; /* condição não atendida — debug vai chamar manualmente */
+    /* Ativa apenas via NeroSurprise 18-19 ou debug */
+    if (!surpriseTour) return;
 
     var menuScreen = document.getElementById('menu-screen');
     if (!menuScreen) { setTimeout(_autoActivate, 200); return; }

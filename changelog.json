@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.51",
+    "date": "29/03/2026",
+    "notes": "Bloqueios estranhos removidos"
+  },
+  {
     "version": "1.0.47",
     "date": "28/03/2026",
     "notes": "Não se esqueça",
