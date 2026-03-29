@@ -1,0 +1,10 @@
+{
+  "appear":           "assets/audio/dev_appear.mp3",
+  "appear_volume":    0.55,
+
+  "disappear":        "assets/audio/dev_disappear.mp3",
+  "disappear_volume": 0.45,
+
+  "tick":             "assets/audio/dev_tick.mp3",
+  "tick_volume":      0.15
+}

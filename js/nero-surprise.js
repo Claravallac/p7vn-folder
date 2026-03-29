@@ -514,6 +514,21 @@ function init_NERO_FORGOT_LINE() {
 }
 
 
+// ════════════════════════════════════════════════════════════
+//  EFEITO 4 – DEV_TOUR (18–19)
+//
+//  A dev aparece no menu com comentários sobre o jogo.
+//  Ativa o tour imediatamente ao abrir o menu, ignorando
+//  a contagem de visitas ao neroblock.
+// ════════════════════════════════════════════════════════════
+
+function init_DEV_TOUR() {
+    // Sinaliza para o sistema de dev tour que deve ativar
+    // independente do número de visitas ao neroblock.
+    window._neroSurpriseDevTour = true;
+    console.log('[NeroSurprise] DEV_TOUR: tour da dev será ativado ao abrir o menu.');
+}
+
 // ── HELPERS DE DEBUG ──────────────────────────────────────
 
 // Permite que o painel de debug force um efeito específico pelo número,

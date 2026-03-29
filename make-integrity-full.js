@@ -18,7 +18,12 @@ const IGNORE_FILES = new Set([
   'integrity.json', 'integrity-full.json',
   '_tmp.json', 'package.json', 'package-lock.json',
   'test-chapter-1-3.html',
+  'changelog.json', 'version.json',
+  'MAPA_MENTAL.md', 'nulnpm',
 ]);
+
+// Extensões a NUNCA incluir no manifesto completo
+const IGNORE_EXTS = new Set(['.bat', '.md', '.log', '.bak', '.tmp']);
 
 function sha256File(filePath) {
   const buf = fs.readFileSync(filePath);
@@ -36,6 +41,8 @@ function collectFiles(dir, base) {
       if (IGNORE_DIRS.has(entry.name)) continue;
       results.push(...collectFiles(fullPath, relPath));
     } else {
+      const ext = path.extname(entry.name).toLowerCase();
+      if (IGNORE_EXTS.has(ext)) continue;
       results.push({ fullPath, relPath });
     }
   }

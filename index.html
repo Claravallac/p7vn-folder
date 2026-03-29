@@ -4032,11 +4032,6 @@
                             border:1px solid rgba(124,58,237,0.25);font-size:9px;letter-spacing:3px;
                             cursor:pointer;font-family:inherit;transition:all .2s;
                         ">🛡 VERIFICAR INTEGRIDADE</button>
-                        <button id="upd-screen-integrity-full" style="
-                            padding:11px 22px;background:transparent;color:rgba(167,139,250,0.35);
-                            border:1px solid rgba(124,58,237,0.15);font-size:9px;letter-spacing:3px;
-                            cursor:pointer;font-family:inherit;transition:all .2s;
-                        ">🛡 VERIFICAÇÃO COMPLETA</button>
                     </div>
                     <div id="upd-integrity-status" style="font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-top:10px;min-height:16px;display:none">
                         <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-left:3px solid #7c3aed;padding:12px 14px">
@@ -4049,6 +4044,7 @@
                                 <div style="display:flex;gap:12px;flex-shrink:0;margin-left:12px">
                                     <span style="font-size:9px;color:rgba(74,222,128,0.7);letter-spacing:1px">OK: <b id="upd-integrity-ok">0</b></span>
                                     <span style="font-size:9px;color:rgba(245,158,11,0.8);letter-spacing:1px">CORRIGIDO: <b id="upd-integrity-fixed">0</b></span>
+                                    <span style="font-size:9px;color:rgba(248,113,113,0.7);letter-spacing:1px">DELETADO: <b id="upd-integrity-deleted">0</b></span>
                                     <span style="font-size:9px;color:rgba(248,113,113,0.8);letter-spacing:1px">ERRO: <b id="upd-integrity-err">0</b></span>
                                 </div>
                             </div>
@@ -4801,6 +4797,7 @@
               <button class="db g" id="dbg-ns-generous">1–10 · NERO_GENEROUS</button>
               <button class="db y" id="dbg-ns-umamusume">11–15 · ABBYL_UMAMUSUME</button>
               <button class="db b" id="dbg-ns-forgot">16–17 · NERO_FORGOT_LINE</button>
+              <button class="db" id="dbg-ns-devtour" style="border-color:rgba(204,0,255,0.4);color:rgba(204,0,255,0.8);">18–19 · DEV_TOUR</button>
             </div>
 
             <div class="dbg-sub">Simular N&#250;mero Espec&#237;fico</div>
@@ -13596,6 +13593,10 @@
                         forceEffect(16);
                         nsLog('NERO_FORGOT_LINE ativado (número 16). Inicie o Prólogo.');
                     });
+                    document.getElementById('dbg-ns-devtour').addEventListener('click', function() {
+                        forceEffect(18);
+                        nsLog('DEV_TOUR ativado (número 18). Abra o menu principal.', 'ok');
+                    });
 
                     // Definir número específico
                     document.getElementById('dbg-ns-set-num').addEventListener('click', function() {
@@ -17885,11 +17886,12 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
   var sIntegrityFile   = document.getElementById('upd-integrity-file');
   var sIntegrityOk     = document.getElementById('upd-integrity-ok');
   var sIntegrityFixed  = document.getElementById('upd-integrity-fixed');
-  var sIntegrityErr    = document.getElementById('upd-integrity-err');
+  var sIntegrityErr     = document.getElementById('upd-integrity-err');
+  var sIntegrityDeleted = document.getElementById('upd-integrity-deleted');
   var sIntegrityErrWrap   = document.getElementById('upd-integrity-err-wrap');
   var sIntegrityErrToggle = document.getElementById('upd-integrity-err-toggle');
   var sIntegrityErrList   = document.getElementById('upd-integrity-err-list');
-  var _integrityOk = 0, _integrityFixed = 0, _integrityErr = 0;
+  var _integrityOk = 0, _integrityFixed = 0, _integrityErr = 0, _integrityDeleted = 0;
 
   // Toggle do log de erros
   if(sIntegrityErrToggle) sIntegrityErrToggle.addEventListener('click', function(){
@@ -17902,10 +17904,11 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     if(!window.electronAPI || !electronAPI.integrityRun) return;
     sIntegrityBtn.disabled = true;
     sIntegrityBtn.textContent = '🛡 VERIFICANDO...';
-    _integrityOk = 0; _integrityFixed = 0; _integrityErr = 0;
+    _integrityOk = 0; _integrityFixed = 0; _integrityErr = 0; _integrityDeleted = 0;
     if(sIntegrityOk)    sIntegrityOk.textContent    = '0';
     if(sIntegrityFixed) sIntegrityFixed.textContent  = '0';
-    if(sIntegrityErr)   sIntegrityErr.textContent    = '0';
+    if(sIntegrityErr)      sIntegrityErr.textContent      = '0';
+    if(sIntegrityDeleted) sIntegrityDeleted.textContent = '0';
     if(sIntegrityBar)   sIntegrityBar.style.width    = '0%';
     if(sIntegrityFile)  sIntegrityFile.textContent   = '';
     if(sIntegrityErrWrap)  sIntegrityErrWrap.style.display  = 'none';
@@ -17919,8 +17922,9 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     electronAPI.onIntegrityProgress(function(pct, total, file, status){
       if(sIntegrityBar)  sIntegrityBar.style.width = pct + '%';
       if(sIntegrityFile) sIntegrityFile.textContent = file;
-      if(status === 'ok')    { _integrityOk++;    if(sIntegrityOk)    sIntegrityOk.textContent    = _integrityOk; }
-      if(status === 'fixed') { _integrityFixed++;  if(sIntegrityFixed) sIntegrityFixed.textContent  = _integrityFixed; }
+      if(status === 'ok')      { _integrityOk++;      if(sIntegrityOk)      sIntegrityOk.textContent      = _integrityOk; }
+      if(status === 'fixed')    { _integrityFixed++;    if(sIntegrityFixed)   sIntegrityFixed.textContent   = _integrityFixed; }
+      if(status === 'deleted')  { _integrityDeleted++;  if(sIntegrityDeleted) sIntegrityDeleted.textContent = _integrityDeleted; }
     });
   }
 
@@ -17928,7 +17932,6 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     electronAPI.onIntegrityError(function(msg){
       if(sIntegrityFile) sIntegrityFile.textContent = '⚠️ Erro: ' + msg;
       if(sIntegrityBtn){ sIntegrityBtn.disabled = false; sIntegrityBtn.textContent = '🛡 VERIFICAR INTEGRIDADE'; }
-      if(sIntegrityFullBtn){ sIntegrityFullBtn.disabled = false; sIntegrityFullBtn.textContent = '🛡 VERIFICAÇÃO COMPLETA'; }
     });
   }
 
@@ -17937,12 +17940,13 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
       if(sIntegrityBar)  sIntegrityBar.style.width = '100%';
       _integrityErr = (result.errors && result.errors.length) || 0;
       if(sIntegrityErr) sIntegrityErr.textContent = _integrityErr;
-      var msg = result.fixed === 0 && _integrityErr === 0
+      var _deleted = result.deleted || 0;
+      if(sIntegrityDeleted) sIntegrityDeleted.textContent = _deleted;
+      var msg = result.fixed === 0 && _integrityErr === 0 && _deleted === 0
         ? '✅ Todos os ' + result.checked + ' arquivo(s) íntegros.'
-        : '🔧 ' + result.fixed + ' corrigido(s). ' + (_integrityErr > 0 ? _integrityErr + ' erro(s).' : '');
+        : '🔧 ' + result.fixed + ' corrigido(s)' + (_deleted > 0 ? ', ' + _deleted + ' deletado(s)' : '') + '. ' + (_integrityErr > 0 ? _integrityErr + ' erro(s).' : '');
       if(sIntegrityFile) sIntegrityFile.textContent = msg;
       if(sIntegrityBtn){ sIntegrityBtn.disabled = false; sIntegrityBtn.textContent = '🛡 VERIFICAR INTEGRIDADE'; }
-      if(sIntegrityFullBtn){ sIntegrityFullBtn.disabled = false; sIntegrityFullBtn.textContent = '🛡 VERIFICAÇÃO COMPLETA'; }
       // Popula lista de erros
       if(_integrityErr > 0 && result.errors && sIntegrityErrWrap && sIntegrityErrList){
         sIntegrityErrWrap.style.display = 'block';
@@ -17961,37 +17965,6 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     sIntegrityBtn.addEventListener('mouseenter', function(){ if(!sIntegrityBtn.disabled) sIntegrityBtn.style.borderColor='rgba(124,58,237,0.5)'; sIntegrityBtn.style.color='rgba(167,139,250,0.9)'; });
     sIntegrityBtn.addEventListener('mouseleave', function(){ sIntegrityBtn.style.borderColor='rgba(124,58,237,0.25)'; sIntegrityBtn.style.color='rgba(167,139,250,0.5)'; });
   }
-
-  // ── Botão Verificação Completa (código + assets) ──────────────────────────
-  var sIntegrityFullBtn = document.getElementById('upd-screen-integrity-full');
-
-  function _runIntegrityFull() {
-    if(!window.electronAPI || !electronAPI.integrityRun) return;
-    sIntegrityFullBtn.disabled = true;
-    sIntegrityBtn.disabled     = true;
-    sIntegrityFullBtn.textContent = '🛡 VERIFICANDO...';
-    _integrityOk = 0; _integrityFixed = 0; _integrityErr = 0;
-    if(sIntegrityOk)    sIntegrityOk.textContent    = '0';
-    if(sIntegrityFixed) sIntegrityFixed.textContent  = '0';
-    if(sIntegrityErr)   sIntegrityErr.textContent    = '0';
-    if(sIntegrityBar)   sIntegrityBar.style.width    = '0%';
-    if(sIntegrityFile)  sIntegrityFile.textContent   = '';
-    if(sIntegrityErrWrap)  sIntegrityErrWrap.style.display  = 'none';
-    if(sIntegrityErrList)  { sIntegrityErrList.innerHTML = ''; sIntegrityErrList.style.display = 'none'; }
-    if(sIntegrityErrToggle) sIntegrityErrToggle.textContent = '▶ VER ARQUIVOS COM ERRO';
-    if(sIntegrityStatus) sIntegrityStatus.style.display = 'block';
-    electronAPI.integrityRun('full');
-  }
-
-  if(sIntegrityFullBtn) sIntegrityFullBtn.addEventListener('click', _runIntegrityFull);
-
-  if(sIntegrityFullBtn){
-    sIntegrityFullBtn.addEventListener('mouseenter', function(){ if(!sIntegrityFullBtn.disabled){ sIntegrityFullBtn.style.borderColor='rgba(124,58,237,0.4)'; sIntegrityFullBtn.style.color='rgba(167,139,250,0.7)'; } });
-    sIntegrityFullBtn.addEventListener('mouseleave', function(){ sIntegrityFullBtn.style.borderColor='rgba(124,58,237,0.15)'; sIntegrityFullBtn.style.color='rgba(167,139,250,0.35)'; });
-  }
-
-  // Ao terminar qualquer check, reabilita ambos os botões
-  var _origIntegrityDoneHandler = null;
 
   if(sCheck) sCheck.addEventListener('click', function(){
     sCheck.disabled=true; sCheckStatus.textContent='Verificando...';
@@ -18567,15 +18540,47 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     if (_twIv) clearInterval(_twIv);
     bubbleEl.textContent = '';
     var i = 0;
+    _startTick();
     _twIv = setInterval(function() {
       if (i < text.length) { bubbleEl.textContent += text[i]; i++; }
-      else { clearInterval(_twIv); _twIv = null; if (onDone) onDone(); }
+      else { clearInterval(_twIv); _twIv = null; _stopTick(); if (onDone) onDone(); }
     }, 28);
   }
 
   /* ── Mostra / esconde o sprite ───────────────────────────────── */
   var _visible = false;
   var _hideTimer = null;
+  /* ── Sons do dev tour ───────────────────────────────────────── */
+  var _devSounds = null;
+  fetch('assets/audio/dev-tour-sounds.json')
+    .then(function(r){ return r.json(); })
+    .then(function(data){ _devSounds = data; })
+    .catch(function(){});
+
+  function _playDevSound(key) {
+    if (!_devSounds || !_devSounds[key]) return;
+    var a = new Audio(_devSounds[key]);
+    a.volume = _devSounds[key + '_volume'] !== undefined ? _devSounds[key + '_volume'] : 0.5;
+    a.play().catch(function(){});
+  }
+
+  var _tickAudio = null;
+  function _startTick() {
+    if (!_devSounds || !_devSounds['tick']) return;
+    _stopTick();
+    _tickAudio = new Audio(_devSounds['tick']);
+    _tickAudio.loop = true;
+    _tickAudio.volume = _devSounds['tick_volume'] !== undefined ? _devSounds['tick_volume'] : 0.18;
+    _tickAudio.play().catch(function(){});
+  }
+  function _stopTick() {
+    if (_tickAudio) {
+      _tickAudio.pause();
+      _tickAudio.currentTime = 0;
+      _tickAudio = null;
+    }
+  }
+
   function showDev(text, duration) {
     if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
     wrap.style.display = 'flex';
@@ -18586,13 +18591,17 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
     bubbleEl.style.transform   = 'translateY(0)';
     bubbleEl.style.opacity     = '1';
     _visible = true;
+    _playDevSound('appear');
     typeWrite(text, function() {
+      _stopTick();
       if (duration) {
         _hideTimer = setTimeout(hideDev, duration);
       }
     });
   }
   function hideDev() {
+    _stopTick();
+    _playDevSound('disappear');
     spriteEl.style.transform = 'translateY(100%)';
     spriteEl.style.opacity   = '0';
     bubbleEl.style.transform = 'translateY(8px)';
@@ -18726,9 +18735,12 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 
   /* ── Auto-ativação: espera o menu abrir se as condições forem atendidas ── */
   (function _autoActivate() {
-    var visits   = parseInt(localStorage.getItem(NB_KEY)   || '0', 10);
-    var tourDone = localStorage.getItem(TOUR_KEY) === '1';
-    if (visits < 10 || tourDone) return; /* condição não atendida — debug vai chamar manualmente */
+    var visits      = parseInt(localStorage.getItem(NB_KEY) || '0', 10);
+    var tourDone    = localStorage.getItem(TOUR_KEY) === '1';
+    var surpriseTour = !!window._neroSurpriseDevTour;
+    /* Ativa se: 10+ visitas ao neroblock OU NeroSurprise 18-19 */
+    if (tourDone) return;
+    if (visits < 10 && !surpriseTour) return; /* condição não atendida — debug vai chamar manualmente */
 
     var menuScreen = document.getElementById('menu-screen');
     if (!menuScreen) { setTimeout(_autoActivate, 200); return; }

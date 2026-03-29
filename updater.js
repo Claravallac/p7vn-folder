@@ -365,7 +365,30 @@ async function runIntegrityCheck(gameDir, fullCheck) {
       await new Promise(r => setTimeout(r, 10));
     }
 
-    emit('integrity-done', { fixed, total: files.length, checked, skipped, errors });
+    // ── Apaga arquivos que constam no removed.json local ────────────────────
+    let deleted = 0;
+    const removedPath = path.join(gameDir, 'removed.json');
+    if (fs.existsSync(removedPath)) {
+      try {
+        const removedList = JSON.parse(fs.readFileSync(removedPath, 'utf8'));
+        for (const relFile of removedList) {
+          const target = path.join(gameDir, ...relFile.split('/'));
+          if (fs.existsSync(target)) {
+            fs.unlinkSync(target);
+            deleted++;
+            emit('integrity-progress', 100, files.length, relFile, 'deleted');
+          }
+        }
+        // Limpa o removed.json após processar
+        if (removedList.length > 0) {
+          fs.writeFileSync(removedPath, '[]', 'utf8');
+        }
+      } catch(e) {
+        console.log('[integrity] Erro ao processar removed.json:', e.message);
+      }
+    }
+
+    emit('integrity-done', { fixed, total: files.length, checked, skipped, deleted, errors });
 
   } catch(e) {
     console.log('[integrity] Erro:', e.message);
