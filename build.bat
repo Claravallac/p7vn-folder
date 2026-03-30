@@ -379,6 +379,10 @@ goto :eof
 :publicar_delta
 :: ══════════════════════════════════════════════════════════════════════════════
 echo.
+echo Gerando manifestos de integridade para o delta...
+node make-integrity.js
+node make-integrity-full.js
+
 echo Gerando ZIP delta...
 node make-delta.js %VERSION%
 if errorlevel 1 ( echo [AVISO] Delta nao gerado — continuando sem ele. & goto :publicar_delta_end )
@@ -406,9 +410,7 @@ node -e "const fs=require('fs');fs.writeFileSync('version.json',JSON.stringify({
 :: Atualiza changelog.json com URL do delta desta versao
 node -e "const fs=require('fs');const cl=JSON.parse(fs.readFileSync('changelog.json','utf8'));const e=cl.find(function(x){return x.version==='%VERSION%';});if(e){e.url='%DELTA_URL%';fs.writeFileSync('changelog.json',JSON.stringify(cl,null,2),'utf8');console.log('changelog.json atualizado com URL');}"
 
-node make-integrity.js
-node make-integrity-full.js
-git add version.json changelog.json integrity.json
+git add version.json changelog.json integrity.json integrity-full.json
 git commit -m "update: url delta v%VERSION%"
 git push --force origin main
 

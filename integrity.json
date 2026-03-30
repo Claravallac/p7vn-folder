@@ -1,6 +1,6 @@
 {
   "files": {
-    "changelog.json": "d65f02b96ecb6ebdbe3cde185673c2f27429fb0f4251ef9d6d0dd82c12727fbb",
+    "changelog.json": "af14899cbb63edcd6425e3ee4d7f08cccf72e67db84145eb4aab7fb73e394bdc",
     "chapters.json": "5d8e29efcb533047bb7f2d907512d10e439cf8576c875c214259991441b6649b",
     "css/animations.css": "768526e9d2f4b9185259181cd0add10c296ed46c0e9c714c7e9c4445a2b88498",
     "css/base.css": "0396e8389736b9351636cbd70a3383de2b0390b19289c57e2fcfdffd9a281bdd",
@@ -16,7 +16,7 @@
     "discord-presence.js": "f90f5e060679a2aa0ca454b1314aceb94840560c05793b7f41fc959996d32dda",
     "himari-editor.html": "5dfdcc3549529904bcd37a14509b7f0e0b9cc80381208fb55e89bda47234d781",
     "index.html": "5b2092a156b7fca08eb9de34b9f118e5f9d7e9d0300e79c2d6ac993f40b08361",
-    "integrity-full.json": "95ca0611f917a69f8b3e277113c9b23e1a065b7281905d3b4f188a9f5d7e8f2d",
+    "integrity-full.json": "2b01ba535849d18d9fc2ad56f9f3fdbc539c361b0ffcdd508e40efcdec28f97c",
     "js/abbyl-cheat.js": "a9f533374ac8867f06ff42c00d5b6b56196db851e1a70d3fd0b861a496bf9388",
     "js/battle-arabel-intro.js": "26959d8c4205a5f7bce3ce55eaed7629247295ce0b78986fdd0ba902d1e67e6c",
     "js/battle-arabel.js": "0af82fae893c0b720cba99bbe87c5ffac6c1bc21ebd058b42b2505f6031edd99",
@@ -54,6 +54,6 @@
     "seven-reels.html": "07866a917930fac7edb006cc3c2108c1bdd0e4b7507ccdd10d467049b8986e7c",
     "update-banner.html": "b5352403b55fbd68e8cb83b8823daadc6517651738bb089c20ae8b5d218f458f",
     "updater.js": "e96ae5819a91a3fa1198661f4b18bc5ed480e1aad14b6eb91c74c79e3709a237",
-    "version.json": "7983fcd7cca22c3cb3e82497fd96319134cb4292f22ae9f287a38a3f3ef5160f"
+    "version.json": "eb49970d9b21e693885616b3cb16ff7b7d5c1b61f48d65ed52717316ef4432da"
   }
 }
