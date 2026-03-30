@@ -35,8 +35,14 @@ const IGNORE = new Set([
 // Filtra só arquivos que existem (ignora deletados e arquivos de dev)
 const files = changed.filter(f => fs.existsSync(f) && !IGNORE.has(path.basename(f)) && !f.startsWith('dist/') && !f.startsWith('node_modules/'));
 
-// Sempre inclui version.json, changelog.json e removed.json no delta
-for (const always of ['version.json', 'changelog.json', 'removed.json']) {
+// Sempre inclui arquivos essenciais no delta — incluindo os manifestos de
+// integridade para que o player consiga verificar arquivos em qualquer versão
+for (const always of [
+  'version.json', 'changelog.json', 'removed.json',
+  // Sistema de integridade — sempre incluso para funcionar em qualquer versão
+  'integrity.json', 'integrity-full.json',
+  'updater.js', 'preload.js',
+]) {
   if (fs.existsSync(always) && !files.includes(always)) files.push(always);
 }
 
