@@ -3241,6 +3241,43 @@
         <video id="splash-video-player" src="assets/videos/splash.mp4" playsinline style="width:100%; height:100%; object-fit:cover;"></video>
     </div>
 
+    <!-- Boot integrity screen — aparece a cada 10 aberturas -->
+    <div id="boot-integrity-screen" style="
+        display:none; position:fixed; inset:0; z-index:10400;
+        background:#07000c; align-items:center; justify-content:center;
+        flex-direction:column; gap:0;
+        opacity:0; transition:opacity 0.6s ease;
+    ">
+        <div style="width:min(420px,72vw); display:flex; flex-direction:column; align-items:flex-start; gap:20px">
+            <div style="font-size:8px;letter-spacing:6px;color:rgba(204,0,255,0.45);font-weight:700;text-transform:uppercase">VERIFICANDO INTEGRIDADE</div>
+            <!-- barra -->
+            <div style="width:100%;height:2px;background:rgba(255,255,255,0.06);position:relative;overflow:hidden">
+                <div id="bi-bar" style="
+                    position:absolute;top:0;left:0;height:100%;width:0%;
+                    background:linear-gradient(90deg,#7c3aed,#cc00ff);
+                    transition:width 0.18s ease;
+                    box-shadow:0 0 12px rgba(204,0,255,0.6);
+                "></div>
+                <!-- shimmer -->
+                <div style="
+                    position:absolute;top:0;left:0;height:100%;width:60px;
+                    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);
+                    animation:biShimmer 1.8s ease-in-out infinite;
+                "></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+                <div id="bi-file" style="font-size:9px;color:rgba(255,255,255,0.18);letter-spacing:1px;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80%"></div>
+                <div id="bi-pct"  style="font-size:9px;color:rgba(204,0,255,0.4);letter-spacing:2px;flex-shrink:0">0%</div>
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes biShimmer {
+            0%   { transform:translateX(-80px); }
+            100% { transform:translateX(calc(min(420px,72vw) + 80px)); }
+        }
+    </style>
+
     <!-- Auto-save overlay — z-index máximo, acima de tudo -->
     <div id="autosave-overlay">
         <img id="autosave-abbyl-gif" src="assets/images/ui/abbyl.gif" alt="" style="display:none">
@@ -13382,6 +13419,65 @@
                     });
                 }
 
+                // ── Boot Integrity Check (a cada 10 aberturas) ────────────────────────
+                function _runBootIntegrity(onDone) {
+                    if (!window.electronAPI || !electronAPI.integrityRun) { onDone(); return; }
+
+                    var LAUNCH_KEY = 'himari_launch_count';
+                    var raw = null;
+                    try { raw = window.electronAPI.saveGetSync(LAUNCH_KEY); } catch(e) {}
+                    var count = parseInt(raw || '0', 10) + 1;
+                    try { window.electronAPI.saveSetSync(LAUNCH_KEY, String(count)); } catch(e) {}
+
+                    // Só roda a cada 10 aberturas
+                    if (count % 5 !== 0) { onDone(); return; }
+
+                    var biScreen = document.getElementById('boot-integrity-screen');
+                    var biBar    = document.getElementById('bi-bar');
+                    var biFile   = document.getElementById('bi-file');
+                    var biPct    = document.getElementById('bi-pct');
+
+                    // Mostra a tela com fade in
+                    biScreen.style.display = 'flex';
+                    requestAnimationFrame(function() { requestAnimationFrame(function() {
+                        biScreen.style.opacity = '1';
+                    }); });
+
+                    // Registra listeners (removeAllListeners para não acumular)
+                    electronAPI.onIntegrityProgress(function(pct, total, file, status) {
+                        if (biBar)  biBar.style.width = pct + '%';
+                        if (biPct)  biPct.textContent = pct + '%';
+                        if (biFile) biFile.textContent = file;
+                    });
+
+                    electronAPI.onIntegrityDone(function(result) {
+                        if (biBar) biBar.style.width = '100%';
+                        if (biPct) biPct.textContent = '100%';
+                        var msg = result.fixed > 0
+                            ? (result.fixed + ' arquivo(s) corrigido(s)')
+                            : 'tudo íntegro';
+                        if (biFile) biFile.textContent = msg;
+
+                        // Fade out suave e avança
+                        setTimeout(function() {
+                            biScreen.style.opacity = '0';
+                            setTimeout(function() {
+                                biScreen.style.display = 'none';
+                                onDone();
+                            }, 650);
+                        }, 800);
+                    });
+
+                    electronAPI.onIntegrityError(function() {
+                        // Em caso de erro, segue sem travar o boot
+                        biScreen.style.opacity = '0';
+                        setTimeout(function() { biScreen.style.display = 'none'; onDone(); }, 650);
+                    });
+
+                    // Dispara a verificação de código (modo normal, não full)
+                    electronAPI.integrityRun('code');
+                }
+
                 // ── Fase 2: vídeo splash.mp4 ─────────────────────────────────────────
                 function _playSplashVideo() {
                     var wrap  = document.getElementById('splash-video-wrap');
@@ -13503,13 +13599,13 @@
                             _bootOv.classList.remove('visible');
                             setTimeout(() => {
                                 _bootOv.classList.remove('show');
-                                _playSplashVideo();
+                                _runBootIntegrity(_playSplashVideo);
                             }, 400);
                         }, 800);
                     }));
                 } else {
                     // Sem overlay de autosave → vai direto pro vídeo
-                    _playSplashVideo();
+                    _runBootIntegrity(_playSplashVideo);
                 }
             })();
 
