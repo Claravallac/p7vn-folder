@@ -30,6 +30,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Bug Reporter
   submitBugReport: (data) => ipcRenderer.invoke('submit-bug-report', data),
 
+  // Leitura de arquivo binário (usado pelo FBMusic para Web Audio API)
+  readFileBuffer: (relativePath) => ipcRenderer.invoke('read-file-buffer', relativePath),
+
   // ── Auto-updater ────────────────────────────────────────────────────────────
   updateDownload:       (url) => ipcRenderer.invoke('update-download', url),
   updateCancel:         ()    => ipcRenderer.invoke('update-cancel'),

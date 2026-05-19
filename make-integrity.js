@@ -13,7 +13,7 @@ const crypto = require('crypto');
 const CODE_EXTS = new Set(['.js', '.html', '.css', '.json']);
 
 // Pastas e arquivos a NUNCA incluir no manifesto
-const IGNORE_DIRS  = new Set(['node_modules', '.git', 'dist', 'assets', 'backup', 'dlc']);
+const IGNORE_DIRS  = new Set(['node_modules', '.git', 'dist', 'assets', 'backup', 'dlc', 'scripts']);
 const IGNORE_FILES = new Set([
   'make-delta.js', 'make-checkpoint.js', 'detect-removed.js',
   'update-changelog.js', 'get-release-url.js', 'make-integrity.js',

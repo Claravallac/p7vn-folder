@@ -1,5 +1,17 @@
 [
   {
+    "version": "1.0.63",
+    "date": "19/05/2026",
+    "notes": "Fixes",
+    "url": "https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip"
+  },
+  {
+    "version": "1.0.62",
+    "date": "19/05/2026",
+    "notes": "Limpeza tecnica e correcao de referencia quebrada.",
+    "url": "https://github.com/Claravallac/p7vn-folder/archive/refs/heads/main.zip"
+  },
+  {
     "version": "1.0.61",
     "date": "31/03/2026",
     "notes": "Banner alterado",

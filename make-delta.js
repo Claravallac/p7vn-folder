@@ -12,28 +12,47 @@ if (!VERSION) { console.error('[ERRO] Versao nao informada. Uso: node make-delta
 
 const OUT = `delta-v${VERSION}.zip`;
 
+function normalizeList(value) {
+  return value
+    .split(/\r?\n|,/)
+    .map(f => f.trim().replace(/\\/g, '/'))
+    .filter(Boolean);
+}
+
 // Pega arquivos alterados/adicionados desde o commit anterior
 let changed = [];
-try {
-  const out = execSync('git diff --name-only HEAD~1 HEAD', { encoding: 'utf8' });
-  changed = out.split('\n').map(f => f.trim()).filter(f => f.length > 0);
-} catch(e) {
-  // Primeiro commit — pega tudo
+if (process.env.DELTA_FILES) {
+  changed = normalizeList(process.env.DELTA_FILES);
+} else {
   try {
-    const out = execSync('git ls-files', { encoding: 'utf8' });
+    const out = execSync('git diff --name-only HEAD~1 HEAD', { encoding: 'utf8' });
     changed = out.split('\n').map(f => f.trim()).filter(f => f.length > 0);
-  } catch(e2) {}
+  } catch(e) {
+    // Primeiro commit — pega tudo
+    try {
+      const out = execSync('git ls-files', { encoding: 'utf8' });
+      changed = out.split('\n').map(f => f.trim()).filter(f => f.length > 0);
+    } catch(e2) {}
+  }
 }
 
 // Arquivos que nunca devem entrar no delta
 const IGNORE = new Set([
   'build.bat', 'make-delta.js', 'get-release-url.js', 'detect-removed.js',
   'update-changelog.js', 'package.json', 'package-lock.json',
-  '_tmp.json', '_tmp.jsontype', 'r2-upload.js'
+  '_tmp.json', '_tmp.jsontype', '_tmp_assets.json', 'r2-upload.js',
+  'nulgit', 'nulnpm', '0)', 'git', 'type', 'gitignore'
 ]);
 
 // Filtra só arquivos que existem (ignora deletados e arquivos de dev)
-const files = changed.filter(f => fs.existsSync(f) && !IGNORE.has(path.basename(f)) && !f.startsWith('dist/') && !f.startsWith('node_modules/'));
+const files = changed.filter(f =>
+  fs.existsSync(f) &&
+  !IGNORE.has(path.basename(f)) &&
+  !f.startsWith('.') &&
+  !f.startsWith('dist/') &&
+  !f.startsWith('node_modules/') &&
+  !f.startsWith('scripts/')
+);
 
 // Sempre inclui arquivos essenciais no delta — incluindo os manifestos de
 // integridade para que o player consiga verificar arquivos em qualquer versão

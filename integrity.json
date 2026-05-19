@@ -1,6 +1,6 @@
 {
   "files": {
-    "changelog.json": "5fd84b648994e54887e2a489732b27d20d0972bb34f940f0c6d0f2280f52c6ef",
+    "changelog.json": "0ae773c9d61933647447b336bc41ca1706b4f95ecd3a9b928f02431a9b1ff15c",
     "chapters.json": "5d8e29efcb533047bb7f2d907512d10e439cf8576c875c214259991441b6649b",
     "css/animations.css": "768526e9d2f4b9185259181cd0add10c296ed46c0e9c714c7e9c4445a2b88498",
     "css/base.css": "0396e8389736b9351636cbd70a3383de2b0390b19289c57e2fcfdffd9a281bdd",
@@ -15,8 +15,8 @@
     "dialogues.json": "4c8d95e23a52272fd88126d8f391c1d5c332288966f53c4295a4e277d34bca84",
     "discord-presence.js": "f90f5e060679a2aa0ca454b1314aceb94840560c05793b7f41fc959996d32dda",
     "himari-editor.html": "5dfdcc3549529904bcd37a14509b7f0e0b9cc80381208fb55e89bda47234d781",
-    "index.html": "6387efc26d618778c32849275fd5f92fe78edf214c57b8089d5ca3af70d0adeb",
-    "integrity-full.json": "3af9b3e5b15e223a345b228036d2d485114d21a45153fe5ba355210d983659ef",
+    "index.html": "eae510062158bf1681f1d25c62b578363f9e5d43a0749cde3b818887dc67e247",
+    "integrity-full.json": "0b4dec6b88f9643ad0dbe6ee6d38bd2ac6f9144df931c78a411de2c2a09b6040",
     "js/abbyl-cheat.js": "a9f533374ac8867f06ff42c00d5b6b56196db851e1a70d3fd0b861a496bf9388",
     "js/battle-arabel-intro.js": "26959d8c4205a5f7bce3ce55eaed7629247295ce0b78986fdd0ba902d1e67e6c",
     "js/battle-arabel.js": "0af82fae893c0b720cba99bbe87c5ffac6c1bc21ebd058b42b2505f6031edd99",
@@ -46,14 +46,14 @@
     "js/press-start.js": "1e8b17705eea58d34a03f4b4a07595f97d69e488b4df9ae906535022751f5c79",
     "js/replay-dialogues.js": "55ad19835a4b81acb7f74b8daba57951efcdd96fe3b4a8c20c1692d017641982",
     "js/transition-arabel-nero.js": "bc831d90dcd6f99a7a4075441e0087f33ee26faa992f8f1bff62244e353f2f85",
-    "main.js": "adc78df0c623c716989d65bc2d7134cc2d16533f01fc3e82b5240bba926d22f4",
-    "make-integrity-full.js": "c9ac1d2cacbded253f08e0bb9c52f921c48209c2850d411d284e9e6e70c98f30",
+    "main.js": "74178af8e043e24ec688478617764073328ba5c22a3b1cbe835c2078efb5fc3a",
+    "make-integrity-full.js": "65101b1383a5a21726745ae06219af8bf0559a0e10d5943182f829ca8f9b80ae",
     "menu-sounds.json": "71d2deffa445d633c24e9e0da55539c837cb25457491fb083cff8a0720e9351b",
-    "preload.js": "7ef18c18b2203e94ec4010543cb29fd1562d0575fcd7e037c629fbdc3eead10c",
+    "preload.js": "3bf261084d0d0775843259fd262fd9c3243e7447e861eb849fa8c4540c337b5a",
     "removed.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
     "seven-reels.html": "07866a917930fac7edb006cc3c2108c1bdd0e4b7507ccdd10d467049b8986e7c",
     "update-banner.html": "b5352403b55fbd68e8cb83b8823daadc6517651738bb089c20ae8b5d218f458f",
     "updater.js": "e96ae5819a91a3fa1198661f4b18bc5ed480e1aad14b6eb91c74c79e3709a237",
-    "version.json": "c742c44da428deae58f25223d97adedad7d1a8aea3bba6fd20caf9f1c5371c61"
+    "version.json": "97f2b505a24776144de61723ee6875e90cf8060e83918bd9767759305cd66172"
   }
 }

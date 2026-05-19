@@ -8,7 +8,7 @@ const path   = require('path');
 const crypto = require('crypto');
 
 // Pastas a NUNCA incluir
-const IGNORE_DIRS = new Set(['node_modules', '.git', 'dist', 'backup', 'dlc']);
+const IGNORE_DIRS = new Set(['node_modules', '.git', 'dist', 'backup', 'dlc', 'scripts']);
 
 // Arquivos a NUNCA incluir
 const IGNORE_FILES = new Set([
@@ -19,7 +19,9 @@ const IGNORE_FILES = new Set([
   '_tmp.json', 'package.json', 'package-lock.json',
   'test-chapter-1-3.html',
   'changelog.json', 'version.json',
-  'MAPA_MENTAL.md', 'nulnpm',
+  'MAPA_MENTAL.md', 'nulnpm', 'nulgit',
+  '_tmp.jsontype', '_tmp_assets.json', 'adm-zip.tgz',
+  '0)', 'git', 'type', 'gitignore',
 ]);
 
 // Extensões a NUNCA incluir no manifesto completo

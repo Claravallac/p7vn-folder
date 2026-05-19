@@ -287,3 +287,14 @@ ipcMain.handle('submit-bug-report', async (_event, { title, body }) => {
     req.end();
   });
 });
+
+// ── Leitura de arquivo binário para Web Audio API (FBMusic) ──────────────────
+ipcMain.handle('read-file-buffer', (_event, relativePath) => {
+  try {
+    const safePath = path.join(__dirname, relativePath.replace(/\.\./g, ''));
+    const buf = fs.readFileSync(safePath);
+    return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  } catch(e) {
+    return null;
+  }
+});

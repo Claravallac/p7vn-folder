@@ -1511,6 +1511,124 @@
         #quiz-start-btn:hover { border-color: white; color: white; }
         #quiz-result { font-size: 32px; margin-top: 20px; color: yellow; }
 
+        /* ── FEEDBACK SCREEN ── */
+        #feedback-screen {
+            position: fixed; inset: 0; background: #07000c;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 4500; font-family: 'VT323', monospace;
+            overflow: hidden;
+        }
+        #feedback-screen::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(-55deg, transparent 0, transparent 18px, rgba(204,0,255,0.018) 18px, rgba(204,0,255,0.018) 19px);
+            pointer-events: none;
+        }
+        #fb-inner {
+            position: relative; z-index: 2;
+            width: min(640px, 90vw);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #fb-label {
+            font-size: 10px; letter-spacing: 7px;
+            color: rgba(204,0,255,0.5); text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        #fb-title {
+            font-size: clamp(32px, 5vw, 52px); letter-spacing: 4px;
+            color: #fff; font-family: 'VT323', monospace;
+            text-shadow: 0 0 24px rgba(204,0,255,0.6);
+            margin-bottom: 6px; text-align: center;
+        }
+        #fb-subtitle {
+            font-size: clamp(13px, 1.5vw, 16px); letter-spacing: 2px;
+            color: rgba(255,255,255,0.35); font-family: 'Segoe UI', sans-serif;
+            margin-bottom: 48px; text-align: center;
+        }
+        #fb-progress-wrap {
+            width: 100%; display: flex; align-items: center; gap: 12px;
+            margin-bottom: 40px;
+        }
+        #fb-progress-bar {
+            flex: 1; height: 2px; background: rgba(255,255,255,0.08);
+            border-radius: 2px; overflow: hidden;
+        }
+        #fb-progress-fill {
+            height: 100%; width: 0%; background: var(--menu-accent);
+            box-shadow: 0 0 8px rgba(204,0,255,0.8);
+            transition: width 0.5s cubic-bezier(0.22,0.61,0.36,1);
+        }
+        #fb-progress-label {
+            font-size: 11px; letter-spacing: 3px;
+            color: rgba(204,0,255,0.6); white-space: nowrap;
+            font-family: 'VT323', monospace;
+        }
+        #fb-question-area { width: 100%; min-height: 120px; margin-bottom: 32px; }
+        #fb-question-text {
+            font-size: clamp(22px, 3.5vw, 34px); color: #fff;
+            line-height: 1.4; letter-spacing: 1px; text-align: center;
+            font-family: 'VT323', monospace;
+            opacity: 0; transform: translateY(12px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+        #fb-question-text.visible { opacity: 1; transform: translateY(0); }
+        #fb-options { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        .fb-opt {
+            width: 100%; border: 1px solid rgba(204,0,255,0.25);
+            background: rgba(204,0,255,0.04); color: rgba(255,255,255,0.7);
+            font-family: 'VT323', monospace; font-size: clamp(18px, 2.5vw, 24px);
+            letter-spacing: 2px; padding: 14px 24px; cursor: pointer;
+            text-align: left; display: flex; align-items: center; gap: 16px;
+            transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.15s;
+            opacity: 0; transform: translateX(-12px);
+        }
+        .fb-opt.visible { opacity: 1; transform: translateX(0); }
+        .fb-opt:hover { border-color: var(--menu-accent); background: rgba(204,0,255,0.1); color: #fff; transform: translateX(6px); }
+        .fb-opt.selected { border-color: #fff; background: rgba(255,255,255,0.08); color: #fff; }
+        .fb-opt-letter {
+            font-size: 13px; letter-spacing: 3px; color: rgba(204,0,255,0.7);
+            min-width: 20px;
+        }
+        #fb-back-btn {
+            position: absolute; top: 28px; left: 36px;
+            background: none; border: none; cursor: pointer;
+            font-family: 'VT323', monospace; font-size: 16px;
+            letter-spacing: 4px; color: rgba(255,255,255,0.3);
+            display: flex; align-items: center; gap: 8px;
+            transition: color 0.2s; z-index: 10;
+        }
+        #fb-back-btn:hover { color: rgba(255,255,255,0.7); }
+        #fb-back-btn .back-arrow { color: var(--menu-accent); font-size: 18px; }
+        #fb-ending {
+            position: absolute; inset: 0; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 5; background: #07000c;
+        }
+        #fb-ending-title {
+            font-size: clamp(36px, 6vw, 68px); letter-spacing: 6px;
+            color: #fff; font-family: 'VT323', monospace;
+            text-shadow: 0 0 32px rgba(204,0,255,0.7);
+            margin-bottom: 16px; text-align: center;
+            opacity: 0; transition: opacity 1.2s ease;
+        }
+        #fb-ending-sub {
+            font-size: clamp(13px, 1.5vw, 16px); letter-spacing: 3px;
+            color: rgba(255,255,255,0.4); font-family: 'Segoe UI', sans-serif;
+            text-align: center; max-width: 500px; line-height: 1.8;
+            opacity: 0; transition: opacity 1.2s ease 0.4s;
+        }
+        #fb-ending-close {
+            margin-top: 52px; background: none;
+            border: 1px solid rgba(255,255,255,0.15); cursor: pointer;
+            font-family: 'VT323', monospace; font-size: 14px;
+            letter-spacing: 5px; color: rgba(255,255,255,0.3);
+            padding: 12px 32px; text-transform: uppercase;
+            transition: color 0.3s, border-color 0.3s;
+            opacity: 0; transition: opacity 1.2s ease 0.8s;
+        }
+        #fb-ending-close:hover { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.4); }
+
         #password-screen { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 6000; font-family: 'VT323', monospace; color: white; }
         .password-container { background: black; border: 5px solid white; padding: 40px; width: 600px; text-align: center; }
         .password-hint { font-size: 28px; margin-bottom: 30px; color: #ffcc00; }
@@ -2618,6 +2736,7 @@
                     <button class="menu-btn" id="boss-nero-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span><span class="mb-label">Boss Nero</span></button>
                     <button class="menu-btn" id="battle-test-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span><span class="mb-label">Modo de Batalha</span></button>
                     <button class="menu-btn" id="nero-legendary-btn" style="display:none"><span class="mb-bar"></span><span class="mb-num">NL</span><span class="mb-label">Nero Legendary Stuff</span></button>
+                    <button class="menu-btn" id="feedback-menu-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span class="mb-label">Feedback</span></button>
                     <button class="menu-btn" id="debug-menu-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span><span class="mb-label">Debug Menu</span></button>
                     <button class="menu-btn sair" id="sair-btn"><span class="mb-bar"></span><span class="mb-num"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="mb-label">Sair</span></button>
                 </div>
@@ -3993,6 +4112,38 @@
             <button class="dev-option-btn" id="dev-option-no">Não</button>
         </div>
     </div>
+
+    <!-- ══ FEEDBACK SCREEN ══════════════════════════════════════════════════ -->
+    <div id="feedback-screen">
+        <button id="fb-back-btn">
+            <span class="back-arrow">←</span> voltar
+        </button>
+
+        <div id="fb-inner">
+            <p id="fb-label">Himari Games</p>
+            <h1 id="fb-title">Feedback</h1>
+            <p id="fb-subtitle">O que o game precisa para melhorar?</p>
+
+            <div id="fb-progress-wrap">
+                <div id="fb-progress-bar"><div id="fb-progress-fill"></div></div>
+                <span id="fb-progress-label">1 / 6</span>
+            </div>
+
+            <div id="fb-question-area">
+                <p id="fb-question-text"></p>
+            </div>
+
+            <div id="fb-options"></div>
+        </div>
+
+        <!-- Tela de encerramento -->
+        <div id="fb-ending">
+            <h2 id="fb-ending-title">Obrigada. ❤️</h2>
+            <p id="fb-ending-sub">Suas respostas foram anotadas.<br>Elas vão ajudar muito no próximo projeto.</p>
+            <button id="fb-ending-close">fechar</button>
+        </div>
+    </div>
+    <!-- ══ fim FEEDBACK SCREEN ══════════════════════════════════════════════ -->
 
     <div id="quiz-screen">
         <div id="quiz-box">
@@ -13766,7 +13917,6 @@
     <script src="./js/battle-core.js"></script>
     <script src="./js/battle-arabel-intro.js"></script>
     <script src="./js/battle-arabel.js"></script>
-    <script src="./js/battle-arabel-pokemon.js"></script>
     <script src="./js/transition-arabel-nero.js"></script>
     <script src="./js/battle-nero-standalone.js"></script>
     <script src="./js/battle-nero.js"></script>
@@ -18212,6 +18362,362 @@ window._devErrAudioSrc = "data:audio/mpeg;base64,SUQzBAAAAAAAf1RYWFgAAAASAAADbWF
 })();
 </script>
 <!-- ══ fim DEV TOUR ════════════════════════════════════════════════════════ -->
+
+<!-- ══ FEEDBACK QUIZ SYSTEM ══════════════════════════════════════════════════ -->
+<script>
+(function() {
+'use strict';
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PERGUNTAS DO QUIZ
+════════════════════════════════════════════════════════════════════════════ */
+var QUESTIONS = [
+    {
+        q: 'Como você avalia o ritmo das histórias?',
+        opts: ['Muito rápido, mal consigo acompanhar', 'Na medida certa', 'Um pouco lento', 'Muito lento, fica arrastado']
+    },
+    {
+        q: 'O que mais te prende no game?',
+        opts: ['Os personagens', 'A história', 'A gameplay / batalhas', 'A estética e trilha sonora']
+    },
+    {
+        q: 'O que mais falta no game hoje?',
+        opts: ['Mais conteúdo de história', 'Mais segredos e easter eggs', 'Mais variedade de gameplay', 'Mais capricho na arte / áudio']
+    },
+    {
+        q: 'Como foi sua experiência com as batalhas?',
+        opts: ['Divertidas e bem feitas', 'Legais, mas precisam melhorar', 'Confusas ou mal explicadas', 'Não testei as batalhas ainda']
+    },
+    {
+        q: 'Você indicaria esse game para um amigo?',
+        opts: ['Com certeza!', 'Talvez, dependendo do amigo', 'Provavelmente não', 'Não por enquanto']
+    },
+    {
+        q: 'O que você espera ver na próxima versão?',
+        opts: ['Continuação da história principal', 'Novos personagens', 'Polimento do que já existe', 'Surpresas — confio em você!']
+    }
+];
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SISTEMA DE MÚSICA SEAMLESS (Web Audio API)
+   intro  → toca uma vez e IMEDIATAMENTE encadeia o loop
+   loop   → toca em repeat infinito entre as perguntas
+   ending → toca quando o quiz encerra (substitui o loop sem corte)
+════════════════════════════════════════════════════════════════════════════ */
+var FBMusic = (function() {
+    var _ctx = null;
+    var _gainNode = null;
+    var _introBuffer = null;
+    var _loopBuffer  = null;
+    var _endingBuffer = null;
+    var _currentSrc  = null;   /* source node atualmente tocando */
+    var _state = 'idle';       /* idle | loading | intro | loop | ending | off */
+    var _loaded = 0;
+
+    var INTRO_SRC   = './assets/audio/feedback-intro.ogg';
+    var LOOP_SRC    = './assets/audio/feedback-loop.ogg';
+    var ENDING_SRC  = './assets/audio/feedback-ending.ogg';
+
+    function _getCtx() {
+        if (!_ctx) {
+            _ctx = new (window.AudioContext || window.webkitAudioContext)();
+            _gainNode = _ctx.createGain();
+            _gainNode.gain.value = 0.7;
+            _gainNode.connect(_ctx.destination);
+        }
+        if (_ctx.state === 'suspended') _ctx.resume();
+        return _ctx;
+    }
+
+    function _loadBuffer(url, cb) {
+        fetch(url)
+            .then(function(r) { return r.arrayBuffer(); })
+            .then(function(ab) { return _getCtx().decodeAudioData(ab); })
+            .then(function(buf) { cb(null, buf); })
+            .catch(function(e) { cb(e, null); });
+    }
+
+    function _loadAll(onReady) {
+        if (_introBuffer && _loopBuffer && _endingBuffer) { onReady(); return; }
+        var done = 0;
+        function check() { if (++done === 3) onReady(); }
+        _loadBuffer(INTRO_SRC,   function(e, b) { if (!e) _introBuffer  = b; check(); });
+        _loadBuffer(LOOP_SRC,    function(e, b) { if (!e) _loopBuffer   = b; check(); });
+        _loadBuffer(ENDING_SRC,  function(e, b) { if (!e) _endingBuffer = b; check(); });
+    }
+
+    function _stopCurrent() {
+        if (_currentSrc) {
+            try { _currentSrc.onended = null; _currentSrc.stop(); } catch(e) {}
+            _currentSrc = null;
+        }
+    }
+
+    function _playBuffer(buf, loop, onEnded) {
+        var ctx = _getCtx();
+        var src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.loop = !!loop;
+        src.connect(_gainNode);
+        if (onEnded) src.onended = onEnded;
+        src.start(0);
+        _currentSrc = src;
+        return src;
+    }
+
+    /* Toca intro → quando terminar, encadeia loop sem pausa */
+    function _playIntro() {
+        _state = 'intro';
+        _playBuffer(_introBuffer, false, function() {
+            if (_state !== 'intro') return; /* foi interrompido */
+            _startLoop();
+        });
+    }
+
+    function _startLoop() {
+        _state = 'loop';
+        _playBuffer(_loopBuffer, true, null);
+    }
+
+    /* Encerramento: para o loop exatamente no final do ciclo atual
+       Não dá pra saber onde estamos no ciclo, então fazemos um crossfade
+       rápido: desce o gain, troca para ending, sobe o gain de volta */
+    function _playEnding() {
+        if (_state === 'idle' || _state === 'off') return;
+        _state = 'ending';
+        var ctx = _getCtx();
+        var now = ctx.currentTime;
+        /* fade out em 80ms */
+        _gainNode.gain.setValueAtTime(_gainNode.gain.value, now);
+        _gainNode.gain.linearRampToValueAtTime(0, now + 0.08);
+        var self = this;
+        setTimeout(function() {
+            _stopCurrent();
+            _gainNode.gain.setValueAtTime(0, ctx.currentTime);
+            _gainNode.gain.linearRampToValueAtTime(0.7, ctx.currentTime + 0.08);
+            _state = 'ending';
+            _playBuffer(_endingBuffer, false, function() {
+                _state = 'off';
+            });
+        }, 90);
+    }
+
+    function _fadeOut(ms, cb) {
+        var ctx = _getCtx();
+        var now = ctx.currentTime;
+        _gainNode.gain.setValueAtTime(_gainNode.gain.value, now);
+        _gainNode.gain.linearRampToValueAtTime(0, now + ms / 1000);
+        setTimeout(function() { _stopCurrent(); _state = 'idle'; if (cb) cb(); }, ms + 50);
+    }
+
+    return {
+        start: function() {
+            if (_state !== 'idle') return;
+            _state = 'loading';
+            _loadAll(function() {
+                if (_state !== 'loading') return;
+                _gainNode.gain.value = 0;
+                var ctx = _getCtx();
+                _gainNode.gain.linearRampToValueAtTime(0.7, ctx.currentTime + 0.5);
+                _playIntro();
+            });
+        },
+        playEnding: _playEnding,
+        stop: function() { _fadeOut(600, null); },
+        isActive: function() { return _state !== 'idle' && _state !== 'off'; }
+    };
+})();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LÓGICA DO QUIZ
+════════════════════════════════════════════════════════════════════════════ */
+var _answers  = [];
+var _qIndex   = 0;
+var _answered = false;
+
+function _el(id) { return document.getElementById(id); }
+
+function _updateProgress() {
+    var total = QUESTIONS.length;
+    var pct   = ((_qIndex) / total) * 100;
+    _el('fb-progress-fill').style.width = pct + '%';
+    _el('fb-progress-label').textContent = (_qIndex + 1) + ' / ' + total;
+}
+
+function _showQuestion(idx) {
+    _answered = false;
+    _qIndex   = idx;
+    _updateProgress();
+
+    var qtEl = _el('fb-question-text');
+    var opEl = _el('fb-options');
+
+    /* fade out */
+    qtEl.classList.remove('visible');
+    opEl.style.opacity = '0';
+
+    setTimeout(function() {
+        qtEl.textContent = QUESTIONS[idx].q;
+        opEl.innerHTML   = '';
+
+        var letters = ['A', 'B', 'C', 'D'];
+        QUESTIONS[idx].opts.forEach(function(opt, i) {
+            var btn = document.createElement('button');
+            btn.className = 'fb-opt';
+            btn.innerHTML = '<span class="fb-opt-letter">' + letters[i] + '</span>' + opt;
+            btn.addEventListener('click', function() { _selectOpt(btn, i); });
+            opEl.appendChild(btn);
+            /* staggered entrance */
+            setTimeout(function() { btn.classList.add('visible'); }, i * 60);
+        });
+
+        /* fade in pergunta */
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                qtEl.classList.add('visible');
+                opEl.style.transition = 'opacity 0.3s ease';
+                opEl.style.opacity    = '1';
+            });
+        });
+    }, 300);
+}
+
+function _selectOpt(btn, optIdx) {
+    if (_answered) return;
+    _answered = true;
+
+    /* visual feedback */
+    _el('fb-options').querySelectorAll('.fb-opt').forEach(function(b) {
+        b.style.pointerEvents = 'none';
+        b.style.opacity = '0.4';
+    });
+    btn.classList.add('selected');
+    btn.style.opacity = '1';
+
+    _answers.push({ q: _qIndex, a: optIdx });
+
+    /* próxima pergunta ou encerramento */
+    setTimeout(function() {
+        if (_qIndex + 1 < QUESTIONS.length) {
+            _showQuestion(_qIndex + 1);
+        } else {
+            _showEnding();
+        }
+    }, 600);
+}
+
+function _showEnding() {
+    /* barra cheia */
+    _el('fb-progress-fill').style.width = '100%';
+    _el('fb-progress-label').textContent = QUESTIONS.length + ' / ' + QUESTIONS.length;
+
+    /* inicia música de encerramento */
+    FBMusic.playEnding();
+
+    /* fade out do conteúdo */
+    var inner = _el('fb-inner');
+    inner.style.transition = 'opacity 0.6s ease';
+    inner.style.opacity    = '0';
+
+    setTimeout(function() {
+        inner.style.display = 'none';
+        var end = _el('fb-ending');
+        end.style.display = 'flex';
+        requestAnimationFrame(function() { requestAnimationFrame(function() {
+            _el('fb-ending-title').style.opacity = '1';
+            _el('fb-ending-sub').style.opacity   = '1';
+            _el('fb-ending-close').style.opacity = '1';
+        }); });
+    }, 650);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ABRIR / FECHAR TELA
+════════════════════════════════════════════════════════════════════════════ */
+function openFeedback() {
+    var scr = _el('feedback-screen');
+    var menu = _el('menu-screen');
+    if (!scr || !menu) return;
+
+    /* reset estado */
+    _answers  = [];
+    _qIndex   = 0;
+    _answered = false;
+
+    var inner = _el('fb-inner');
+    var end   = _el('fb-ending');
+    inner.style.display   = '';
+    inner.style.opacity   = '1';
+    end.style.display     = 'none';
+    _el('fb-ending-title').style.opacity = '0';
+    _el('fb-ending-sub').style.opacity   = '0';
+    _el('fb-ending-close').style.opacity = '0';
+    _el('fb-question-text').classList.remove('visible');
+    _el('fb-options').innerHTML = '';
+    _el('fb-progress-fill').style.width = '0%';
+
+    /* pausa música do menu */
+    var mm = _el('menu-music');
+    if (mm && !mm.paused) { mm.pause(); }
+
+    menu.style.display = 'none';
+    scr.style.display  = 'flex';
+
+    /* inicia música e primeira pergunta */
+    FBMusic.start();
+    setTimeout(function() { _showQuestion(0); }, 400);
+}
+
+function closeFeedback() {
+    var scr  = _el('feedback-screen');
+    var menu = _el('menu-screen');
+    if (!scr || !menu) return;
+
+    FBMusic.stop();
+
+    scr.style.transition  = 'opacity 0.5s ease';
+    scr.style.opacity     = '0';
+    setTimeout(function() {
+        scr.style.display   = 'flex'; /* mantém flex mas invisível... */
+        scr.style.display   = 'none';
+        scr.style.opacity   = '1';
+        scr.style.transition = '';
+        menu.style.display  = 'flex';
+        /* retoma música do menu */
+        var mm = _el('menu-music');
+        if (mm) { mm.volume = 0.7; mm.play().catch(function(){}); }
+        if (typeof showMenuView === 'function') showMenuView('main-menu-buttons', false);
+    }, 520);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   WIRING — conecta botões depois do DOM carregar
+════════════════════════════════════════════════════════════════════════════ */
+function _wire() {
+    var fbBtn   = _el('feedback-menu-btn');
+    var backBtn = _el('fb-back-btn');
+    var closeBtn = _el('fb-ending-close');
+
+    if (fbBtn)   fbBtn.addEventListener('click',   openFeedback);
+    if (backBtn) backBtn.addEventListener('click',  function() {
+        /* volta ao menu sem salvar respostas parciais */
+        closeFeedback();
+    });
+    if (closeBtn) closeBtn.addEventListener('click', closeFeedback);
+
+    /* expõe globalmente caso debug precise */
+    window.openFeedbackScreen = openFeedback;
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _wire);
+} else {
+    _wire();
+}
+
+})();
+</script>
+<!-- ══ fim FEEDBACK QUIZ SYSTEM ══════════════════════════════════════════════ -->
 
 </body>
 </html>
